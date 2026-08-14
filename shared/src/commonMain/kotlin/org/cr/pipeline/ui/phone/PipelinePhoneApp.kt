@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.cr.pipeline.data.JobApplicationRepository
-import org.cr.pipeline.ui.components.PipeFab
+import org.cr.pipeline.ui.components.PlFab
 import org.koin.compose.koinInject
 
 private enum class PhoneScreen { LIST, DETAIL, ADD, SETTINGS, PAIR }
@@ -53,7 +53,7 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
             PhoneScreen.PAIR -> PairingScreen(onBack = { screen = PhoneScreen.SETTINGS })
         }
         if (screen == PhoneScreen.LIST && !sheetOpen) {
-            PipeFab(
+            PlFab(
                 onClick = { screen = PhoneScreen.ADD },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 20.dp),
             )

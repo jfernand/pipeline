@@ -14,19 +14,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 @Composable
-fun PipeFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun PlFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(
         modifier
             .size(56.dp)
             .shadow(6.dp, RoundedCornerShape(4.dp))
             .clip(RoundedCornerShape(4.dp))
-            .background(PipeColors.brandPrimary)
+            .background(PlColors.brandPrimary)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(Icons.Filled.Add, null, tint = PipeColors.onBrand, modifier = Modifier.size(24.dp))
+        Icon(Icons.Filled.Add, null, tint = PlColors.onBrand, modifier = Modifier.size(24.dp))
     }
 }

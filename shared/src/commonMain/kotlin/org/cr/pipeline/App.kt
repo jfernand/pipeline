@@ -11,17 +11,17 @@ import androidx.compose.ui.unit.dp
 import org.cr.pipeline.di.platformDataModule
 import org.cr.pipeline.ui.PipelineTabletApp
 import org.cr.pipeline.ui.phone.PipelinePhoneApp
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 
 private val pipeDarkColorScheme = darkColorScheme(
-    primary = PipeColors.brandPrimary,
-    onPrimary = PipeColors.onBrand,
-    background = PipeColors.bgBase,
-    onBackground = PipeColors.fgPrimary,
-    surface = PipeColors.bgBase,
-    onSurface = PipeColors.fgPrimary,
+    primary = PlColors.brandPrimary,
+    onPrimary = PlColors.onBrand,
+    background = PlColors.bgBase,
+    onBackground = PlColors.fgPrimary,
+    surface = PlColors.bgBase,
+    onSurface = PlColors.fgPrimary,
 )
 
 /** Material3's compact/medium width breakpoint: below this we're on a phone-class layout. */

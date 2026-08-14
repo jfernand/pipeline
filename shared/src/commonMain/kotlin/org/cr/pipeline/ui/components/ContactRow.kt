@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
-import org.cr.pipeline.ui.theme.PipeType
+import org.cr.pipeline.ui.theme.PlColors
+import org.cr.pipeline.ui.theme.PlType
 
 data class ContactInfo(val initials: String, val name: String, val role: String, val email: String)
 
@@ -36,26 +36,26 @@ fun ContactRow(contact: ContactInfo, modifier: Modifier = Modifier) {
         val avatarShape = RoundedCornerShape(2.dp)
         Box(
             Modifier.size(40.dp)
-                .background(PipeColors.bgOverlay, avatarShape)
-                .border(1.dp, PipeColors.borderDefault, avatarShape),
+                .background(PlColors.bgOverlay, avatarShape)
+                .border(1.dp, PlColors.borderDefault, avatarShape),
             contentAlignment = Alignment.Center,
         ) {
-            MonoText(contact.initials, size = 11.sp, color = PipeColors.fgSecondary, letterSpacing = 0.05f.em)
+            MonoText(contact.initials, size = 11.sp, color = PlColors.fgSecondary, letterSpacing = 0.05f.em)
         }
         Column(Modifier.weight(1f)) {
-            BodyText(contact.name, size = 14.5f.sp, weight = FontWeight.SemiBold, color = PipeColors.fgPrimary)
-            MonoText(contact.role, size = 9.sp, color = PipeColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
+            BodyText(contact.name, size = 14.5f.sp, weight = FontWeight.SemiBold, color = PlColors.fgPrimary)
+            MonoText(contact.role, size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
             androidx.compose.material3.Text(
                 contact.email,
-                fontFamily = PipeType.mono(),
+                fontFamily = PlType.mono(),
                 fontSize = 11.sp,
-                color = PipeColors.fgSecondary,
+                color = PlColors.fgSecondary,
                 modifier = Modifier.padding(top = 4.dp),
             )
         }
         Row {
-            PipeIconButton(Icons.Filled.Email, size = 40.dp, iconSize = 16.dp)
-            PipeIconButton(Icons.Filled.Link, size = 40.dp, iconSize = 16.dp)
+            PlIconButton(Icons.Filled.Email, size = 40.dp, iconSize = 16.dp)
+            PlIconButton(Icons.Filled.Link, size = 40.dp, iconSize = 16.dp)
         }
     }
 }

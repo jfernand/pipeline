@@ -35,11 +35,11 @@ import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.ui.components.AppCard
 import org.cr.pipeline.ui.components.GridColumns
-import org.cr.pipeline.ui.components.PipeFilterChip
+import org.cr.pipeline.ui.components.PlFilterChip
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
 import org.cr.pipeline.ui.theme.drawRightBorder
 
@@ -60,40 +60,40 @@ fun ListPane(
         modifier
             .then(if (fixedWidth != null) Modifier.width(fixedWidth) else Modifier.fillMaxWidth())
             .fillMaxHeight()
-            .drawRightBorder(PipeColors.borderDefault)
-            .background(PipeColors.bgBase),
+            .drawRightBorder(PlColors.borderDefault)
+            .background(PlColors.bgBase),
     ) {
         Column(Modifier.fillMaxSize()) {
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .drawBottomBorder(PipeColors.borderSubtle)
+                    .drawBottomBorder(PlColors.borderSubtle)
                     .padding(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     DisplayText("Applications", size = 25.sp, letterSpacing = 0.02f.em)
-                    MonoText("${applications.size} open", size = 10.sp, color = PipeColors.fgMuted)
+                    MonoText("${applications.size} open", size = 10.sp, color = PlColors.fgMuted)
                 }
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .height(44.dp)
-                        .background(PipeColors.field, RoundedCornerShape(2.dp))
-                        .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(2.dp))
+                        .background(PlColors.field, RoundedCornerShape(2.dp))
+                        .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Icon(Icons.Filled.Search, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
-                    MonoText("Search company or role", size = 10.5f.sp, color = PipeColors.fgMuted)
+                    Icon(Icons.Filled.Search, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
+                    MonoText("Search company or role", size = 10.5f.sp, color = PlColors.fgMuted)
                 }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    PipeFilterChip("All · ${applications.size}", active = true)
-                    PipeFilterChip("Applied", dotColor = AppStatus.APPLIED.color)
-                    PipeFilterChip("Phone screen", dotColor = AppStatus.SCREEN.color)
-                    PipeFilterChip("Interviewing", dotColor = AppStatus.INTERVIEW.color)
-                    PipeFilterChip("Offer", dotColor = AppStatus.OFFER.color)
+                    PlFilterChip("All · ${applications.size}", active = true)
+                    PlFilterChip("Applied", dotColor = AppStatus.APPLIED.color)
+                    PlFilterChip("Phone screen", dotColor = AppStatus.SCREEN.color)
+                    PlFilterChip("Interviewing", dotColor = AppStatus.INTERVIEW.color)
+                    PlFilterChip("Offer", dotColor = AppStatus.OFFER.color)
                 }
             }
             Column(
@@ -121,7 +121,7 @@ fun ListPane(
                 .align(Alignment.BottomEnd)
                 .padding(end = 20.dp, bottom = 24.dp)
                 .height(52.dp),
-            color = PipeColors.brandPrimary,
+            color = PlColors.brandPrimary,
             shape = RoundedCornerShape(4.dp),
             shadowElevation = 6.dp,
         ) {
@@ -130,8 +130,8 @@ fun ListPane(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Icon(Icons.Filled.Add, null, tint = PipeColors.onBrand, modifier = Modifier.size(20.dp))
-                MonoText("New", size = 11.sp, weight = FontWeight.SemiBold, color = PipeColors.onBrand)
+                Icon(Icons.Filled.Add, null, tint = PlColors.onBrand, modifier = Modifier.size(20.dp))
+                MonoText("New", size = 11.sp, weight = FontWeight.SemiBold, color = PlColors.onBrand)
             }
         }
     }

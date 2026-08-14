@@ -9,7 +9,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 /**
  * Deterministic pseudo-QR pattern (not a scannable code) matching the design mock's approach:
@@ -21,7 +21,7 @@ fun QrCodePlaceholder(modifier: Modifier = Modifier, qrSize: Dp = 176.dp) {
         val n = 25
         val cellPx = size.width / n
         val ink = Color(0xFF0E0E0E)
-        drawRect(color = PipeColors.paper)
+        drawRect(color = PlColors.paper)
 
         var seed = 20260624L
         fun rnd(): Double {
@@ -41,7 +41,7 @@ fun QrCodePlaceholder(modifier: Modifier = Modifier, qrSize: Dp = 176.dp) {
 
         fun eye(x: Int, y: Int) {
             drawRect(color = ink, topLeft = Offset(x * cellPx, y * cellPx), size = Size(cellPx * 7, cellPx * 7))
-            drawRect(color = PipeColors.paper, topLeft = Offset((x + 1) * cellPx, (y + 1) * cellPx), size = Size(cellPx * 5, cellPx * 5))
+            drawRect(color = PlColors.paper, topLeft = Offset((x + 1) * cellPx, (y + 1) * cellPx), size = Size(cellPx * 5, cellPx * 5))
             drawRect(color = ink, topLeft = Offset((x + 2) * cellPx, (y + 2) * cellPx), size = Size(cellPx * 3, cellPx * 3))
         }
         eye(0, 0)

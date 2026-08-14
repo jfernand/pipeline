@@ -13,7 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 @Composable
 fun SectionLabel(
@@ -23,8 +23,8 @@ fun SectionLabel(
     accent: Boolean = false,
 ) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        MonoText(label, size = 10.sp, weight = FontWeight.SemiBold, color = if (accent) PipeColors.brandPrimary else PipeColors.fgMuted)
-        if (count != null) MonoText("· $count", size = 10.sp, color = PipeColors.fgMuted)
-        Spacer(Modifier.weight(1f).height(1.dp).background(PipeColors.borderDefault))
+        MonoText(label, size = 10.sp, weight = FontWeight.SemiBold, color = if (accent) PlColors.brandPrimary else PlColors.fgMuted)
+        if (count != null) MonoText("· $count", size = 10.sp, color = PlColors.fgMuted)
+        Spacer(Modifier.weight(1f).height(1.dp).background(PlColors.borderDefault))
     }
 }

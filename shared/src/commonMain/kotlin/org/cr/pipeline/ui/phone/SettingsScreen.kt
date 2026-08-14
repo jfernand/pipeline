@@ -26,34 +26,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.ui.components.Dot
-import org.cr.pipeline.ui.components.PipeSecondaryButton
-import org.cr.pipeline.ui.components.PipeTopBar
+import org.cr.pipeline.ui.components.PlSecondaryButton
+import org.cr.pipeline.ui.components.PlTopBar
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.components.SettingsRow
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPair: () -> Unit = {}) {
-    Column(modifier.fillMaxSize().background(PipeColors.bgBase).verticalScroll(rememberScrollState())) {
-        PipeTopBar(title = "Settings", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, onLeftClick = onBack)
+    Column(modifier.fillMaxSize().background(PlColors.bgBase).verticalScroll(rememberScrollState())) {
+        PlTopBar(title = "Settings", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, onLeftClick = onBack)
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)) {
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .background(PipeColors.bgRaised, RoundedCornerShape(4.dp))
-                    .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(4.dp))
+                    .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                    .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp))
                     .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Dot(color = AppStatus.OFFER.color)
-                    MonoText("Sync up to date", size = 9.5f.sp, color = PipeColors.fgSecondary, modifier = Modifier.weight(1f))
-                    MonoText("11 min ago", size = 9.sp, color = PipeColors.fgMuted)
+                    MonoText("Sync up to date", size = 9.5f.sp, color = PlColors.fgSecondary, modifier = Modifier.weight(1f))
+                    MonoText("11 min ago", size = 9.sp, color = PlColors.fgMuted)
                 }
-                BodyText("Pixel Tablet · 14 records, 0 conflicts", size = 13.sp, color = PipeColors.fgMuted)
-                PipeSecondaryButton("Sync now", height = 42.dp, modifier = Modifier.fillMaxWidth())
+                BodyText("Pixel Tablet · 14 records, 0 conflicts", size = 13.sp, color = PlColors.fgMuted)
+                PlSecondaryButton("Sync now", height = 42.dp, modifier = Modifier.fillMaxWidth())
             }
         }
         Column(Modifier.padding(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("Sync") }
@@ -66,8 +66,8 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("About") }
         SettingsRow("Pipeline 1.4.0", value = "Build 2026.06.24", icon = Icons.Filled.Info, chevron = false)
         Column(Modifier.padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 32.dp)) {
-            MonoText("No account. No server. No telemetry.", size = 9.sp, color = PipeColors.fgMuted)
-            MonoText("Your data stays on your devices.", size = 9.sp, color = PipeColors.fgMuted, modifier = Modifier.padding(top = 4.dp))
+            MonoText("No account. No server. No telemetry.", size = 9.sp, color = PlColors.fgMuted)
+            MonoText("Your data stays on your devices.", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }

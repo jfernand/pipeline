@@ -24,32 +24,32 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.BodyText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 private val buttonShape = RoundedCornerShape(2.dp)
 
 @Composable
-fun PipePrimaryButton(
+fun PlPrimaryButton(
     text: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     height: Dp = 48.dp,
     icon: ImageVector? = null,
 ) {
-    Surface(onClick = onClick, modifier = modifier.height(height), color = PipeColors.brandPrimary, shape = buttonShape) {
+    Surface(onClick = onClick, modifier = modifier.height(height), color = PlColors.brandPrimary, shape = buttonShape) {
         Row(
             Modifier.fillMaxHeight().padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            icon?.let { Icon(it, null, tint = PipeColors.onBrand, modifier = Modifier.size(16.dp)) }
-            BodyText(text, size = 14.5f.sp, weight = FontWeight.SemiBold, color = PipeColors.onBrand)
+            icon?.let { Icon(it, null, tint = PlColors.onBrand, modifier = Modifier.size(16.dp)) }
+            BodyText(text, size = 14.5f.sp, weight = FontWeight.SemiBold, color = PlColors.onBrand)
         }
     }
 }
 
 @Composable
-fun PipeSecondaryButton(
+fun PlSecondaryButton(
     text: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
@@ -60,7 +60,7 @@ fun PipeSecondaryButton(
         onClick = onClick,
         modifier = modifier.height(height),
         color = Color.Transparent,
-        border = androidx.compose.foundation.BorderStroke(1.dp, PipeColors.borderStrong),
+        border = androidx.compose.foundation.BorderStroke(1.dp, PlColors.borderStrong),
         shape = buttonShape,
     ) {
         Row(
@@ -68,27 +68,27 @@ fun PipeSecondaryButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            icon?.let { Icon(it, null, tint = PipeColors.fgPrimary, modifier = Modifier.size(16.dp)) }
-            BodyText(text, size = 14.5f.sp, weight = FontWeight.Medium, color = PipeColors.fgPrimary)
+            icon?.let { Icon(it, null, tint = PlColors.fgPrimary, modifier = Modifier.size(16.dp)) }
+            BodyText(text, size = 14.5f.sp, weight = FontWeight.Medium, color = PlColors.fgPrimary)
         }
     }
 }
 
 @Composable
-fun PipeIconButton(
+fun PlIconButton(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     size: Dp = 44.dp,
     iconSize: Dp = 16.dp,
-    tint: Color = PipeColors.fgSecondary,
+    tint: Color = PlColors.fgSecondary,
     bordered: Boolean = false,
 ) {
     Box(
         modifier
             .size(size)
             .clip(buttonShape)
-            .then(if (bordered) Modifier.border(1.dp, PipeColors.borderDefault, buttonShape) else Modifier)
+            .then(if (bordered) Modifier.border(1.dp, PlColors.borderDefault, buttonShape) else Modifier)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

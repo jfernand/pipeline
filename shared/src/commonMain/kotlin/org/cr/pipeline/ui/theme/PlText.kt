@@ -25,7 +25,7 @@ import pipeline.shared.generated.resources.space_grotesk_semibold
  * Google Fonts (OFL-licensed; see /fonts-licenses). Only the weights actually used by
  * [MonoText], [DisplayText] and [BodyText] are included.
  */
-object PipeType {
+object PlType {
     @Composable
     fun display(): FontFamily {
         val extraBold = Font(Res.font.barlow_condensed_extrabold, FontWeight.ExtraBold)
@@ -55,7 +55,7 @@ fun MonoText(
     size: TextUnit,
     modifier: Modifier = Modifier,
     weight: FontWeight = FontWeight.Medium,
-    color: Color = PipeColors.fgMuted,
+    color: Color = PlColors.fgMuted,
     letterSpacing: TextUnit = 0.14f.em,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -65,7 +65,7 @@ fun MonoText(
         modifier = modifier,
         color = color,
         fontSize = size,
-        fontFamily = PipeType.mono(),
+        fontFamily = PlType.mono(),
         fontWeight = weight,
         letterSpacing = letterSpacing,
         maxLines = maxLines,
@@ -80,7 +80,7 @@ fun DisplayText(
     size: TextUnit,
     modifier: Modifier = Modifier,
     weight: FontWeight = FontWeight.ExtraBold,
-    color: Color = PipeColors.fgPrimary,
+    color: Color = PlColors.fgPrimary,
     letterSpacing: TextUnit = (-0.01f).em,
     lineHeight: TextUnit = TextUnit.Unspecified,
 ) {
@@ -89,7 +89,7 @@ fun DisplayText(
         modifier = modifier,
         color = color,
         fontSize = size,
-        fontFamily = PipeType.display(),
+        fontFamily = PlType.display(),
         fontWeight = weight,
         letterSpacing = letterSpacing,
         lineHeight = lineHeight,
@@ -103,7 +103,7 @@ fun BodyText(
     modifier: Modifier = Modifier,
     size: TextUnit = 14.sp,
     weight: FontWeight = FontWeight.Normal,
-    color: Color = PipeColors.fgPrimary,
+    color: Color = PlColors.fgPrimary,
     lineHeight: TextUnit = TextUnit.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
@@ -113,7 +113,7 @@ fun BodyText(
         modifier = modifier,
         color = color,
         fontSize = size,
-        fontFamily = PipeType.body(),
+        fontFamily = PlType.body(),
         fontWeight = weight,
         lineHeight = lineHeight,
         maxLines = maxLines,

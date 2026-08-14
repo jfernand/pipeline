@@ -31,7 +31,7 @@ import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.ui.components.Dot
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawRightBorder
 
 enum class NavDestination(val icon: ImageVector, val label: String) {
@@ -47,15 +47,15 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
         modifier
             .width(84.dp)
             .fillMaxHeight()
-            .background(PipeColors.bgSunken)
-            .drawRightBorder(PipeColors.borderDefault)
+            .background(PlColors.bgSunken)
+            .drawRightBorder(PlColors.borderDefault)
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DisplayText(
             "PL",
             size = 15.sp,
-            color = PipeColors.brandPrimary,
+            color = PlColors.brandPrimary,
             letterSpacing = 0.04f.em,
             modifier = Modifier.padding(top = 6.dp, bottom = 18.dp),
         )
@@ -67,8 +67,8 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
                     .padding(vertical = 2.dp)
                     .width(68.dp)
                     .clip(itemShape)
-                    .background(if (isActive) PipeColors.brandSubtle else androidx.compose.ui.graphics.Color.Transparent)
-                    .border(1.dp, if (isActive) PipeColors.overdueBorder else androidx.compose.ui.graphics.Color.Transparent, itemShape)
+                    .background(if (isActive) PlColors.brandSubtle else androidx.compose.ui.graphics.Color.Transparent)
+                    .border(1.dp, if (isActive) PlColors.overdueBorder else androidx.compose.ui.graphics.Color.Transparent, itemShape)
                     .clickable { onSelect(destination) }
                     .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,17 +76,17 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
                 Icon(
                     destination.icon,
                     contentDescription = destination.label,
-                    tint = if (isActive) PipeColors.brandPrimary else PipeColors.fgMuted,
+                    tint = if (isActive) PlColors.brandPrimary else PlColors.fgMuted,
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.height(6.dp))
-                MonoText(destination.label, size = 8.5f.sp, color = if (isActive) PipeColors.brandPrimary else PipeColors.fgMuted)
+                MonoText(destination.label, size = 8.5f.sp, color = if (isActive) PlColors.brandPrimary else PlColors.fgMuted)
             }
         }
         Spacer(Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Dot(color = AppStatus.OFFER.color)
-            MonoText("Synced", size = 8.sp, color = PipeColors.fgMuted)
+            MonoText("Synced", size = 8.sp, color = PlColors.fgMuted)
         }
     }
 }

@@ -36,9 +36,9 @@ import org.cr.pipeline.ui.components.ContactInfo
 import org.cr.pipeline.ui.components.ContactRow
 import org.cr.pipeline.ui.components.DetailSection
 import org.cr.pipeline.ui.components.Dot
-import org.cr.pipeline.ui.components.PipeIconButton
-import org.cr.pipeline.ui.components.PipePrimaryButton
-import org.cr.pipeline.ui.components.PipeSecondaryButton
+import org.cr.pipeline.ui.components.PlIconButton
+import org.cr.pipeline.ui.components.PlPrimaryButton
+import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.StatusChip
 import org.cr.pipeline.ui.components.Timeline
 import org.cr.pipeline.ui.components.TimelineEntry
@@ -47,8 +47,8 @@ import org.cr.pipeline.ui.components.changesLabel
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
-import org.cr.pipeline.ui.theme.PipeType
+import org.cr.pipeline.ui.theme.PlColors
+import org.cr.pipeline.ui.theme.PlType
 import org.cr.pipeline.ui.theme.drawBottomBorder
 import org.cr.pipeline.ui.theme.drawRightBorder
 import org.koin.compose.koinInject
@@ -64,18 +64,18 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
         }
     }
 
-    Column(modifier.fillMaxHeight().fillMaxWidth().background(PipeColors.bgBase)) {
+    Column(modifier.fillMaxHeight().fillMaxWidth().background(PlColors.bgBase)) {
         val current = detail
         if (current == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                MonoText("Select an application", size = 11.sp, color = PipeColors.fgMuted)
+                MonoText("Select an application", size = 11.sp, color = PlColors.fgMuted)
             }
             return@Column
         }
         Row(
             Modifier
                 .fillMaxWidth()
-                .drawBottomBorder(PipeColors.borderDefault)
+                .drawBottomBorder(PlColors.borderDefault)
                 .padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 18.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -85,7 +85,7 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                 BodyText(
                     current.role,
                     size = 16.sp,
-                    color = PipeColors.fgSecondary,
+                    color = PlColors.fgSecondary,
                     modifier = Modifier.padding(top = 6.dp),
                 )
                 Row(
@@ -96,15 +96,15 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                     StatusChip(current.status)
                     val activity = "${current.daysSinceActivity}d since activity" +
                         (current.source?.let { " · Source: $it" } ?: "")
-                    MonoText(activity, size = 9.5f.sp, color = PipeColors.fgMuted)
+                    MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted)
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (current.postingUrl != null) {
-                    PipeSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
+                    PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
                 }
-                PipeIconButton(Icons.Filled.Edit, size = 44.dp, bordered = true, tint = PipeColors.fgSecondary)
-                PipePrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
+                PlIconButton(Icons.Filled.Edit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
+                PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
             }
         }
         Row(Modifier.weight(1f).fillMaxWidth()) {
@@ -113,7 +113,7 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                     .weight(1f)
                     .fillMaxHeight()
                     .verticalScroll(rememberScrollState())
-                    .drawRightBorder(PipeColors.borderDefault),
+                    .drawRightBorder(PlColors.borderDefault),
             ) {
                 val overdueReminder = current.reminders.firstOrNull { it.overdue }
                 if (overdueReminder != null) {
@@ -121,29 +121,29 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                         Modifier
                             .padding(start = 24.dp, top = 18.dp, end = 24.dp)
                             .fillMaxWidth()
-                            .background(PipeColors.overdueBg, RoundedCornerShape(4.dp))
-                            .border(1.dp, PipeColors.overdueBorder, RoundedCornerShape(4.dp))
+                            .background(PlColors.overdueBg, RoundedCornerShape(4.dp))
+                            .border(1.dp, PlColors.overdueBorder, RoundedCornerShape(4.dp))
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        Icon(Icons.Filled.Notifications, null, tint = PipeColors.brandPrimary, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Filled.Notifications, null, tint = PlColors.brandPrimary, modifier = Modifier.size(16.dp))
                         Column(Modifier.weight(1f)) {
-                            MonoText("Follow-up overdue", size = 9.5f.sp, color = PipeColors.brandPrimary)
+                            MonoText("Follow-up overdue", size = 9.5f.sp, color = PlColors.brandPrimary)
                             BodyText(
                                 overdueReminder.message,
                                 size = 13.sp,
-                                color = PipeColors.fgSecondary,
+                                color = PlColors.fgSecondary,
                                 modifier = Modifier.padding(top = 3.dp),
                             )
                         }
-                        MonoText(overdueReminder.dueDate, size = 9.5f.sp, color = PipeColors.fgMuted)
+                        MonoText(overdueReminder.dueDate, size = 9.5f.sp, color = PlColors.fgMuted)
                     }
                 }
                 if (current.statusHistory.isNotEmpty()) {
                     DetailSection(
                         label = "Status history",
-                        right = { MonoText(changesLabel(current.statusHistory.size), size = 9.sp, color = PipeColors.fgMuted) },
+                        right = { MonoText(changesLabel(current.statusHistory.size), size = 9.sp, color = PlColors.fgMuted) },
                         modifier = Modifier.padding(horizontal = 24.dp),
                     ) {
                         Timeline(entries = current.statusHistory.map { TimelineEntry(it.status, it.date, it.note, it.current) })
@@ -152,7 +152,7 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                 if (current.contacts.isNotEmpty()) {
                     DetailSection(
                         label = "Contacts",
-                        right = { Icon(Icons.Filled.Add, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp)) },
+                        right = { Icon(Icons.Filled.Add, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
                         modifier = Modifier.padding(horizontal = 24.dp),
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -172,41 +172,41 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
             ) {
                 DetailSection(
                     label = "Notes",
-                    right = { Icon(Icons.Filled.Edit, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp)) },
+                    right = { Icon(Icons.Filled.Edit, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
                 ) {
                     BodyText(
                         current.notes,
                         size = 13.5f.sp,
-                        color = PipeColors.fgSecondary,
+                        color = PlColors.fgSecondary,
                         lineHeight = 21.sp,
                     )
                 }
                 if (current.reminders.isNotEmpty()) {
                     DetailSection(
                         label = "Reminders",
-                        right = { Icon(Icons.Filled.Add, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp)) },
+                        right = { Icon(Icons.Filled.Add, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             current.reminders.forEach { reminder ->
                                 Row(
                                     Modifier
                                         .fillMaxWidth()
-                                        .background(PipeColors.bgRaised, RoundedCornerShape(2.dp))
+                                        .background(PlColors.bgRaised, RoundedCornerShape(2.dp))
                                         .border(
                                             1.dp,
-                                            if (reminder.overdue) PipeColors.overdueBorder else PipeColors.borderDefault,
+                                            if (reminder.overdue) PlColors.overdueBorder else PlColors.borderDefault,
                                             RoundedCornerShape(2.dp),
                                         )
                                         .padding(horizontal = 12.dp, vertical = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    Dot(color = if (reminder.overdue) PipeColors.brandPrimary else PipeColors.fgMuted)
-                                    BodyText(reminder.message, size = 13.5f.sp, color = PipeColors.fgPrimary, modifier = Modifier.weight(1f))
+                                    Dot(color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted)
+                                    BodyText(reminder.message, size = 13.5f.sp, color = PlColors.fgPrimary, modifier = Modifier.weight(1f))
                                     MonoText(
                                         reminder.dueDate,
                                         size = 9.5f.sp,
-                                        color = if (reminder.overdue) PipeColors.brandPrimary else PipeColors.fgMuted,
+                                        color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted,
                                     )
                                 }
                             }
@@ -218,23 +218,23 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                         Row(
                             Modifier
                                 .fillMaxWidth()
-                                .background(PipeColors.field, RoundedCornerShape(2.dp))
-                                .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(2.dp))
+                                .background(PlColors.field, RoundedCornerShape(2.dp))
+                                .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            Icon(Icons.Filled.Link, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Filled.Link, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
                             Text(
                                 current.postingUrl,
-                                fontFamily = PipeType.mono(),
+                                fontFamily = PlType.mono(),
                                 fontSize = 11.sp,
-                                color = PipeColors.fgSecondary,
+                                color = PlColors.fgSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f),
                             )
-                            Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = PipeColors.fgMuted, modifier = Modifier.size(14.dp))
+                            Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = PlColors.fgMuted, modifier = Modifier.size(14.dp))
                         }
                     }
                 }

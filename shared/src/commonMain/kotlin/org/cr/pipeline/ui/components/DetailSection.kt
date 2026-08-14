@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 @Composable
 fun DetailSection(
@@ -24,13 +24,13 @@ fun DetailSection(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(modifier.fillMaxWidth()) {
-        HorizontalDivider(color = PipeColors.borderDefault, thickness = 1.dp)
+        HorizontalDivider(color = PlColors.borderDefault, thickness = 1.dp)
         Column(
             Modifier.padding(top = 16.dp, bottom = 18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MonoText(label, size = 9.5f.sp, weight = FontWeight.SemiBold, color = PipeColors.fgMuted, modifier = Modifier.weight(1f))
+                MonoText(label, size = 9.5f.sp, weight = FontWeight.SemiBold, color = PlColors.fgMuted, modifier = Modifier.weight(1f))
                 right?.invoke()
             }
             content()

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
 
 @Composable
@@ -34,18 +34,18 @@ fun SettingsRow(
     Row(
         modifier
             .fillMaxWidth()
-            .drawBottomBorder(PipeColors.borderSubtle)
+            .drawBottomBorder(PlColors.borderSubtle)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 16.dp, vertical = 14.dp)
             .defaultMinSize(minHeight = 56.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (icon != null) Icon(icon, null, tint = PipeColors.fgMuted, modifier = Modifier.size(18.dp))
+        if (icon != null) Icon(icon, null, tint = PlColors.fgMuted, modifier = Modifier.size(18.dp))
         Column(Modifier.weight(1f)) {
-            BodyText(label, size = 14.5f.sp, color = PipeColors.fgPrimary)
-            if (value != null) MonoText(value, size = 9.sp, color = PipeColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
+            BodyText(label, size = 14.5f.sp, color = PlColors.fgPrimary)
+            if (value != null) MonoText(value, size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
         }
-        if (chevron) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
+        if (chevron) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
     }
 }

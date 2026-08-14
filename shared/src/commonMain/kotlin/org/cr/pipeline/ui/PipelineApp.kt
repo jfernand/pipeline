@@ -20,7 +20,7 @@ import org.cr.pipeline.ui.tablet.NavRail
 import org.cr.pipeline.ui.tablet.TabletListContent
 import org.cr.pipeline.ui.tablet.TabletSyncContent
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 import org.koin.compose.koinInject
 
 /** Entry point for the Pipeline tablet UI: a persistent nav rail plus a switchable content pane. */
@@ -31,7 +31,7 @@ fun PipelineTabletApp() {
     var destination by remember { mutableStateOf(NavDestination.LIST) }
     var selectedId by remember { mutableStateOf<Long?>(null) }
 
-    Row(Modifier.fillMaxSize().background(PipeColors.bgBase)) {
+    Row(Modifier.fillMaxSize().background(PlColors.bgBase)) {
         NavRail(active = destination, onSelect = { destination = it })
         Box(Modifier.weight(1f).fillMaxHeight()) {
             when (destination) {
@@ -50,7 +50,7 @@ fun PipelineTabletApp() {
 
 @Composable
 private fun PlaceholderPane(label: String) {
-    Box(Modifier.fillMaxSize().background(PipeColors.bgBase), contentAlignment = Alignment.Center) {
-        MonoText("$label — coming soon", size = 11.sp, color = PipeColors.fgMuted)
+    Box(Modifier.fillMaxSize().background(PlColors.bgBase), contentAlignment = Alignment.Center) {
+        MonoText("$label — coming soon", size = 11.sp, color = PlColors.fgMuted)
     }
 }

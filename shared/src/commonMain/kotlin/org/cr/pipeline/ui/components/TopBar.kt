@@ -16,11 +16,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
 
 @Composable
-fun PipeTopBar(
+fun PlTopBar(
     title: String,
     leftIcon: ImageVector,
     modifier: Modifier = Modifier,
@@ -33,11 +33,11 @@ fun PipeTopBar(
         modifier
             .fillMaxWidth()
             .height(56.dp)
-            .drawBottomBorder(PipeColors.borderSubtle)
+            .drawBottomBorder(PlColors.borderSubtle)
             .padding(horizontal = 6.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        PipeIconButton(leftIcon, onClick = onLeftClick, size = 44.dp, iconSize = 20.dp, tint = PipeColors.fgSecondary)
+        PlIconButton(leftIcon, onClick = onLeftClick, size = 44.dp, iconSize = 20.dp, tint = PlColors.fgSecondary)
         DisplayText(
             title,
             size = 21.sp,
@@ -45,14 +45,14 @@ fun PipeTopBar(
             modifier = Modifier.weight(1f).padding(start = 2.dp),
         )
         rightActions.forEach { (icon, onClick) ->
-            PipeIconButton(icon, onClick = onClick, size = 44.dp, iconSize = 20.dp, tint = PipeColors.fgSecondary)
+            PlIconButton(icon, onClick = onClick, size = 44.dp, iconSize = 20.dp, tint = PlColors.fgSecondary)
         }
         if (actionLabel != null) {
             Box(
                 Modifier.height(44.dp).clickable(onClick = onAction).padding(horizontal = 12.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                MonoText(actionLabel, size = 11.sp, weight = FontWeight.SemiBold, color = PipeColors.brandPrimary)
+                MonoText(actionLabel, size = 11.sp, weight = FontWeight.SemiBold, color = PlColors.brandPrimary)
             }
         }
     }

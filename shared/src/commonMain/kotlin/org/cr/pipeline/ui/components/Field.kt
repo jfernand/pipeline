@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 /** A labeled input-style box for the Add/Edit form. Read-only display; not a real text field. */
 @Composable
@@ -32,13 +32,13 @@ fun Field(
     tall: Boolean = false,
 ) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        MonoText(label, size = 9.5f.sp, color = PipeColors.fgMuted)
+        MonoText(label, size = 9.5f.sp, color = PlColors.fgMuted)
         Row(
             Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = if (tall) 84.dp else 46.dp)
-                .background(PipeColors.field, RoundedCornerShape(2.dp))
-                .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(2.dp))
+                .background(PlColors.field, RoundedCornerShape(2.dp))
+                .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
                 .padding(horizontal = 12.dp, vertical = if (tall) 12.dp else 0.dp),
             verticalAlignment = if (tall) Alignment.Top else Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -46,11 +46,11 @@ fun Field(
             BodyText(
                 value ?: placeholder.orEmpty(),
                 size = 14.sp,
-                color = if (value != null) PipeColors.fgPrimary else PipeColors.fgMuted,
+                color = if (value != null) PlColors.fgPrimary else PlColors.fgMuted,
                 lineHeight = 21.sp,
                 modifier = Modifier.weight(1f),
             )
-            if (icon != null) Icon(icon, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
+            if (icon != null) Icon(icon, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
         }
     }
 }

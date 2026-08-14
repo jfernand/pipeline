@@ -26,18 +26,18 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.ui.components.Dot
-import org.cr.pipeline.ui.components.PipeSecondaryButton
-import org.cr.pipeline.ui.components.PipeTopBar
+import org.cr.pipeline.ui.components.PlSecondaryButton
+import org.cr.pipeline.ui.components.PlTopBar
 import org.cr.pipeline.ui.components.QrCodePlaceholder
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 @Composable
 fun PairingScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}) {
-    Column(modifier.fillMaxSize().background(PipeColors.bgBase)) {
-        PipeTopBar(title = "Pair a device", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, onLeftClick = onBack)
+    Column(modifier.fillMaxSize().background(PlColors.bgBase)) {
+        PlTopBar(title = "Pair a device", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, onLeftClick = onBack)
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
@@ -48,33 +48,33 @@ fun PairingScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}) {
                 "Sync runs directly between your own devices over the local network. No account, no server, " +
                     "nothing leaves the two devices.",
                 size = 13.5f.sp,
-                color = PipeColors.fgSecondary,
+                color = PlColors.fgSecondary,
                 lineHeight = 21.sp,
             )
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .background(PipeColors.bgRaised, RoundedCornerShape(4.dp))
-                    .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(4.dp))
+                    .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                    .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp))
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                MonoText("Scan this on your other device", size = 9.5f.sp, color = PipeColors.fgMuted)
-                Column(Modifier.background(PipeColors.paper, RoundedCornerShape(2.dp)).padding(12.dp)) {
+                MonoText("Scan this on your other device", size = 9.5f.sp, color = PlColors.fgMuted)
+                Column(Modifier.background(PlColors.paper, RoundedCornerShape(2.dp)).padding(12.dp)) {
                     QrCodePlaceholder()
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MonoText("4K7P — 2QX9", size = 13.sp, color = PipeColors.fgPrimary, letterSpacing = 0.2f.em)
-                    MonoText("Code expires in 4:52", size = 9.sp, color = PipeColors.fgMuted)
+                    MonoText("4K7P — 2QX9", size = 13.sp, color = PlColors.fgPrimary, letterSpacing = 0.2f.em)
+                    MonoText("Code expires in 4:52", size = 9.sp, color = PlColors.fgMuted)
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Column(Modifier.weight(1f).height(1.dp).background(PipeColors.borderDefault)) {}
-                MonoText("or", size = 9.sp, color = PipeColors.fgMuted)
-                Column(Modifier.weight(1f).height(1.dp).background(PipeColors.borderDefault)) {}
+                Column(Modifier.weight(1f).height(1.dp).background(PlColors.borderDefault)) {}
+                MonoText("or", size = 9.sp, color = PlColors.fgMuted)
+                Column(Modifier.weight(1f).height(1.dp).background(PlColors.borderDefault)) {}
             }
-            PipeSecondaryButton(
+            PlSecondaryButton(
                 "Scan a code instead",
                 icon = Icons.Filled.QrCodeScanner,
                 modifier = Modifier.fillMaxWidth(),
@@ -84,19 +84,19 @@ fun PairingScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}) {
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .background(PipeColors.bgRaised, RoundedCornerShape(4.dp))
-                        .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(4.dp))
+                        .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                        .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp))
                         .padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Icon(Icons.Filled.TabletMac, null, tint = PipeColors.fgSecondary)
+                    Icon(Icons.Filled.TabletMac, null, tint = PlColors.fgSecondary)
                     Column(Modifier.weight(1f)) {
-                        BodyText("Pixel Tablet", size = 14.sp, weight = FontWeight.SemiBold, color = PipeColors.fgPrimary)
+                        BodyText("Pixel Tablet", size = 14.sp, weight = FontWeight.SemiBold, color = PlColors.fgPrimary)
                         MonoText(
                             "Last synced 11 min ago · 14 records",
                             size = 9.sp,
-                            color = PipeColors.fgMuted,
+                            color = PlColors.fgMuted,
                             modifier = Modifier.padding(top = 3.dp),
                         )
                     }

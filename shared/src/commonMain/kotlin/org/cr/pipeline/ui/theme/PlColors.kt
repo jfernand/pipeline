@@ -3,7 +3,7 @@ package org.cr.pipeline.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /** Palette mirroring the "Industrial Strength Software Services" design tokens (colors_and_type.css). */
-object PipeColors {
+object PlColors {
     val bgBase = Color(0xFF0E0E0E)
     val bgRaised = Color(0xFF1A1A1A)
     val bgSunken = Color(0xFF080808)

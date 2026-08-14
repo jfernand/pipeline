@@ -27,18 +27,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.ui.components.Field
-import org.cr.pipeline.ui.components.PipeFilterChip
-import org.cr.pipeline.ui.components.PipePrimaryButton
-import org.cr.pipeline.ui.components.PipeSecondaryButton
-import org.cr.pipeline.ui.components.PipeTopBar
+import org.cr.pipeline.ui.components.PlFilterChip
+import org.cr.pipeline.ui.components.PlPrimaryButton
+import org.cr.pipeline.ui.components.PlSecondaryButton
+import org.cr.pipeline.ui.components.PlTopBar
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 @Composable
 fun AddEditScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
-    Column(modifier.fillMaxSize().background(PipeColors.bgBase)) {
-        PipeTopBar(
+    Column(modifier.fillMaxSize().background(PlColors.bgBase)) {
+        PlTopBar(
             title = "New application",
             leftIcon = Icons.Filled.Close,
             onLeftClick = onClose,
@@ -54,13 +54,13 @@ fun AddEditScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
             Field("Company", value = "Northwind Labs")
             Field("Role", value = "Staff Android Engineer")
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                MonoText("Status", size = 9.5f.sp, color = PipeColors.fgMuted)
+                MonoText("Status", size = 9.5f.sp, color = PlColors.fgMuted)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    PipeFilterChip("Wishlist", dotColor = AppStatus.WISHLIST.color)
-                    PipeFilterChip("Applied", active = true)
-                    PipeFilterChip("Phone screen", dotColor = AppStatus.SCREEN.color)
-                    PipeFilterChip("Interviewing", dotColor = AppStatus.INTERVIEW.color)
-                    PipeFilterChip("Offer", dotColor = AppStatus.OFFER.color)
+                    PlFilterChip("Wishlist", dotColor = AppStatus.WISHLIST.color)
+                    PlFilterChip("Applied", active = true)
+                    PlFilterChip("Phone screen", dotColor = AppStatus.SCREEN.color)
+                    PlFilterChip("Interviewing", dotColor = AppStatus.INTERVIEW.color)
+                    PlFilterChip("Offer", dotColor = AppStatus.OFFER.color)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -69,25 +69,25 @@ fun AddEditScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
             }
             Field("Posting URL", value = "northwindlabs.com/careers/staff-android", icon = Icons.Filled.Link)
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                MonoText("Source", size = 9.5f.sp, color = PipeColors.fgMuted)
+                MonoText("Source", size = 9.5f.sp, color = PlColors.fgMuted)
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .height(46.dp)
-                        .background(PipeColors.field, RoundedCornerShape(2.dp))
-                        .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(2.dp))
+                        .background(PlColors.field, RoundedCornerShape(2.dp))
+                        .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
                         .padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    BodyText("Referral", size = 14.sp, color = PipeColors.fgPrimary, modifier = Modifier.weight(1f))
-                    Icon(Icons.Filled.KeyboardArrowDown, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
+                    BodyText("Referral", size = 14.sp, color = PlColors.fgPrimary, modifier = Modifier.weight(1f))
+                    Icon(Icons.Filled.KeyboardArrowDown, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
                 }
-                MonoText("Referral · LinkedIn · Company site · Recruiter · Other", size = 9.sp, color = PipeColors.fgMuted)
+                MonoText("Referral · LinkedIn · Company site · Recruiter · Other", size = 9.sp, color = PlColors.fgMuted)
             }
             Field("Notes", tall = true, placeholder = "Anything you'll want to remember in three weeks.")
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                PipeSecondaryButton("Cancel", onClick = onClose, modifier = Modifier.weight(1f))
-                PipePrimaryButton("Save application", onClick = onClose, modifier = Modifier.weight(2f))
+                PlSecondaryButton("Cancel", onClick = onClose, modifier = Modifier.weight(1f))
+                PlPrimaryButton("Save application", onClick = onClose, modifier = Modifier.weight(2f))
             }
         }
     }

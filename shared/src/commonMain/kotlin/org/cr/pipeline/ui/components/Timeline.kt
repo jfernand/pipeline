@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
-import org.cr.pipeline.ui.theme.PipeColors
+import org.cr.pipeline.ui.theme.PlColors
 
 data class TimelineEntry(val status: AppStatus, val date: String, val note: String, val current: Boolean = false)
 
@@ -36,9 +36,9 @@ fun Timeline(modifier: Modifier = Modifier, entries: List<TimelineEntry> = defau
             Row(Modifier.height(IntrinsicSize.Min)) {
                 Column(Modifier.width(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(Modifier.height(4.dp))
-                    Dot(color = if (entry.current) PipeColors.brandPrimary else entry.status.color, size = if (entry.current) 10.dp else 7.dp)
+                    Dot(color = if (entry.current) PlColors.brandPrimary else entry.status.color, size = if (entry.current) 10.dp else 7.dp)
                     if (index != entries.lastIndex) {
-                        Spacer(Modifier.width(1.dp).weight(1f).background(PipeColors.borderDefault))
+                        Spacer(Modifier.width(1.dp).weight(1f).background(PlColors.borderDefault))
                     } else {
                         Spacer(Modifier.weight(1f))
                     }
@@ -47,13 +47,13 @@ fun Timeline(modifier: Modifier = Modifier, entries: List<TimelineEntry> = defau
                 Column(Modifier.padding(bottom = if (index == entries.lastIndex) 0.dp else 18.dp).widthIn(min = 0.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatusChip(entry.status, small = true)
-                        MonoText(entry.date, size = 9.5f.sp, color = PipeColors.fgMuted)
-                        if (entry.current) MonoText("· current", size = 9.sp, weight = FontWeight.SemiBold, color = PipeColors.brandPrimary)
+                        MonoText(entry.date, size = 9.5f.sp, color = PlColors.fgMuted)
+                        if (entry.current) MonoText("· current", size = 9.sp, weight = FontWeight.SemiBold, color = PlColors.brandPrimary)
                     }
                     BodyText(
                         entry.note,
                         size = 13.sp,
-                        color = PipeColors.fgSecondary,
+                        color = PlColors.fgSecondary,
                         lineHeight = 18.sp,
                         modifier = Modifier.padding(top = 5.dp),
                     )
