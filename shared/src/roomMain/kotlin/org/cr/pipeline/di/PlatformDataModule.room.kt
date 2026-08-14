@@ -11,5 +11,8 @@ import org.koin.dsl.module
 actual val platformDataModule: Module = module {
     single { buildDatabase(getDatabaseBuilder()) }
     single { get<AppDatabase>().applicationDao() }
-    single<JobApplicationRepository> { RoomJobApplicationRepository(get()) }
+    single { get<AppDatabase>().statusEventDao() }
+    single { get<AppDatabase>().contactDao() }
+    single { get<AppDatabase>().reminderDao() }
+    single<JobApplicationRepository> { RoomJobApplicationRepository(get(), get(), get(), get()) }
 }
