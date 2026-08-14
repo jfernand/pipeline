@@ -141,8 +141,8 @@ fun TabletSyncContent(modifier: Modifier = Modifier) {
                         Row(
                             Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 10.dp)
-                                .drawBottomBorder(PipeColors.borderSubtle),
+                                .drawBottomBorder(PipeColors.borderSubtle)
+                                .padding(vertical = 10.dp),
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                         ) {
                             MonoText(time, size = 9.5f.sp, color = PipeColors.fgMuted, modifier = Modifier.width(80.dp))

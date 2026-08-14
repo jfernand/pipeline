@@ -67,8 +67,8 @@ fun ListPane(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 12.dp)
-                    .drawBottomBorder(PipeColors.borderSubtle),
+                    .drawBottomBorder(PipeColors.borderSubtle)
+                    .padding(start = 20.dp, top = 18.dp, end = 20.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

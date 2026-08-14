@@ -55,8 +55,8 @@ fun DetailPane(modifier: Modifier = Modifier) {
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 18.dp)
-                .drawBottomBorder(PipeColors.borderDefault),
+                .drawBottomBorder(PipeColors.borderDefault)
+                .padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 18.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
