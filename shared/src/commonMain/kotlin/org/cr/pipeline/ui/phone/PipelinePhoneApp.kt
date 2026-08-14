@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,7 +22,7 @@ private enum class PhoneScreen { LIST, DETAIL, ADD, SETTINGS, PAIR }
 @Composable
 fun PipelinePhoneApp(modifier: Modifier = Modifier) {
     val repository = koinInject<JobApplicationRepository>()
-    val applications = remember { repository.getApplications() }
+    val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var screen by remember { mutableStateOf(PhoneScreen.LIST) }
     var sheetOpen by remember { mutableStateOf(false) }
 

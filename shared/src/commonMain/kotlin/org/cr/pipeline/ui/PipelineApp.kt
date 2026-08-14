@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,17 +27,17 @@ import org.koin.compose.koinInject
 @Composable
 fun PipelineTabletApp() {
     val repository = koinInject<JobApplicationRepository>()
-    val sampleApplications = remember { repository.getApplications() }
+    val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var destination by remember { mutableStateOf(NavDestination.LIST) }
-    var selectedCompany by remember { mutableStateOf(sampleApplications.first().company) }
+    var selectedCompany by remember { mutableStateOf<String?>(null) }
 
     Row(Modifier.fillMaxSize().background(PipeColors.bgBase)) {
         NavRail(active = destination, onSelect = { destination = it })
         Box(Modifier.weight(1f).fillMaxHeight()) {
             when (destination) {
                 NavDestination.LIST -> TabletListContent(
-                    applications = sampleApplications,
-                    selectedCompany = selectedCompany,
+                    applications = applications,
+                    selectedCompany = selectedCompany ?: applications.firstOrNull()?.company,
                     onSelect = { selectedCompany = it.company },
                     onNew = {},
                 )
