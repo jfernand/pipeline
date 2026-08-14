@@ -13,17 +13,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
-import org.cr.pipeline.model.sampleApplications
+import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.ui.tablet.NavDestination
 import org.cr.pipeline.ui.tablet.NavRail
 import org.cr.pipeline.ui.tablet.TabletListContent
 import org.cr.pipeline.ui.tablet.TabletSyncContent
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PipeColors
+import org.koin.compose.koinInject
 
 /** Entry point for the Pipeline tablet UI: a persistent nav rail plus a switchable content pane. */
 @Composable
 fun PipelineTabletApp() {
+    val repository = koinInject<JobApplicationRepository>()
+    val sampleApplications = remember { repository.getApplications() }
     var destination by remember { mutableStateOf(NavDestination.LIST) }
     var selectedCompany by remember { mutableStateOf(sampleApplications.first().company) }
 

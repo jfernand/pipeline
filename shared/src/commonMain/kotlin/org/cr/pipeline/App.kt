@@ -8,9 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.cr.pipeline.di.appModule
 import org.cr.pipeline.ui.PipelineTabletApp
 import org.cr.pipeline.ui.phone.PipelinePhoneApp
 import org.cr.pipeline.ui.theme.PipeColors
+import org.koin.compose.KoinApplication
+import org.koin.dsl.koinConfiguration
 
 private val pipeDarkColorScheme = darkColorScheme(
     primary = PipeColors.brandPrimary,
@@ -27,12 +30,14 @@ private val COMPACT_WIDTH_BREAKPOINT = 600.dp
 @Composable
 @Preview
 fun App() {
-    MaterialTheme(colorScheme = pipeDarkColorScheme) {
-        BoxWithConstraints(Modifier.fillMaxSize()) {
-            if (maxWidth < COMPACT_WIDTH_BREAKPOINT) {
-                PipelinePhoneApp()
-            } else {
-                PipelineTabletApp()
+    KoinApplication(koinConfiguration { modules(appModule) }) {
+        MaterialTheme(colorScheme = pipeDarkColorScheme) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                if (maxWidth < COMPACT_WIDTH_BREAKPOINT) {
+                    PipelinePhoneApp()
+                } else {
+                    PipelineTabletApp()
+                }
             }
         }
     }

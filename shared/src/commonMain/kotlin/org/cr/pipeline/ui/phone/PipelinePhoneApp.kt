@@ -11,21 +11,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.cr.pipeline.model.sampleApplications
+import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.ui.components.PipeFab
+import org.koin.compose.koinInject
 
 private enum class PhoneScreen { LIST, DETAIL, ADD, SETTINGS, PAIR }
 
 /** Entry point for the Pipeline phone UI: single-pane navigation plus a status-update sheet. */
 @Composable
 fun PipelinePhoneApp(modifier: Modifier = Modifier) {
+    val repository = koinInject<JobApplicationRepository>()
+    val applications = remember { repository.getApplications() }
     var screen by remember { mutableStateOf(PhoneScreen.LIST) }
     var sheetOpen by remember { mutableStateOf(false) }
 
     Box(modifier.fillMaxSize()) {
         when (screen) {
             PhoneScreen.LIST -> ListScreen(
-                applications = sampleApplications,
+                applications = applications,
                 dimmed = sheetOpen,
                 onCard = { screen = PhoneScreen.DETAIL },
                 onSettings = { screen = PhoneScreen.SETTINGS },
