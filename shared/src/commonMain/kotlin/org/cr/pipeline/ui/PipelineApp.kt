@@ -29,7 +29,7 @@ fun PipelineTabletApp() {
     val repository = koinInject<JobApplicationRepository>()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var destination by remember { mutableStateOf(NavDestination.LIST) }
-    var selectedCompany by remember { mutableStateOf<String?>(null) }
+    var selectedId by remember { mutableStateOf<Long?>(null) }
 
     Row(Modifier.fillMaxSize().background(PipeColors.bgBase)) {
         NavRail(active = destination, onSelect = { destination = it })
@@ -37,8 +37,8 @@ fun PipelineTabletApp() {
             when (destination) {
                 NavDestination.LIST -> TabletListContent(
                     applications = applications,
-                    selectedCompany = selectedCompany ?: applications.firstOrNull()?.company,
-                    onSelect = { selectedCompany = it.company },
+                    selectedId = selectedId ?: applications.firstOrNull()?.id,
+                    onSelect = { selectedId = it.id },
                     onNew = {},
                 )
                 NavDestination.SYNC -> TabletSyncContent()

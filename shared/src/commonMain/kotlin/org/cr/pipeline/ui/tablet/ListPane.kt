@@ -46,7 +46,7 @@ import org.cr.pipeline.ui.theme.drawRightBorder
 @Composable
 fun ListPane(
     applications: List<JobApplication>,
-    selectedCompany: String?,
+    selectedId: Long?,
     onSelect: (JobApplication) -> Unit,
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
@@ -106,12 +106,12 @@ fun ListPane(
             ) {
                 SectionLabel("Needs follow-up", count = followUp.size, accent = true)
                 GridColumns(followUp, columns) { app ->
-                    AppCard(app, selected = app.company == selectedCompany, onClick = { onSelect(app) })
+                    AppCard(app, selected = app.id == selectedId, onClick = { onSelect(app) })
                 }
                 Spacer(Modifier.height(6.dp))
                 SectionLabel("All applications", count = rest.size)
                 GridColumns(rest, columns) { app ->
-                    AppCard(app, selected = app.company == selectedCompany, onClick = { onSelect(app) })
+                    AppCard(app, selected = app.id == selectedId, onClick = { onSelect(app) })
                 }
             }
         }

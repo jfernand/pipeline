@@ -25,16 +25,22 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var screen by remember { mutableStateOf(PhoneScreen.LIST) }
     var sheetOpen by remember { mutableStateOf(false) }
+    var selectedApplicationId by remember { mutableStateOf<Long?>(null) }
+    val selectedApplication = applications.firstOrNull { it.id == selectedApplicationId }
 
     Box(modifier.fillMaxSize()) {
         when (screen) {
             PhoneScreen.LIST -> ListScreen(
                 applications = applications,
                 dimmed = sheetOpen,
-                onCard = { screen = PhoneScreen.DETAIL },
+                onCard = { app ->
+                    selectedApplicationId = app.id
+                    screen = PhoneScreen.DETAIL
+                },
                 onSettings = { screen = PhoneScreen.SETTINGS },
             )
             PhoneScreen.DETAIL -> DetailScreen(
+                applicationId = selectedApplicationId,
                 dimmed = sheetOpen,
                 onBack = { screen = PhoneScreen.LIST },
                 onUpdate = { sheetOpen = true },
@@ -52,8 +58,14 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 20.dp),
             )
         }
-        if (sheetOpen) {
-            StatusSheet(onClose = { sheetOpen = false }, modifier = Modifier.align(Alignment.BottomCenter))
+        if (sheetOpen && selectedApplication != null) {
+            StatusSheet(
+                company = selectedApplication.company,
+                role = selectedApplication.role,
+                currentStatus = selectedApplication.status,
+                onClose = { sheetOpen = false },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 }

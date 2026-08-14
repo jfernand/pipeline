@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.formatShort
+import org.cr.pipeline.model.todayDate
 import org.cr.pipeline.ui.components.PipeFilterChip
 import org.cr.pipeline.ui.components.PipePrimaryButton
 import org.cr.pipeline.ui.components.PipeSecondaryButton
@@ -33,7 +35,13 @@ import org.cr.pipeline.ui.theme.PipeColors
 import org.cr.pipeline.ui.theme.drawTopBorder
 
 @Composable
-fun StatusSheet(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
+fun StatusSheet(
+    company: String,
+    role: String,
+    currentStatus: AppStatus,
+    modifier: Modifier = Modifier,
+    onClose: () -> Unit = {},
+) {
     Column(
         modifier
             .fillMaxWidth()
@@ -49,7 +57,7 @@ fun StatusSheet(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
         Column {
             DisplayText("Update status", size = 21.sp, letterSpacing = 0.02f.em)
             BodyText(
-                "Northwind Labs · Staff Android Engineer",
+                "$company · $role",
                 size = 13.sp,
                 color = PipeColors.fgMuted,
                 modifier = Modifier.padding(top = 3.dp),
@@ -59,7 +67,7 @@ fun StatusSheet(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
             MonoText("New status", size = 9.5f.sp, color = PipeColors.fgMuted)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 AppStatus.entries.forEach { status ->
-                    val isSelected = status == AppStatus.OFFER
+                    val isSelected = status == currentStatus
                     PipeFilterChip(status.label, active = isSelected, dotColor = if (isSelected) null else status.color)
                 }
             }
@@ -74,7 +82,7 @@ fun StatusSheet(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
                     .border(1.dp, PipeColors.borderDefault, RoundedCornerShape(2.dp))
                     .padding(12.dp),
             ) {
-                BodyText("Verbal offer from Dana, written to follow Monday.", size = 13.5f.sp, color = PipeColors.fgPrimary)
+                BodyText("Anything worth remembering about this update.", size = 13.5f.sp, color = PipeColors.fgMuted)
             }
         }
         Row(
@@ -83,7 +91,7 @@ fun StatusSheet(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Icon(Icons.Filled.CalendarToday, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
-            MonoText("Jun 24, 2026", size = 10.sp, color = PipeColors.fgSecondary, modifier = Modifier.weight(1f))
+            MonoText(todayFormatted(), size = 10.sp, color = PipeColors.fgSecondary, modifier = Modifier.weight(1f))
             MonoText("Dated today", size = 9.sp, color = PipeColors.fgMuted)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -91,4 +99,9 @@ fun StatusSheet(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
             PipePrimaryButton("Save update", onClick = onClose, height = 46.dp, modifier = Modifier.weight(2f))
         }
     }
+}
+
+private fun todayFormatted(): String {
+    val today = todayDate()
+    return "${today.formatShort()}, ${today.year}"
 }

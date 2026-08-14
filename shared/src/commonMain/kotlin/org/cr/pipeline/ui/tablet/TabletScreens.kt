@@ -41,7 +41,7 @@ import org.cr.pipeline.ui.theme.drawBottomBorder
 @Composable
 fun TabletListContent(
     applications: List<JobApplication>,
-    selectedCompany: String?,
+    selectedId: Long?,
     onSelect: (JobApplication) -> Unit,
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
@@ -49,13 +49,13 @@ fun TabletListContent(
     BoxWithConstraints(modifier.fillMaxSize()) {
         if (maxWidth > maxHeight) {
             Row(Modifier.fillMaxSize()) {
-                ListPane(applications, selectedCompany, onSelect, onNew, fixedWidth = 392.dp)
-                DetailPane(Modifier.weight(1f))
+                ListPane(applications, selectedId, onSelect, onNew, fixedWidth = 392.dp)
+                DetailPane(applicationId = selectedId, modifier = Modifier.weight(1f))
             }
         } else {
             ListPane(
                 applications,
-                selectedCompany,
+                selectedId,
                 onSelect,
                 onNew,
                 modifier = Modifier.fillMaxSize(),
