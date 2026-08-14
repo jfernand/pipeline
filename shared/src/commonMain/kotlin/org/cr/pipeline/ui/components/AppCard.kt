@@ -1,0 +1,68 @@
+package org.cr.pipeline.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import org.cr.pipeline.model.JobApplication
+import org.cr.pipeline.ui.theme.BodyText
+import org.cr.pipeline.ui.theme.MonoText
+import org.cr.pipeline.ui.theme.PipeColors
+
+@Composable
+fun AppCard(
+    app: JobApplication,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    onClick: (() -> Unit)? = null,
+) {
+    val shape = RoundedCornerShape(4.dp)
+    val borderColor = when {
+        selected -> PipeColors.brandPrimary
+        app.overdueDays != null -> PipeColors.overdueBorder
+        else -> PipeColors.borderDefault
+    }
+    Column(
+        modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(PipeColors.bgRaised)
+            .border(1.dp, borderColor, shape)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(9.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(Modifier.weight(1f)) {
+                BodyText(app.company, size = 16.5f.sp, weight = FontWeight.SemiBold, color = PipeColors.fgPrimary, lineHeight = 20.sp)
+                BodyText(
+                    app.role,
+                    size = 13.5f.sp,
+                    color = PipeColors.fgSecondary,
+                    lineHeight = 19.sp,
+                    modifier = Modifier.padding(top = 2.dp),
+                )
+            }
+            MonoText("${app.daysAgo}d", size = 10.5f.sp, color = PipeColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatusChip(app.status)
+            app.overdueDays?.let { OverdueBadge(it) }
+            Spacer(Modifier.weight(1f))
+            MonoText(app.meta, size = 9.5f.sp, color = PipeColors.fgMuted)
+        }
+    }
+}
