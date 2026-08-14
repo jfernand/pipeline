@@ -27,6 +27,9 @@ import org.cr.pipeline.ui.theme.PipeType
 
 data class ContactInfo(val initials: String, val name: String, val role: String, val email: String)
 
+fun String.contactInitials(): String =
+    trim().split(Regex("\\s+")).filter { it.isNotEmpty() }.take(2).map { it.first().uppercaseChar() }.joinToString("")
+
 @Composable
 fun ContactRow(contact: ContactInfo, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
