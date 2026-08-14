@@ -23,7 +23,7 @@ import org.cr.pipeline.ui.theme.PipeColors
 
 /** Entry point for the Pipeline tablet UI: a persistent nav rail plus a switchable content pane. */
 @Composable
-fun PipelineApp() {
+fun PipelineTabletApp() {
     var destination by remember { mutableStateOf(NavDestination.LIST) }
     var selectedCompany by remember { mutableStateOf(sampleApplications.first().company) }
 
