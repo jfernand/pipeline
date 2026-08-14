@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,7 +37,7 @@ import org.cr.pipeline.ui.theme.PipeColors
 
 @Composable
 fun AddEditScreen(modifier: Modifier = Modifier, onClose: () -> Unit = {}) {
-    Column(modifier.background(PipeColors.bgBase)) {
+    Column(modifier.fillMaxSize().background(PipeColors.bgBase)) {
         PipeTopBar(
             title = "New application",
             leftIcon = Icons.Filled.Close,

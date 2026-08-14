@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,7 +36,7 @@ import org.cr.pipeline.ui.theme.PipeColors
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPair: () -> Unit = {}) {
-    Column(modifier.background(PipeColors.bgBase).verticalScroll(rememberScrollState())) {
+    Column(modifier.fillMaxSize().background(PipeColors.bgBase).verticalScroll(rememberScrollState())) {
         PipeTopBar(title = "Settings", leftIcon = Icons.AutoMirrored.Filled.ArrowBack, onLeftClick = onBack)
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)) {
             Column(
