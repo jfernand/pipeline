@@ -199,7 +199,7 @@ fun DetailPane(modifier: Modifier = Modifier) {
                         Icon(Icons.Filled.Link, null, tint = PipeColors.fgMuted, modifier = Modifier.size(16.dp))
                         Text(
                             "northwindlabs.com/careers/staff-android",
-                            fontFamily = PipeType.mono,
+                            fontFamily = PipeType.mono(),
                             fontSize = 11.sp,
                             color = PipeColors.fgSecondary,
                             maxLines = 1,

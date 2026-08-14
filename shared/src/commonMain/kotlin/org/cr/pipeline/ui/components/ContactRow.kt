@@ -44,7 +44,7 @@ fun ContactRow(contact: ContactInfo, modifier: Modifier = Modifier) {
             MonoText(contact.role, size = 9.sp, color = PipeColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
             androidx.compose.material3.Text(
                 contact.email,
-                fontFamily = PipeType.mono,
+                fontFamily = PipeType.mono(),
                 fontSize = 11.sp,
                 color = PipeColors.fgSecondary,
                 modifier = Modifier.padding(top = 4.dp),

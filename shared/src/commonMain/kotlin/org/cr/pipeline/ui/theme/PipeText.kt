@@ -2,6 +2,7 @@ package org.cr.pipeline.ui.theme
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -10,16 +11,41 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.Font
+import pipeline.shared.generated.resources.Res
+import pipeline.shared.generated.resources.barlow_condensed_extrabold
+import pipeline.shared.generated.resources.ibm_plex_mono_medium
+import pipeline.shared.generated.resources.ibm_plex_mono_semibold
+import pipeline.shared.generated.resources.space_grotesk_medium
+import pipeline.shared.generated.resources.space_grotesk_regular
+import pipeline.shared.generated.resources.space_grotesk_semibold
 
 /**
- * Approximations of the web design's Barlow Condensed / Space Grotesk / IBM Plex Mono
- * stacks using platform-default font families, since the web font files aren't bundled
- * with the app.
+ * The design's Barlow Condensed / Space Grotesk / IBM Plex Mono stacks, bundled from
+ * Google Fonts (OFL-licensed; see /fonts-licenses). Only the weights actually used by
+ * [MonoText], [DisplayText] and [BodyText] are included.
  */
 object PipeType {
-    val display = FontFamily.SansSerif
-    val body = FontFamily.SansSerif
-    val mono = FontFamily.Monospace
+    @Composable
+    fun display(): FontFamily {
+        val extraBold = Font(Res.font.barlow_condensed_extrabold, FontWeight.ExtraBold)
+        return remember(extraBold) { FontFamily(extraBold) }
+    }
+
+    @Composable
+    fun body(): FontFamily {
+        val regular = Font(Res.font.space_grotesk_regular, FontWeight.Normal)
+        val medium = Font(Res.font.space_grotesk_medium, FontWeight.Medium)
+        val semiBold = Font(Res.font.space_grotesk_semibold, FontWeight.SemiBold)
+        return remember(regular, medium, semiBold) { FontFamily(regular, medium, semiBold) }
+    }
+
+    @Composable
+    fun mono(): FontFamily {
+        val medium = Font(Res.font.ibm_plex_mono_medium, FontWeight.Medium)
+        val semiBold = Font(Res.font.ibm_plex_mono_semibold, FontWeight.SemiBold)
+        return remember(medium, semiBold) { FontFamily(medium, semiBold) }
+    }
 }
 
 /** The design's ".label"/".mono" style: uppercase, wide tracking, monospace. */
@@ -39,7 +65,7 @@ fun MonoText(
         modifier = modifier,
         color = color,
         fontSize = size,
-        fontFamily = PipeType.mono,
+        fontFamily = PipeType.mono(),
         fontWeight = weight,
         letterSpacing = letterSpacing,
         maxLines = maxLines,
@@ -63,7 +89,7 @@ fun DisplayText(
         modifier = modifier,
         color = color,
         fontSize = size,
-        fontFamily = PipeType.display,
+        fontFamily = PipeType.display(),
         fontWeight = weight,
         letterSpacing = letterSpacing,
         lineHeight = lineHeight,
@@ -87,7 +113,7 @@ fun BodyText(
         modifier = modifier,
         color = color,
         fontSize = size,
-        fontFamily = PipeType.body,
+        fontFamily = PipeType.body(),
         fontWeight = weight,
         lineHeight = lineHeight,
         maxLines = maxLines,
