@@ -6,9 +6,16 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
+    // Room's KMP database-constructor pattern (expect object AppDatabaseConstructor) relies
+    // on expect/actual classes, still Beta in the compiler.
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -52,6 +59,16 @@ kotlin {
     }
 
     sourceSets {
+        // Room's KMP support covers Android/JVM/Native but not js/wasmJs, so the
+        // Room-backed data layer lives here instead of commonMain, shared only by the
+        // targets that can use it. js/wasmJs fall back to an in-memory repository.
+        val roomMain by creating {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(roomMain)
+        jvmMain.get().dependsOn(roomMain)
+        iosMain.get().dependsOn(roomMain)
+
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
@@ -68,6 +85,12 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        roomMain.dependencies {
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+            implementation(libs.kotlinx.datetime)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -79,5 +102,9 @@ kotlin {
 }
 
 dependencies {
+    add("kspAndroid", libs.room.compiler)
+    add("kspJvm", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
+    add("kspIosSimulatorArm64", libs.room.compiler)
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
