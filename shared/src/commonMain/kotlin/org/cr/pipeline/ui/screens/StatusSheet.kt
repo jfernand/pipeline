@@ -1,4 +1,4 @@
-package org.cr.pipeline.ui.phone
+package org.cr.pipeline.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +15,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -25,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.formatShort
 import org.cr.pipeline.model.todayDate
+import org.cr.pipeline.ui.components.Field
 import org.cr.pipeline.ui.components.PlFilterChip
 import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlSecondaryButton
@@ -40,8 +44,12 @@ fun StatusSheet(
     role: String,
     currentStatus: AppStatus,
     modifier: Modifier = Modifier,
-    onClose: () -> Unit = {},
+    onCancel: () -> Unit = {},
+    onSave: (AppStatus, String) -> Unit = { _, _ -> },
 ) {
+    var selectedStatus by remember { mutableStateOf(currentStatus) }
+    var note by remember { mutableStateOf("") }
+
     Column(
         modifier
             .fillMaxWidth()
@@ -67,24 +75,23 @@ fun StatusSheet(
             MonoText("New status", size = 9.5f.sp, color = PlColors.fgMuted)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 AppStatus.entries.forEach { status ->
-                    val isSelected = status == currentStatus
-                    PlFilterChip(status.label, active = isSelected, dotColor = if (isSelected) null else status.color)
+                    val isSelected = status == selectedStatus
+                    PlFilterChip(
+                        status.label,
+                        active = isSelected,
+                        dotColor = if (isSelected) null else status.color,
+                        onClick = { selectedStatus = status },
+                    )
                 }
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            MonoText("Note", size = 9.5f.sp, color = PlColors.fgMuted)
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 64.dp)
-                    .background(PlColors.field, RoundedCornerShape(2.dp))
-                    .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
-                    .padding(12.dp),
-            ) {
-                BodyText("Anything worth remembering about this update.", size = 13.5f.sp, color = PlColors.fgMuted)
-            }
-        }
+        Field(
+            label = "Note",
+            tall = true,
+            value = note,
+            placeholder = "Anything worth remembering about this update.",
+            onValueChange = { note = it },
+        )
         Row(
             Modifier.fillMaxWidth().drawTopBorder(PlColors.borderSubtle).padding(top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -95,8 +102,13 @@ fun StatusSheet(
             MonoText("Dated today", size = 9.sp, color = PlColors.fgMuted)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            PlSecondaryButton("Cancel", onClick = onClose, height = 46.dp, modifier = Modifier.weight(1f))
-            PlPrimaryButton("Save update", onClick = onClose, height = 46.dp, modifier = Modifier.weight(2f))
+            PlSecondaryButton("Cancel", onClick = onCancel, height = 46.dp, modifier = Modifier.weight(1f))
+            PlPrimaryButton(
+                "Save update",
+                onClick = { onSave(selectedStatus, note) },
+                height = 46.dp,
+                modifier = Modifier.weight(2f),
+            )
         }
     }
 }
