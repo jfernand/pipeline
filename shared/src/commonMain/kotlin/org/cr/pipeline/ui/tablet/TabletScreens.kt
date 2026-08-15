@@ -45,12 +45,19 @@ fun TabletListContent(
     onSelect: (JobApplication) -> Unit,
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
+    onUpdateStatus: () -> Unit = {},
+    onEdit: () -> Unit = {},
 ) {
     BoxWithConstraints(modifier.fillMaxSize()) {
         if (maxWidth > maxHeight) {
             Row(Modifier.fillMaxSize()) {
                 ListPane(applications, selectedId, onSelect, onNew, fixedWidth = 392.dp)
-                DetailPane(applicationId = selectedId, modifier = Modifier.weight(1f))
+                DetailPane(
+                    applicationId = selectedId,
+                    onUpdateStatus = onUpdateStatus,
+                    onEdit = onEdit,
+                    modifier = Modifier.weight(1f),
+                )
             }
         } else {
             ListPane(

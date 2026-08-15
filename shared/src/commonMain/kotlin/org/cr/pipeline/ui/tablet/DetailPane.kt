@@ -54,7 +54,12 @@ import org.cr.pipeline.ui.theme.drawRightBorder
 import org.koin.compose.koinInject
 
 @Composable
-fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStatus: () -> Unit = {}) {
+fun DetailPane(
+    applicationId: Long?,
+    modifier: Modifier = Modifier,
+    onUpdateStatus: () -> Unit = {},
+    onEdit: () -> Unit = {},
+) {
     val repository = koinInject<JobApplicationRepository>()
     val detail by produceState<ApplicationDetail?>(initialValue = null, applicationId) {
         if (applicationId == null) {
@@ -103,7 +108,7 @@ fun DetailPane(applicationId: Long?, modifier: Modifier = Modifier, onUpdateStat
                 if (current.postingUrl != null) {
                     PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
                 }
-                PlIconButton(Icons.Filled.Edit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
+                PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
                 PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
             }
         }
