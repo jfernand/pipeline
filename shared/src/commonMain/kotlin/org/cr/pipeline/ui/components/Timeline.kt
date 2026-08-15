@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
@@ -47,8 +48,17 @@ fun Timeline(modifier: Modifier = Modifier, entries: List<TimelineEntry> = defau
                 Column(Modifier.padding(bottom = if (index == entries.lastIndex) 0.dp else 18.dp).widthIn(min = 0.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatusChip(entry.status, small = true)
-                        MonoText(entry.date, size = 9.5f.sp, color = PlColors.fgMuted)
-                        if (entry.current) MonoText("· current", size = 9.sp, weight = FontWeight.SemiBold, color = PlColors.brandPrimary)
+                        MonoText(entry.date, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (entry.current) {
+                            MonoText(
+                                "· current",
+                                size = 9.sp,
+                                weight = FontWeight.SemiBold,
+                                color = PlColors.brandPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                     }
                     BodyText(
                         entry.note,

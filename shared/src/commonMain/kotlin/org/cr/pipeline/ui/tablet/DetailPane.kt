@@ -101,7 +101,7 @@ fun DetailPane(
                         StatusChip(current.status)
                         val activity = "${current.daysSinceActivity}d since activity" +
                             (current.source?.let { " · Source: $it" } ?: "")
-                        MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted)
+                        MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -159,7 +159,13 @@ fun DetailPane(
                                 modifier = Modifier.padding(top = 3.dp),
                             )
                         }
-                        MonoText(overdueReminder.dueDate, size = 9.5f.sp, color = PlColors.fgMuted)
+                        MonoText(
+                            overdueReminder.dueDate,
+                            size = 9.5f.sp,
+                            color = PlColors.fgMuted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
                 if (current.statusHistory.isNotEmpty()) {
@@ -224,11 +230,20 @@ fun DetailPane(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
                                     Dot(color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted)
-                                    BodyText(reminder.message, size = 13.5f.sp, color = PlColors.fgPrimary, modifier = Modifier.weight(1f))
+                                    BodyText(
+                                        reminder.message,
+                                        size = 13.5f.sp,
+                                        color = PlColors.fgPrimary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f),
+                                    )
                                     MonoText(
                                         reminder.dueDate,
                                         size = 9.5f.sp,
                                         color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                 }
                             }

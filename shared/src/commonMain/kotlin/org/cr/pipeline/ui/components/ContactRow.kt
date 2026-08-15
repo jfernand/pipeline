@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -43,13 +44,29 @@ fun ContactRow(contact: ContactInfo, modifier: Modifier = Modifier) {
             MonoText(contact.initials, size = 11.sp, color = PlColors.fgSecondary, letterSpacing = 0.05f.em)
         }
         Column(Modifier.weight(1f)) {
-            BodyText(contact.name, size = 14.5f.sp, weight = FontWeight.SemiBold, color = PlColors.fgPrimary)
-            MonoText(contact.role, size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
+            BodyText(
+                contact.name,
+                size = 14.5f.sp,
+                weight = FontWeight.SemiBold,
+                color = PlColors.fgPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            MonoText(
+                contact.role,
+                size = 9.sp,
+                color = PlColors.fgMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 3.dp),
+            )
             androidx.compose.material3.Text(
                 contact.email,
                 fontFamily = PlType.mono(),
                 fontSize = 11.sp,
                 color = PlColors.fgSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 4.dp),
             )
         }

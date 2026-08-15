@@ -102,7 +102,13 @@ fun DetailScreen(
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatusChip(current.status)
-                    MonoText("${current.daysSinceActivity}d since activity", size = 9.5f.sp, color = PlColors.fgMuted)
+                    MonoText(
+                        "${current.daysSinceActivity}d since activity",
+                        size = 9.5f.sp,
+                        color = PlColors.fgMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     PlPrimaryButton("Update status", onClick = onUpdate, height = 46.dp, modifier = Modifier.weight(1f))
