@@ -24,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import org.cr.pipeline.BuildInfo
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.ui.components.Dot
 import org.cr.pipeline.ui.theme.DisplayText
@@ -87,6 +89,14 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Dot(color = AppStatus.OFFER.color)
             MonoText("Synced", size = 8.sp, color = PlColors.fgMuted)
+            MonoText(
+                BuildInfo.GIT_DESCRIBE,
+                size = 6.5f.sp,
+                color = PlColors.fgMuted,
+                letterSpacing = 0f.em,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

@@ -1,5 +1,8 @@
+import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -7,6 +10,49 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.ksp)
+}
+
+/**
+ * Generates a single commonMain Kotlin file exposing the current `git describe` output, so the
+ * running app can show which commit it was built from. Always re-runs (git HEAD/dirty state can
+ * change without any other Gradle input changing) and never fails the build if git is unavailable.
+ */
+abstract class GenerateGitInfoTask : DefaultTask() {
+    @get:Inject
+    abstract val execOps: ExecOperations
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        val describe = runCatching {
+            val out = ByteArrayOutputStream()
+            val result = execOps.exec {
+                commandLine("git", "describe", "--tags", "--always", "--dirty")
+                standardOutput = out
+                isIgnoreExitValue = true
+            }
+            if (result.exitValue == 0) out.toString(Charsets.UTF_8).trim() else null
+        }.getOrNull()?.takeIf { it.isNotBlank() } ?: "unknown"
+
+        val pkgDir = outputDir.get().asFile.resolve("org/cr/pipeline")
+        pkgDir.mkdirs()
+        pkgDir.resolve("BuildInfo.kt").writeText(
+            """
+            |package org.cr.pipeline
+            |
+            |object BuildInfo {
+            |    const val GIT_DESCRIBE: String = "$describe"
+            |}
+            |""".trimMargin(),
+        )
+    }
+}
+
+val generateGitInfo = tasks.register<GenerateGitInfoTask>("generateGitInfo") {
+    outputDir.set(layout.buildDirectory.dir("generated/gitInfo/kotlin"))
+    outputs.upToDateWhen { false }
 }
 
 kotlin {
@@ -59,6 +105,8 @@ kotlin {
     }
 
     sourceSets {
+        commonMain.get().kotlin.srcDir(generateGitInfo.map { it.outputDir })
+
         // Room's KMP support covers Android/JVM/Native but not js/wasmJs, so the
         // Room-backed data layer lives here instead of commonMain, shared only by the
         // targets that can use it. js/wasmJs fall back to an in-memory repository.
