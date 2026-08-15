@@ -61,6 +61,7 @@ fun DetailScreen(
     dimmed: Boolean = false,
     onBack: () -> Unit = {},
     onUpdate: () -> Unit = {},
+    onEdit: () -> Unit = {},
 ) {
     val repository = koinInject<JobApplicationRepository>()
     val detail by produceState<ApplicationDetail?>(initialValue = null, applicationId) {
@@ -84,7 +85,7 @@ fun DetailScreen(
                 title = "Application",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onLeftClick = onBack,
-                rightActions = listOf(Icons.Filled.Edit to {}, Icons.Filled.Delete to {}),
+                rightActions = listOf(Icons.Filled.Edit to onEdit, Icons.Filled.Delete to {}),
             )
             Column(
                 Modifier.fillMaxWidth().padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 20.dp),

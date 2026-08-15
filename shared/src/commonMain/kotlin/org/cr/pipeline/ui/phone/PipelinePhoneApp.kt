@@ -8,12 +8,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.ui.components.PlFab
+import org.cr.pipeline.ui.screens.AddEditScreen
+import org.cr.pipeline.ui.screens.StatusSheet
 import org.koin.compose.koinInject
 
 private enum class PhoneScreen { LIST, DETAIL, ADD, SETTINGS, PAIR }
@@ -22,10 +26,12 @@ private enum class PhoneScreen { LIST, DETAIL, ADD, SETTINGS, PAIR }
 @Composable
 fun PipelinePhoneApp(modifier: Modifier = Modifier) {
     val repository = koinInject<JobApplicationRepository>()
+    val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var screen by remember { mutableStateOf(PhoneScreen.LIST) }
     var sheetOpen by remember { mutableStateOf(false) }
     var selectedApplicationId by remember { mutableStateOf<Long?>(null) }
+    var editingApplicationId by remember { mutableStateOf<Long?>(null) }
     val selectedApplication = applications.firstOrNull { it.id == selectedApplicationId }
 
     Box(modifier.fillMaxSize()) {
@@ -44,8 +50,15 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
                 dimmed = sheetOpen,
                 onBack = { screen = PhoneScreen.LIST },
                 onUpdate = { sheetOpen = true },
+                onEdit = {
+                    editingApplicationId = selectedApplicationId
+                    screen = PhoneScreen.ADD
+                },
             )
-            PhoneScreen.ADD -> AddEditScreen(onClose = { screen = PhoneScreen.LIST })
+            PhoneScreen.ADD -> AddEditScreen(
+                applicationId = editingApplicationId,
+                onClose = { screen = if (editingApplicationId != null) PhoneScreen.DETAIL else PhoneScreen.LIST },
+            )
             PhoneScreen.SETTINGS -> SettingsScreen(
                 onBack = { screen = PhoneScreen.LIST },
                 onPair = { screen = PhoneScreen.PAIR },
@@ -54,7 +67,10 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
         }
         if (screen == PhoneScreen.LIST && !sheetOpen) {
             PlFab(
-                onClick = { screen = PhoneScreen.ADD },
+                onClick = {
+                    editingApplicationId = null
+                    screen = PhoneScreen.ADD
+                },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 20.dp),
             )
         }
@@ -63,7 +79,11 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
                 company = selectedApplication.company,
                 role = selectedApplication.role,
                 currentStatus = selectedApplication.status,
-                onClose = { sheetOpen = false },
+                onCancel = { sheetOpen = false },
+                onSave = { status, note ->
+                    scope.launch { repository.updateStatus(selectedApplication.id, status, note) }
+                    sheetOpen = false
+                },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
