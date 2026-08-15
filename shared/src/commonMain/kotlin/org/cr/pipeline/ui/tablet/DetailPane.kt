@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -77,39 +78,55 @@ fun DetailPane(
             }
             return@Column
         }
-        Row(
+        BoxWithConstraints(
             Modifier
                 .fillMaxWidth()
                 .drawBottomBorder(PlColors.borderDefault)
                 .padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 18.dp),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Column(Modifier.weight(1f)) {
-                DisplayText(current.company, size = 39.sp, lineHeight = 39.sp)
-                BodyText(
-                    current.role,
-                    size = 16.sp,
-                    color = PlColors.fgSecondary,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-                Row(
-                    Modifier.padding(top = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    StatusChip(current.status)
-                    val activity = "${current.daysSinceActivity}d since activity" +
-                        (current.source?.let { " · Source: $it" } ?: "")
-                    MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted)
+            val info: @Composable () -> Unit = {
+                Column {
+                    DisplayText(current.company, size = 39.sp, lineHeight = 39.sp)
+                    BodyText(
+                        current.role,
+                        size = 16.sp,
+                        color = PlColors.fgSecondary,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
+                    Row(
+                        Modifier.padding(top = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        StatusChip(current.status)
+                        val activity = "${current.daysSinceActivity}d since activity" +
+                            (current.source?.let { " · Source: $it" } ?: "")
+                        MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted)
+                    }
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (current.postingUrl != null) {
-                    PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
+            val actions: @Composable () -> Unit = {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (current.postingUrl != null) {
+                        PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
+                    }
+                    PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
+                    PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
                 }
-                PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
-                PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
+            }
+            // Below this, the info block (especially the company name at 39sp) doesn't have room
+            // to share a row with the action buttons without getting crushed into a near-zero
+            // width and wrapping character-by-character; stack them instead.
+            if (maxWidth >= 640.dp) {
+                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Box(Modifier.weight(1f)) { info() }
+                    actions()
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    info()
+                    actions()
+                }
             }
         }
         Row(Modifier.weight(1f).fillMaxWidth()) {
