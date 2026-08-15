@@ -2,6 +2,7 @@ package org.cr.pipeline.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -60,12 +61,19 @@ fun OverdueBadge(days: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun PlFilterChip(label: String, modifier: Modifier = Modifier, active: Boolean = false, dotColor: Color? = null) {
+fun PlFilterChip(
+    label: String,
+    modifier: Modifier = Modifier,
+    active: Boolean = false,
+    dotColor: Color? = null,
+    onClick: (() -> Unit)? = null,
+) {
     Row(
         modifier
             .clip(chipShape)
             .background(if (active) PlColors.brandPrimary else Color.Transparent)
             .border(1.dp, if (active) PlColors.brandPrimary else PlColors.borderDefault, chipShape)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
