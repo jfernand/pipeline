@@ -1,7 +1,6 @@
 package org.cr.pipeline.ui.tablet
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +19,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +38,7 @@ import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.ui.components.AppCard
 import org.cr.pipeline.ui.components.GridColumns
 import org.cr.pipeline.ui.components.PlFilterChip
+import org.cr.pipeline.ui.components.PlSearchField
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
@@ -53,8 +56,14 @@ fun ListPane(
     columns: Int = 1,
     fixedWidth: Dp? = 392.dp,
 ) {
-    val followUp = applications.filter { it.overdueDays != null }
-    val rest = applications.filter { it.overdueDays == null }
+    var query by remember { mutableStateOf("") }
+    var statusFilter by remember { mutableStateOf<AppStatus?>(null) }
+    val visible = applications.filter {
+        (statusFilter == null || it.status == statusFilter) &&
+            (query.isBlank() || it.company.contains(query, ignoreCase = true) || it.role.contains(query, ignoreCase = true))
+    }
+    val followUp = visible.filter { it.overdueDays != null }
+    val rest = visible.filter { it.overdueDays == null }
 
     Box(
         modifier
@@ -75,25 +84,17 @@ fun ListPane(
                     DisplayText("Applications", size = 25.sp, letterSpacing = 0.02f.em)
                     MonoText("${applications.size} open", size = 10.sp, color = PlColors.fgMuted)
                 }
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                        .background(PlColors.field, RoundedCornerShape(2.dp))
-                        .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
-                        .padding(horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    Icon(Icons.Filled.Search, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
-                    MonoText("Search company or role", size = 10.5f.sp, color = PlColors.fgMuted)
-                }
+                PlSearchField(query = query, onQueryChange = { query = it })
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    PlFilterChip("All · ${applications.size}", active = true)
-                    PlFilterChip("Applied", dotColor = AppStatus.APPLIED.color)
-                    PlFilterChip("Phone screen", dotColor = AppStatus.SCREEN.color)
-                    PlFilterChip("Interviewing", dotColor = AppStatus.INTERVIEW.color)
-                    PlFilterChip("Offer", dotColor = AppStatus.OFFER.color)
+                    PlFilterChip("All · ${applications.size}", active = statusFilter == null, onClick = { statusFilter = null })
+                    AppStatus.entries.forEach { status ->
+                        PlFilterChip(
+                            status.label,
+                            active = statusFilter == status,
+                            dotColor = if (statusFilter == status) null else status.color,
+                            onClick = { statusFilter = status },
+                        )
+                    }
                 }
             }
             Column(
