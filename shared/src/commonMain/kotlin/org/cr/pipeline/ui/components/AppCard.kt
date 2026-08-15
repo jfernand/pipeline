@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.JobApplication
@@ -62,7 +63,13 @@ fun AppCard(
             StatusChip(app.status)
             app.overdueDays?.let { OverdueBadge(it) }
             Spacer(Modifier.weight(1f))
-            MonoText(app.meta, size = 9.5f.sp, color = PlColors.fgMuted)
+            MonoText(
+                app.meta,
+                size = 9.5f.sp,
+                color = PlColors.fgMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
