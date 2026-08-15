@@ -61,6 +61,7 @@ fun Field(
                         value = value.orEmpty(),
                         onValueChange = onValueChange,
                         singleLine = !tall,
+                        minLines = if (tall) 3 else 1,
                         textStyle = TextStyle(
                             fontFamily = PlType.body(),
                             fontSize = 14.sp,
