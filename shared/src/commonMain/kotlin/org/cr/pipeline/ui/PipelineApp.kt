@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavHostController
+import androidx.navigation.NavUri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
@@ -45,7 +48,7 @@ import org.koin.compose.koinInject
 
 /** Entry point for the Pipeline tablet UI: a persistent nav rail plus a routed content area. */
 @Composable
-fun PipelineTabletApp(navController: NavHostController) {
+fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String? = null) {
     val repository = koinInject<JobApplicationRepository>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
@@ -102,6 +105,15 @@ fun PipelineTabletApp(navController: NavHostController) {
                 composable<SyncRoute> { TabletSyncContent() }
                 composable<FollowUpsRoute> { PlaceholderPane("Follow-ups") }
                 composable<SettingsRoute> { PlaceholderPane("Settings") }
+            }
+            // Runs in the same composition pass as the NavHost above (both are children of this
+            // Box), so navController.graph is guaranteed to already be set here — unlike calling
+            // handleDeepLink from App()'s onNavHostReady, which fires from an ancestor before this
+            // width-gated subtree (and therefore NavHost) has necessarily been composed at all.
+            LaunchedEffect(initialDeepLink) {
+                if (initialDeepLink != null) {
+                    navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(initialDeepLink)).build())
+                }
             }
             if (statusSheetApplication != null) {
                 StatusSheet(

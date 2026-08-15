@@ -32,16 +32,19 @@ private val COMPACT_WIDTH_BREAKPOINT = 600.dp
 
 @Composable
 @Preview
-fun App(onNavHostReady: suspend (NavHostController) -> Unit = {}) {
+fun App(
+    initialDeepLink: String? = null,
+    onNavHostReady: suspend (NavHostController) -> Unit = {},
+) {
     KoinApplication(koinConfiguration { modules(platformDataModule) }) {
         MaterialTheme(colorScheme = pipeDarkColorScheme) {
             val navController = rememberNavController()
             LaunchedEffect(navController) { onNavHostReady(navController) }
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 if (maxWidth < COMPACT_WIDTH_BREAKPOINT) {
-                    PipelinePhoneApp(navController)
+                    PipelinePhoneApp(navController, initialDeepLink = initialDeepLink)
                 } else {
-                    PipelineTabletApp(navController)
+                    PipelineTabletApp(navController, initialDeepLink = initialDeepLink)
                 }
             }
         }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,8 +15,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
+import androidx.navigation.NavUri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,7 +38,7 @@ import org.koin.compose.koinInject
 
 /** Entry point for the Pipeline phone UI: single-pane routed navigation plus a status-update sheet. */
 @Composable
-fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modifier) {
+fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modifier, initialDeepLink: String? = null) {
     val repository = koinInject<JobApplicationRepository>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
@@ -75,6 +78,14 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
             }
             composable<PairRoute> {
                 PairingScreen(onBack = { navController.popBackStack() })
+            }
+        }
+        // See the matching comment in PipelineTabletApp: this must run in the same composition
+        // pass as the NavHost above, not from App()'s onNavHostReady, or navController.graph may
+        // not be set yet.
+        LaunchedEffect(initialDeepLink) {
+            if (initialDeepLink != null) {
+                navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(initialDeepLink)).build())
             }
         }
         if (onListRoute && sheetApplication == null) {

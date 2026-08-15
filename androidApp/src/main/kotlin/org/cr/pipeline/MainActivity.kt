@@ -19,13 +19,16 @@ class MainActivity : ComponentActivity() {
         AndroidDatabaseContext.init(this)
 
         setContent {
-            App(onNavHostReady = { controller ->
-                navController = controller
-                controller.handleDeepLink(intent)
-            })
+            App(
+                initialDeepLink = intent.data?.toString(),
+                onNavHostReady = { controller -> navController = controller },
+            )
         }
     }
 
+    // Called for a "warm" start (activity already running); the NavController's graph is
+    // guaranteed to already be set by this point, unlike on cold start (see the comment in
+    // PipelineTabletApp/PipelinePhoneApp on why that case needs initialDeepLink instead).
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         navController?.handleDeepLink(intent)
