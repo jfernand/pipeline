@@ -54,7 +54,7 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
     ) {
         DisplayText(
             "PL",
-            size = 15.sp,
+            size = 30.sp,
             color = PlColors.brandPrimary,
             letterSpacing = 0.04f.em,
             modifier = Modifier.padding(top = 6.dp, bottom = 18.dp),
