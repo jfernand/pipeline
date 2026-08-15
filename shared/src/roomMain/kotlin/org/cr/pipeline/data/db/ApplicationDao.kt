@@ -34,6 +34,9 @@ interface ApplicationDao {
     @Query("SELECT COUNT(*) FROM applications")
     suspend fun count(): Int
 
+    @Query("SELECT * FROM applications WHERE id = :id")
+    suspend fun getById(id: Long): Application?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(application: Application): Long
 

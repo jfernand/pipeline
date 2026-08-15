@@ -18,6 +18,7 @@ import org.cr.pipeline.data.db.ReminderDao
 import org.cr.pipeline.data.db.StatusEvent
 import org.cr.pipeline.data.db.StatusEventDao
 import org.cr.pipeline.model.ApplicationDetail
+import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.ContactSummary
 import org.cr.pipeline.model.JobApplication
@@ -42,6 +43,74 @@ internal class RoomJobApplicationRepository(
 
     override fun observeApplicationDetail(id: Long): Flow<ApplicationDetail?> =
         applicationDao.observeWithDetails(id).map { it?.toDetailUiModel() }
+
+    override suspend fun getApplicationInput(id: Long): ApplicationInput? =
+        applicationDao.getById(id)?.let { entity ->
+            ApplicationInput(
+                company = entity.companyName,
+                role = entity.role,
+                status = entity.status.toUiStatus(),
+                dateApplied = entity.dateApplied,
+                nextActionDate = entity.nextActionDate,
+                postingUrl = entity.postingUrl,
+                source = entity.source,
+                notes = entity.notes,
+            )
+        }
+
+    override suspend fun saveApplication(id: Long?, input: ApplicationInput): Long {
+        if (id == null) {
+            val newId = applicationDao.insert(
+                ApplicationEntity(
+                    companyName = input.company,
+                    role = input.role,
+                    status = input.status.toDbStatus(),
+                    dateApplied = input.dateApplied,
+                    postingUrl = input.postingUrl,
+                    source = input.source,
+                    notes = input.notes,
+                    nextActionDate = input.nextActionDate,
+                ),
+            )
+            statusEventDao.insert(
+                StatusEvent(
+                    applicationId = newId,
+                    status = input.status.toDbStatus(),
+                    date = input.dateApplied ?: todayDate(),
+                    note = "Application created",
+                ),
+            )
+            return newId
+        }
+        val existing = applicationDao.getById(id) ?: return id
+        val newStatus = input.status.toDbStatus()
+        applicationDao.update(
+            existing.copy(
+                companyName = input.company,
+                role = input.role,
+                status = newStatus,
+                dateApplied = input.dateApplied,
+                postingUrl = input.postingUrl,
+                source = input.source,
+                notes = input.notes,
+                nextActionDate = input.nextActionDate,
+            ),
+        )
+        if (existing.status != newStatus) {
+            statusEventDao.insert(
+                StatusEvent(applicationId = id, status = newStatus, date = todayDate(), note = "Updated via edit"),
+            )
+        }
+        return id
+    }
+
+    override suspend fun updateStatus(id: Long, status: AppStatus, note: String) {
+        val existing = applicationDao.getById(id) ?: return
+        applicationDao.update(existing.copy(status = status.toDbStatus()))
+        statusEventDao.insert(
+            StatusEvent(applicationId = id, status = status.toDbStatus(), date = todayDate(), note = note),
+        )
+    }
 
     private suspend fun seedIfEmpty() {
         if (applicationDao.count() > 0) return
