@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +45,7 @@ fun PipelineTabletApp() {
     val effectiveSelectedId = selectedId ?: applications.firstOrNull()?.id
     val selectedApplication = applications.firstOrNull { it.id == effectiveSelectedId }
 
-    Row(Modifier.fillMaxSize().background(PlColors.bgBase)) {
+    Row(Modifier.fillMaxSize().background(PlColors.bgBase).statusBarsPadding()) {
         NavRail(active = destination, onSelect = { destination = it })
         Box(Modifier.weight(1f).fillMaxHeight()) {
             when {

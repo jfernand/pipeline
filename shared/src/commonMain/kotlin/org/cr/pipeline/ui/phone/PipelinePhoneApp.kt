@@ -3,6 +3,7 @@ package org.cr.pipeline.ui.phone
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,7 +35,7 @@ fun PipelinePhoneApp(modifier: Modifier = Modifier) {
     var editingApplicationId by remember { mutableStateOf<Long?>(null) }
     val selectedApplication = applications.firstOrNull { it.id == selectedApplicationId }
 
-    Box(modifier.fillMaxSize()) {
+    Box(modifier.fillMaxSize().statusBarsPadding()) {
         when (screen) {
             PhoneScreen.LIST -> ListScreen(
                 applications = applications,
