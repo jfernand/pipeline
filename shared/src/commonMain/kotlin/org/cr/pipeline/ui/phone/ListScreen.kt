@@ -16,6 +16,10 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.cr.pipeline.model.AppStatus
@@ -36,8 +40,14 @@ fun ListScreen(
     onCard: (JobApplication) -> Unit = {},
     onSettings: () -> Unit = {},
 ) {
-    val followUp = applications.filter { it.overdueDays != null }
-    val rest = applications.filter { it.overdueDays == null }
+    var query by remember { mutableStateOf("") }
+    var statusFilter by remember { mutableStateOf<AppStatus?>(null) }
+    val visible = applications.filter {
+        (statusFilter == null || it.status == statusFilter) &&
+            (query.isBlank() || it.company.contains(query, ignoreCase = true) || it.role.contains(query, ignoreCase = true))
+    }
+    val followUp = visible.filter { it.overdueDays != null }
+    val rest = visible.filter { it.overdueDays == null }
 
     DimmedOverlay(dimmed, modifier.background(PlColors.bgBase)) {
         Column(Modifier.fillMaxSize()) {
@@ -50,15 +60,20 @@ fun ListScreen(
                 ),
             )
             Column(Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                PlSearchField()
+                PlSearchField(query = query, onQueryChange = { query = it })
                 Row(
                     Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    PlFilterChip("All · ${applications.size}", active = true)
-                    PlFilterChip("Applied", dotColor = AppStatus.APPLIED.color)
-                    PlFilterChip("Phone screen", dotColor = AppStatus.SCREEN.color)
-                    PlFilterChip("Interviewing", dotColor = AppStatus.INTERVIEW.color)
+                    PlFilterChip("All · ${applications.size}", active = statusFilter == null, onClick = { statusFilter = null })
+                    AppStatus.entries.forEach { status ->
+                        PlFilterChip(
+                            status.label,
+                            active = statusFilter == status,
+                            dotColor = if (statusFilter == status) null else status.color,
+                            onClick = { statusFilter = status },
+                        )
+                    }
                 }
             }
             Column(
