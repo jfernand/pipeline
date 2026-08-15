@@ -37,7 +37,11 @@ import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
 
-/** T1 (landscape) / T2 (portrait): adapts between list+detail and a two-column list. */
+/**
+ * The applications list, full width. A real tablet's width isn't reliably enough to show this
+ * alongside a detail pane without squashing one of them, so selecting a card navigates to a
+ * full-screen detail destination instead of showing it side by side (see TabletDetailScreen).
+ */
 @Composable
 fun TabletListContent(
     applications: List<JobApplication>,
@@ -45,31 +49,10 @@ fun TabletListContent(
     onSelect: (JobApplication) -> Unit,
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
-    onUpdateStatus: () -> Unit = {},
-    onEdit: () -> Unit = {},
 ) {
     BoxWithConstraints(modifier.fillMaxSize()) {
-        if (maxWidth > maxHeight) {
-            Row(Modifier.fillMaxSize()) {
-                ListPane(applications, selectedId, onSelect, onNew, fixedWidth = 392.dp)
-                DetailPane(
-                    applicationId = selectedId,
-                    onUpdateStatus = onUpdateStatus,
-                    onEdit = onEdit,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        } else {
-            ListPane(
-                applications,
-                selectedId,
-                onSelect,
-                onNew,
-                modifier = Modifier.fillMaxSize(),
-                columns = 2,
-                fixedWidth = null,
-            )
-        }
+        val columns = if (maxWidth >= 1100.dp) 3 else 2
+        ListPane(applications, selectedId, onSelect, onNew, modifier = Modifier.fillMaxSize(), columns = columns)
     }
 }
 

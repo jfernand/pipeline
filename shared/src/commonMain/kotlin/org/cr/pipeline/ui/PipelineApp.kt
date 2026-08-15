@@ -19,69 +19,99 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.ui.nav.AddEditRoute
+import org.cr.pipeline.ui.nav.DetailRoute
+import org.cr.pipeline.ui.nav.FollowUpsRoute
+import org.cr.pipeline.ui.nav.ListRoute
+import org.cr.pipeline.ui.nav.SettingsRoute
+import org.cr.pipeline.ui.nav.SyncRoute
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.cr.pipeline.ui.tablet.NavDestination
 import org.cr.pipeline.ui.tablet.NavRail
+import org.cr.pipeline.ui.tablet.TabletDetailScreen
 import org.cr.pipeline.ui.tablet.TabletListContent
 import org.cr.pipeline.ui.tablet.TabletSyncContent
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 import org.koin.compose.koinInject
 
-/** Entry point for the Pipeline tablet UI: a persistent nav rail plus a switchable content pane. */
+/** Entry point for the Pipeline tablet UI: a persistent nav rail plus a routed content area. */
 @Composable
-fun PipelineTabletApp() {
+fun PipelineTabletApp(navController: NavHostController) {
     val repository = koinInject<JobApplicationRepository>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
-    var destination by remember { mutableStateOf(NavDestination.LIST) }
-    var selectedId by remember { mutableStateOf<Long?>(null) }
-    var editingApplicationId by remember { mutableStateOf<Long?>(null) }
-    var addEditOpen by remember { mutableStateOf(false) }
-    var sheetOpen by remember { mutableStateOf(false) }
-    val effectiveSelectedId = selectedId ?: applications.firstOrNull()?.id
-    val selectedApplication = applications.firstOrNull { it.id == effectiveSelectedId }
+    var activeRailDestination by remember { mutableStateOf(NavDestination.LIST) }
+    var lastViewedId by remember { mutableStateOf<Long?>(null) }
+    var statusSheetApplicationId by remember { mutableStateOf<Long?>(null) }
+    val statusSheetApplication = applications.firstOrNull { it.id == statusSheetApplicationId }
 
     Row(Modifier.fillMaxSize().background(PlColors.bgBase).statusBarsPadding()) {
-        NavRail(active = destination, onSelect = { destination = it })
+        NavRail(
+            active = activeRailDestination,
+            onSelect = { destination ->
+                activeRailDestination = destination
+                val route = when (destination) {
+                    NavDestination.LIST -> ListRoute
+                    NavDestination.FOLLOWUPS -> FollowUpsRoute
+                    NavDestination.SYNC -> SyncRoute
+                    NavDestination.SETTINGS -> SettingsRoute
+                }
+                navController.navigate(route) {
+                    popUpTo(ListRoute)
+                    launchSingleTop = true
+                }
+            },
+        )
         Box(Modifier.weight(1f).fillMaxHeight()) {
-            when {
-                addEditOpen -> AddEditScreen(
-                    applicationId = editingApplicationId,
-                    onClose = {
-                        editingApplicationId?.let { selectedId = it }
-                        addEditOpen = false
-                    },
-                )
-                destination == NavDestination.LIST -> TabletListContent(
-                    applications = applications,
-                    selectedId = effectiveSelectedId,
-                    onSelect = { selectedId = it.id },
-                    onNew = {
-                        editingApplicationId = null
-                        addEditOpen = true
-                    },
-                    onUpdateStatus = { sheetOpen = true },
-                    onEdit = {
-                        editingApplicationId = effectiveSelectedId
-                        addEditOpen = true
-                    },
-                )
-                destination == NavDestination.SYNC -> TabletSyncContent()
-                else -> PlaceholderPane(destination.label)
+            NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
+                composable<ListRoute> {
+                    TabletListContent(
+                        applications = applications,
+                        selectedId = lastViewedId,
+                        onSelect = { app ->
+                            lastViewedId = app.id
+                            navController.navigate(DetailRoute(app.id))
+                        },
+                        onNew = { navController.navigate(AddEditRoute()) },
+                    )
+                }
+                composable<DetailRoute>(
+                    deepLinks = listOf(navDeepLink<DetailRoute>(basePath = "pipeline://app")),
+                ) { backStackEntry ->
+                    val route = backStackEntry.toRoute<DetailRoute>()
+                    TabletDetailScreen(
+                        applicationId = route.id,
+                        onBack = { navController.popBackStack() },
+                        onEdit = { navController.navigate(AddEditRoute(route.id)) },
+                        onUpdateStatus = { statusSheetApplicationId = route.id },
+                    )
+                }
+                composable<AddEditRoute> { backStackEntry ->
+                    val route = backStackEntry.toRoute<AddEditRoute>()
+                    AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
+                }
+                composable<SyncRoute> { TabletSyncContent() }
+                composable<FollowUpsRoute> { PlaceholderPane("Follow-ups") }
+                composable<SettingsRoute> { PlaceholderPane("Settings") }
             }
-            if (sheetOpen && selectedApplication != null && !addEditOpen) {
+            if (statusSheetApplication != null) {
                 StatusSheet(
-                    company = selectedApplication.company,
-                    role = selectedApplication.role,
-                    currentStatus = selectedApplication.status,
-                    onCancel = { sheetOpen = false },
+                    company = statusSheetApplication.company,
+                    role = statusSheetApplication.role,
+                    currentStatus = statusSheetApplication.status,
+                    onCancel = { statusSheetApplicationId = null },
                     onSave = { status, note ->
-                        scope.launch { repository.updateStatus(selectedApplication.id, status, note) }
-                        sheetOpen = false
+                        scope.launch { repository.updateStatus(statusSheetApplication.id, status, note) }
+                        statusSheetApplicationId = null
                     },
                     modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 480.dp).padding(bottom = 20.dp),
                 )

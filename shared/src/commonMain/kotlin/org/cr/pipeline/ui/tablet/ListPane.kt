@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -46,7 +44,6 @@ import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
-import org.cr.pipeline.ui.theme.drawRightBorder
 
 @Composable
 fun ListPane(
@@ -56,7 +53,6 @@ fun ListPane(
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
     columns: Int = 1,
-    fixedWidth: Dp? = 392.dp,
 ) {
     var query by remember { mutableStateOf("") }
     var statusFilter by remember { mutableStateOf<AppStatus?>(null) }
@@ -69,9 +65,8 @@ fun ListPane(
 
     Box(
         modifier
-            .then(if (fixedWidth != null) Modifier.width(fixedWidth) else Modifier.fillMaxWidth())
+            .fillMaxWidth()
             .fillMaxHeight()
-            .drawRightBorder(PlColors.borderDefault)
             .background(PlColors.bgBase),
     ) {
         Column(Modifier.fillMaxSize()) {
