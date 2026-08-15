@@ -1,11 +1,8 @@
 package org.cr.pipeline.model
 
 import kotlin.time.Clock
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
 
 data class SeedStatusEvent(val status: AppStatus, val daysAgo: Int, val note: String)
@@ -181,46 +178,3 @@ fun LocalDate.formatShort(): String {
     return "${monthNames[month.ordinal]} $day"
 }
 
-fun SeedApplication.toJobApplication(id: Long): JobApplication = JobApplication(
-    id = id,
-    company = company,
-    role = role,
-    status = status,
-    daysAgo = daysAgoApplied,
-    meta = "Applied ${todayDate().minus(daysAgoApplied, DateTimeUnit.DAY).formatShort()}",
-    overdueDays = nextActionOffsetDays?.takeIf { it < 0 }?.let { -it },
-)
-
-fun SeedApplication.toApplicationDetail(id: Long): ApplicationDetail {
-    val today = todayDate()
-    val orderedHistory = statusHistory.sortedByDescending { it.daysAgo }
-    return ApplicationDetail(
-        id = id,
-        company = company,
-        role = role,
-        status = status,
-        daysSinceActivity = orderedHistory.lastOrNull()?.daysAgo ?: daysAgoApplied,
-        source = source,
-        dateApplied = today.minus(daysAgoApplied, DateTimeUnit.DAY).formatShort(),
-        postingUrl = postingUrl,
-        notes = notes,
-        statusHistory = orderedHistory.mapIndexed { index, event ->
-            StatusHistoryEntry(
-                status = event.status,
-                date = today.minus(event.daysAgo, DateTimeUnit.DAY).formatShort(),
-                note = event.note,
-                current = index == orderedHistory.lastIndex,
-            )
-        },
-        contacts = contacts.map { ContactSummary(name = it.name, role = it.role, email = it.email) },
-        reminders = reminders
-            .sortedBy { it.offsetDays }
-            .map { reminder ->
-                ReminderSummary(
-                    message = reminder.message,
-                    dueDate = today.plus(reminder.offsetDays, DateTimeUnit.DAY).formatShort(),
-                    overdue = reminder.offsetDays < 0,
-                )
-            },
-    )
-}
