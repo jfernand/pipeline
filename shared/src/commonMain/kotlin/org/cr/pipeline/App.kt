@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import org.cr.pipeline.di.platformDataModule
 import org.cr.pipeline.ui.PipelineTabletApp
 import org.cr.pipeline.ui.phone.PipelinePhoneApp
@@ -29,14 +32,16 @@ private val COMPACT_WIDTH_BREAKPOINT = 600.dp
 
 @Composable
 @Preview
-fun App() {
+fun App(onNavHostReady: suspend (NavHostController) -> Unit = {}) {
     KoinApplication(koinConfiguration { modules(platformDataModule) }) {
         MaterialTheme(colorScheme = pipeDarkColorScheme) {
+            val navController = rememberNavController()
+            LaunchedEffect(navController) { onNavHostReady(navController) }
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 if (maxWidth < COMPACT_WIDTH_BREAKPOINT) {
-                    PipelinePhoneApp()
+                    PipelinePhoneApp(navController)
                 } else {
-                    PipelineTabletApp()
+                    PipelineTabletApp(navController)
                 }
             }
         }
