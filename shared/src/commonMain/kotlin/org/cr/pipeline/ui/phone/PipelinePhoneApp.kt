@@ -14,76 +14,84 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.ui.components.PlFab
+import org.cr.pipeline.ui.nav.AddEditRoute
+import org.cr.pipeline.ui.nav.DetailRoute
+import org.cr.pipeline.ui.nav.ListRoute
+import org.cr.pipeline.ui.nav.PairRoute
+import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.koin.compose.koinInject
 
-private enum class PhoneScreen { LIST, DETAIL, ADD, SETTINGS, PAIR }
-
-/** Entry point for the Pipeline phone UI: single-pane navigation plus a status-update sheet. */
+/** Entry point for the Pipeline phone UI: single-pane routed navigation plus a status-update sheet. */
 @Composable
-fun PipelinePhoneApp(modifier: Modifier = Modifier) {
+fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modifier) {
     val repository = koinInject<JobApplicationRepository>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
-    var screen by remember { mutableStateOf(PhoneScreen.LIST) }
-    var sheetOpen by remember { mutableStateOf(false) }
-    var selectedApplicationId by remember { mutableStateOf<Long?>(null) }
-    var editingApplicationId by remember { mutableStateOf<Long?>(null) }
-    val selectedApplication = applications.firstOrNull { it.id == selectedApplicationId }
+    var sheetApplicationId by remember { mutableStateOf<Long?>(null) }
+    val sheetApplication = applications.firstOrNull { it.id == sheetApplicationId }
+    val currentEntry by navController.currentBackStackEntryAsState()
+    val onListRoute = currentEntry?.destination?.hasRoute<ListRoute>() == true
 
     Box(modifier.fillMaxSize().statusBarsPadding()) {
-        when (screen) {
-            PhoneScreen.LIST -> ListScreen(
-                applications = applications,
-                dimmed = sheetOpen,
-                onCard = { app ->
-                    selectedApplicationId = app.id
-                    screen = PhoneScreen.DETAIL
-                },
-                onSettings = { screen = PhoneScreen.SETTINGS },
-            )
-            PhoneScreen.DETAIL -> DetailScreen(
-                applicationId = selectedApplicationId,
-                dimmed = sheetOpen,
-                onBack = { screen = PhoneScreen.LIST },
-                onUpdate = { sheetOpen = true },
-                onEdit = {
-                    editingApplicationId = selectedApplicationId
-                    screen = PhoneScreen.ADD
-                },
-            )
-            PhoneScreen.ADD -> AddEditScreen(
-                applicationId = editingApplicationId,
-                onClose = { screen = if (editingApplicationId != null) PhoneScreen.DETAIL else PhoneScreen.LIST },
-            )
-            PhoneScreen.SETTINGS -> SettingsScreen(
-                onBack = { screen = PhoneScreen.LIST },
-                onPair = { screen = PhoneScreen.PAIR },
-            )
-            PhoneScreen.PAIR -> PairingScreen(onBack = { screen = PhoneScreen.SETTINGS })
+        NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
+            composable<ListRoute> {
+                ListScreen(
+                    applications = applications,
+                    dimmed = sheetApplication != null,
+                    onCard = { app -> navController.navigate(DetailRoute(app.id)) },
+                    onSettings = { navController.navigate(SettingsRoute) },
+                )
+            }
+            composable<DetailRoute>(
+                deepLinks = listOf(navDeepLink<DetailRoute>(basePath = "pipeline://app")),
+            ) { backStackEntry ->
+                val route = backStackEntry.toRoute<DetailRoute>()
+                DetailScreen(
+                    applicationId = route.id,
+                    dimmed = sheetApplication != null,
+                    onBack = { navController.popBackStack() },
+                    onUpdate = { sheetApplicationId = route.id },
+                    onEdit = { navController.navigate(AddEditRoute(route.id)) },
+                )
+            }
+            composable<AddEditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<AddEditRoute>()
+                AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
+            }
+            composable<SettingsRoute> {
+                SettingsScreen(onBack = { navController.popBackStack() }, onPair = { navController.navigate(PairRoute) })
+            }
+            composable<PairRoute> {
+                PairingScreen(onBack = { navController.popBackStack() })
+            }
         }
-        if (screen == PhoneScreen.LIST && !sheetOpen) {
+        if (onListRoute && sheetApplication == null) {
             PlFab(
-                onClick = {
-                    editingApplicationId = null
-                    screen = PhoneScreen.ADD
-                },
+                onClick = { navController.navigate(AddEditRoute()) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 20.dp),
             )
         }
-        if (sheetOpen && selectedApplication != null) {
+        if (sheetApplication != null) {
             StatusSheet(
-                company = selectedApplication.company,
-                role = selectedApplication.role,
-                currentStatus = selectedApplication.status,
-                onCancel = { sheetOpen = false },
+                company = sheetApplication.company,
+                role = sheetApplication.role,
+                currentStatus = sheetApplication.status,
+                onCancel = { sheetApplicationId = null },
                 onSave = { status, note ->
-                    scope.launch { repository.updateStatus(selectedApplication.id, status, note) }
-                    sheetOpen = false
+                    scope.launch { repository.updateStatus(sheetApplication.id, status, note) }
+                    sheetApplicationId = null
                 },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
