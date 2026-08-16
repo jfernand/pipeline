@@ -2,6 +2,7 @@ package org.cr.pipeline.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.DateTimeUnit
@@ -27,6 +28,15 @@ import org.cr.pipeline.model.StatusHistoryEntry
 import org.cr.pipeline.model.formatShort
 import org.cr.pipeline.model.seedApplications
 import org.cr.pipeline.model.todayDate
+import org.cr.pipeline.sync.event.ApplicationCreated
+import org.cr.pipeline.sync.event.ApplicationEdited
+import org.cr.pipeline.sync.event.ApplicationId
+import org.cr.pipeline.sync.event.ApplicationState
+import org.cr.pipeline.sync.event.ContactRecord
+import org.cr.pipeline.sync.event.ReminderRecord
+import org.cr.pipeline.sync.event.StatusChanged
+import org.cr.pipeline.sync.event.StatusHistoryRecord
+import org.cr.pipeline.sync.event.applyEvent
 
 /** Room-backed on Android/JVM/iOS. Seeds [org.cr.pipeline.model.seedApplications] on first run,
  *  so the app has real, browsable data to QA before any application is added by hand. */
@@ -72,45 +82,61 @@ internal class RoomJobApplicationRepository(
                     nextActionDate = input.nextActionDate,
                 ),
             )
-            statusEventDao.insert(
-                StatusEvent(
-                    applicationId = newId,
-                    status = input.status.toDbStatus(),
-                    date = input.dateApplied ?: todayDate(),
-                    note = "Application created",
-                ),
-            )
+            // Row ids aren't stable across devices; this stands in until real ids are wired up.
+            val state = applyEvent(null, ApplicationCreated(ApplicationId(newId.toString()), input), todayDate())
+            insertNewStatusHistory(newId, sinceCount = 0, state)
             return newId
         }
-        val existing = applicationDao.getById(id) ?: return id
-        val newStatus = input.status.toDbStatus()
+        val existingDetails = applicationDao.observeWithDetails(id).first() ?: return id
+        val currentState = existingDetails.toApplicationState()
+        val newState = applyEvent(currentState, ApplicationEdited(ApplicationId(id.toString()), input), todayDate())
         applicationDao.update(
-            existing.copy(
-                companyName = input.company,
-                role = input.role,
-                status = newStatus,
-                dateApplied = input.dateApplied,
-                postingUrl = input.postingUrl,
-                source = input.source,
-                notes = input.notes,
-                nextActionDate = input.nextActionDate,
+            existingDetails.application.copy(
+                companyName = newState.company,
+                role = newState.role,
+                status = newState.status.toDbStatus(),
+                dateApplied = newState.dateApplied,
+                postingUrl = newState.postingUrl,
+                source = newState.source,
+                notes = newState.notes,
+                nextActionDate = newState.nextActionDate,
             ),
         )
-        if (existing.status != newStatus) {
-            statusEventDao.insert(
-                StatusEvent(applicationId = id, status = newStatus, date = todayDate(), note = "Updated via edit"),
-            )
-        }
+        insertNewStatusHistory(id, currentState.statusHistory.size, newState)
         return id
     }
 
     override suspend fun updateStatus(id: Long, status: AppStatus, note: String) {
-        val existing = applicationDao.getById(id) ?: return
-        applicationDao.update(existing.copy(status = status.toDbStatus()))
-        statusEventDao.insert(
-            StatusEvent(applicationId = id, status = status.toDbStatus(), date = todayDate(), note = note),
-        )
+        val existingDetails = applicationDao.observeWithDetails(id).first() ?: return
+        val currentState = existingDetails.toApplicationState()
+        val newState = applyEvent(currentState, StatusChanged(ApplicationId(id.toString()), status, note), todayDate())
+        applicationDao.update(existingDetails.application.copy(status = newState.status.toDbStatus()))
+        insertNewStatusHistory(id, currentState.statusHistory.size, newState)
     }
+
+    /** [applyEvent] only ever appends status-history entries, never edits or removes past ones,
+     *  so anything past index [sinceCount] in [newState] is new and needs inserting. */
+    private suspend fun insertNewStatusHistory(applicationId: Long, sinceCount: Int, newState: ApplicationState) {
+        newState.statusHistory.drop(sinceCount).forEach { entry ->
+            statusEventDao.insert(
+                StatusEvent(applicationId = applicationId, status = entry.status.toDbStatus(), date = entry.date, note = entry.note),
+            )
+        }
+    }
+
+    private fun ApplicationWithDetails.toApplicationState(): ApplicationState = ApplicationState(
+        company = application.companyName,
+        role = application.role,
+        status = application.status.toUiStatus(),
+        dateApplied = application.dateApplied,
+        nextActionDate = application.nextActionDate,
+        postingUrl = application.postingUrl,
+        source = application.source,
+        notes = application.notes,
+        statusHistory = statusHistory.sortedBy { it.date }.map { StatusHistoryRecord(it.status.toUiStatus(), it.date, it.note) },
+        contacts = contacts.map { ContactRecord(it.name, it.role.orEmpty(), it.email.orEmpty()) },
+        reminders = reminders.map { ReminderRecord(it.message, it.dueDate) },
+    )
 
     private suspend fun seedIfEmpty() {
         if (applicationDao.count() > 0) return

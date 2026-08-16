@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.cr.pipeline.model.ApplicationDetail
@@ -19,29 +18,22 @@ import org.cr.pipeline.model.StatusHistoryEntry
 import org.cr.pipeline.model.formatShort
 import org.cr.pipeline.model.seedApplications
 import org.cr.pipeline.model.todayDate
+import org.cr.pipeline.sync.event.ApplicationCreated
+import org.cr.pipeline.sync.event.ApplicationEdited
+import org.cr.pipeline.sync.event.ApplicationId
+import org.cr.pipeline.sync.event.ApplicationState
+import org.cr.pipeline.sync.event.ContactRecord
+import org.cr.pipeline.sync.event.ReminderRecord
+import org.cr.pipeline.sync.event.StatusChanged
+import org.cr.pipeline.sync.event.StatusHistoryRecord
+import org.cr.pipeline.sync.event.applyEvent
 
 /**
  * Used on targets without a Room-backed data layer (js/wasmJs). A mutable in-memory store
  * seeded from [seedApplications]; edits last for the process lifetime, not persisted to disk.
  */
 class InMemoryJobApplicationRepository : JobApplicationRepository {
-    private data class StatusEventRecord(val status: AppStatus, val date: LocalDate, val note: String)
-    private data class ContactRecord(val name: String, val role: String, val email: String)
-    private data class ReminderRecord(val message: String, val dueDate: LocalDate)
-    private data class Record(
-        val id: Long,
-        val company: String,
-        val role: String,
-        val status: AppStatus,
-        val dateApplied: LocalDate?,
-        val nextActionDate: LocalDate?,
-        val postingUrl: String?,
-        val source: String?,
-        val notes: String,
-        val statusHistory: List<StatusEventRecord>,
-        val contacts: List<ContactRecord>,
-        val reminders: List<ReminderRecord>,
-    )
+    private data class Record(val id: Long, val state: ApplicationState)
 
     private val records = MutableStateFlow(seedApplications.mapIndexed { index, seed -> seed.toRecord(id = index + 1L) })
     private var nextId = (records.value.maxOfOrNull { it.id } ?: 0L) + 1L
@@ -58,7 +50,9 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
     override suspend fun saveApplication(id: Long?, input: ApplicationInput): Long {
         if (id == null) {
             val newId = nextId++
-            records.update { list -> listOf(input.toNewRecord(newId)) + list }
+            // Row ids aren't stable across devices; this stands in until real ids are wired up.
+            val state = applyEvent(null, ApplicationCreated(ApplicationId(newId.toString()), input), todayDate())
+            records.update { list -> listOf(Record(newId, state)) + list }
             return newId
         }
         records.update { list ->
@@ -66,12 +60,7 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
                 if (record.id != id) {
                     record
                 } else {
-                    val updated = record.applyInput(input)
-                    if (record.status != input.status) {
-                        updated.copy(statusHistory = updated.statusHistory + StatusEventRecord(input.status, todayDate(), "Updated via edit"))
-                    } else {
-                        updated
-                    }
+                    record.copy(state = applyEvent(record.state, ApplicationEdited(ApplicationId(id.toString()), input), todayDate()))
                 }
             }
         }
@@ -84,10 +73,7 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
                 if (record.id != id) {
                     record
                 } else {
-                    record.copy(
-                        status = status,
-                        statusHistory = record.statusHistory + StatusEventRecord(status, todayDate(), note),
-                    )
+                    record.copy(state = applyEvent(record.state, StatusChanged(ApplicationId(id.toString()), status, note), todayDate()))
                 }
             }
         }
@@ -95,8 +81,7 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
 
     private fun SeedApplication.toRecord(id: Long): Record {
         val today = todayDate()
-        return Record(
-            id = id,
+        val state = ApplicationState(
             company = company,
             role = role,
             status = status,
@@ -105,48 +90,23 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
             postingUrl = postingUrl,
             source = source,
             notes = notes,
-            statusHistory = statusHistory.map { StatusEventRecord(it.status, today.minus(it.daysAgo, DateTimeUnit.DAY), it.note) },
+            statusHistory = statusHistory.map { StatusHistoryRecord(it.status, today.minus(it.daysAgo, DateTimeUnit.DAY), it.note) },
             contacts = contacts.map { ContactRecord(it.name, it.role, it.email) },
             reminders = reminders.map { ReminderRecord(it.message, today.plus(it.offsetDays, DateTimeUnit.DAY)) },
         )
+        return Record(id, state)
     }
-
-    private fun ApplicationInput.toNewRecord(id: Long): Record = Record(
-        id = id,
-        company = company,
-        role = role,
-        status = status,
-        dateApplied = dateApplied,
-        nextActionDate = nextActionDate,
-        postingUrl = postingUrl,
-        source = source,
-        notes = notes,
-        statusHistory = listOf(StatusEventRecord(status, dateApplied ?: todayDate(), "Application created")),
-        contacts = emptyList(),
-        reminders = emptyList(),
-    )
-
-    private fun Record.applyInput(input: ApplicationInput): Record = copy(
-        company = input.company,
-        role = input.role,
-        status = input.status,
-        dateApplied = input.dateApplied,
-        nextActionDate = input.nextActionDate,
-        postingUrl = input.postingUrl,
-        source = input.source,
-        notes = input.notes,
-    )
 
     private fun Record.toJobApplication(): JobApplication {
         val today = todayDate()
-        val daysAgo = dateApplied?.let { today.toEpochDays() - it.toEpochDays() } ?: 0
-        val overdueDays = nextActionDate?.takeIf { it < today }?.let { today.toEpochDays() - it.toEpochDays() }
-        val meta = dateApplied?.let { "Applied ${it.formatShort()}" } ?: "Saved"
+        val daysAgo = state.dateApplied?.let { today.toEpochDays() - it.toEpochDays() } ?: 0
+        val overdueDays = state.nextActionDate?.takeIf { it < today }?.let { today.toEpochDays() - it.toEpochDays() }
+        val meta = state.dateApplied?.let { "Applied ${it.formatShort()}" } ?: "Saved"
         return JobApplication(
             id = id,
-            company = company,
-            role = role,
-            status = status,
+            company = state.company,
+            role = state.role,
+            status = state.status,
             daysAgo = daysAgo.toInt(),
             meta = meta,
             overdueDays = overdueDays?.toInt(),
@@ -155,19 +115,19 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
 
     private fun Record.toApplicationDetail(): ApplicationDetail {
         val today = todayDate()
-        val orderedHistory = statusHistory.sortedBy { it.date }
+        val orderedHistory = state.statusHistory.sortedBy { it.date }
         return ApplicationDetail(
             id = id,
-            company = company,
-            role = role,
-            status = status,
+            company = state.company,
+            role = state.role,
+            status = state.status,
             daysSinceActivity = orderedHistory.lastOrNull()?.date
                 ?.let { (today.toEpochDays() - it.toEpochDays()).toInt() }
                 ?: 0,
-            source = source,
-            dateApplied = dateApplied?.formatShort(),
-            postingUrl = postingUrl,
-            notes = notes,
+            source = state.source,
+            dateApplied = state.dateApplied?.formatShort(),
+            postingUrl = state.postingUrl,
+            notes = state.notes,
             statusHistory = orderedHistory.mapIndexed { index, event ->
                 StatusHistoryEntry(
                     status = event.status,
@@ -176,21 +136,21 @@ class InMemoryJobApplicationRepository : JobApplicationRepository {
                     current = index == orderedHistory.lastIndex,
                 )
             },
-            contacts = contacts.map { ContactSummary(name = it.name, role = it.role, email = it.email) },
-            reminders = reminders
+            contacts = state.contacts.map { ContactSummary(name = it.name, role = it.role, email = it.email) },
+            reminders = state.reminders
                 .sortedBy { it.dueDate }
                 .map { reminder -> ReminderSummary(reminder.message, reminder.dueDate.formatShort(), reminder.dueDate < today) },
         )
     }
 
     private fun Record.toApplicationInput(): ApplicationInput = ApplicationInput(
-        company = company,
-        role = role,
-        status = status,
-        dateApplied = dateApplied,
-        nextActionDate = nextActionDate,
-        postingUrl = postingUrl,
-        source = source,
-        notes = notes,
+        company = state.company,
+        role = state.role,
+        status = state.status,
+        dateApplied = state.dateApplied,
+        nextActionDate = state.nextActionDate,
+        postingUrl = state.postingUrl,
+        source = state.source,
+        notes = state.notes,
     )
 }
