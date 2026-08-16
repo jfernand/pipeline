@@ -75,6 +75,9 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
                     .padding(vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (NavDestination.SETTINGS == destination) {
+                    Spacer(Modifier.height(60.dp))
+                }
                 Icon(
                     destination.icon,
                     contentDescription = destination.label,
