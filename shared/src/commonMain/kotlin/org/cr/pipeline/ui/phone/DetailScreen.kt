@@ -21,10 +21,8 @@ import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -42,6 +40,7 @@ import org.cr.pipeline.ui.components.DimmedOverlay
 import org.cr.pipeline.ui.components.PlIconButton
 import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlTopBar
+import org.cr.pipeline.ui.components.PostingLinkRow
 import org.cr.pipeline.ui.components.StatusChip
 import org.cr.pipeline.ui.components.Timeline
 import org.cr.pipeline.ui.components.TimelineEntry
@@ -51,7 +50,6 @@ import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
-import org.cr.pipeline.ui.theme.PlType
 import org.koin.compose.koinInject
 
 @Composable
@@ -172,27 +170,7 @@ fun DetailScreen(
             }
             if (current.postingUrl != null) {
                 DetailSection(label = "Posting", modifier = Modifier.padding(horizontal = 16.dp)) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .background(PlColors.field, RoundedCornerShape(2.dp))
-                            .border(1.dp, PlColors.borderDefault, RoundedCornerShape(2.dp))
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Icon(Icons.Filled.Link, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
-                        Text(
-                            current.postingUrl,
-                            fontFamily = PlType.mono(),
-                            fontSize = 11.sp,
-                            color = PlColors.fgSecondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = PlColors.fgMuted, modifier = Modifier.size(14.dp))
-                    }
+                    PostingLinkRow(current.postingUrl)
                     val sourceLine = listOfNotNull(
                         current.source?.let { "Source: $it" },
                         current.dateApplied?.let { "Added $it" },
