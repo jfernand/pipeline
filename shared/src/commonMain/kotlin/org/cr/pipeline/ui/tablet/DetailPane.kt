@@ -24,10 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.cr.pipeline.ui.components.ContactInfo
-import org.cr.pipeline.ui.components.ContactRow
+import org.cr.pipeline.model.ApplicationDetail
+import org.cr.pipeline.model.ReminderSummary
+import org.cr.pipeline.ui.components.ContactsSection
 import org.cr.pipeline.ui.components.DetailSection
 import org.cr.pipeline.ui.components.Dot
 import org.cr.pipeline.ui.components.OverdueBanner
@@ -36,10 +38,7 @@ import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.PostingLinkRow
 import org.cr.pipeline.ui.components.StatusChip
-import org.cr.pipeline.ui.components.Timeline
-import org.cr.pipeline.ui.components.TimelineEntry
-import org.cr.pipeline.ui.components.contactInitials
-import org.cr.pipeline.ui.components.changesLabel
+import org.cr.pipeline.ui.components.StatusHistorySection
 import org.cr.pipeline.ui.components.rememberApplicationDetail
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
@@ -70,155 +69,141 @@ fun DetailPane(
                 .drawBottomBorder(PlColors.borderDefault)
                 .padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 18.dp),
         ) {
-            val info: @Composable () -> Unit = {
-                Column {
-                    DisplayText(detail.company, size = 39.sp, lineHeight = 39.sp)
-                    BodyText(
-                        detail.role,
-                        size = 16.sp,
-                        color = PlColors.fgSecondary,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                    Row(
-                        Modifier.padding(top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        StatusChip(detail.status)
-                        val activity = "${detail.daysSinceActivity}d since activity" +
-                            (detail.source?.let { " · Source: $it" } ?: "")
-                        MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-                }
-            }
-            val actions: @Composable () -> Unit = {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (detail.postingUrl != null) {
-                        PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
-                    }
-                    PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
-                    PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
-                }
-            }
-            // Below this, the info block (especially the company name at 39sp) doesn't have room
-            // to share a row with the action buttons without getting crushed into a near-zero
-            // width and wrapping character-by-character; stack them instead.
-            if (maxWidth >= 640.dp) {
-                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    Box(Modifier.weight(1f)) { info() }
-                    actions()
-                }
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    info()
-                    actions()
-                }
-            }
+            DetailHeader(detail, maxWidth, onUpdateStatus, onEdit)
         }
         Row(Modifier.weight(1f).fillMaxWidth()) {
-            Column(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .drawRightBorder(PlColors.borderDefault),
+            DetailPrimaryColumn(
+                detail,
+                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).drawRightBorder(PlColors.borderDefault),
+            )
+            DetailSecondaryColumn(
+                detail,
+                modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailHeader(detail: ApplicationDetail, maxWidth: Dp, onUpdateStatus: () -> Unit, onEdit: () -> Unit) {
+    val info: @Composable () -> Unit = {
+        Column {
+            DisplayText(detail.company, size = 39.sp, lineHeight = 39.sp)
+            BodyText(detail.role, size = 16.sp, color = PlColors.fgSecondary, modifier = Modifier.padding(top = 6.dp))
+            Row(
+                Modifier.padding(top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                val overdueReminder = detail.reminders.firstOrNull { it.overdue }
-                if (overdueReminder != null) {
-                    OverdueBanner(
-                        message = overdueReminder.message,
-                        dueDate = overdueReminder.dueDate,
-                        modifier = Modifier.padding(start = 24.dp, top = 18.dp, end = 24.dp),
-                    )
-                }
-                if (detail.statusHistory.isNotEmpty()) {
-                    DetailSection(
-                        label = "Status history",
-                        right = { MonoText(changesLabel(detail.statusHistory.size), size = 9.sp, color = PlColors.fgMuted) },
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                    ) {
-                        Timeline(entries = detail.statusHistory.map { TimelineEntry(it.status, it.date, it.note, it.current) })
-                    }
-                }
-                if (detail.contacts.isNotEmpty()) {
-                    DetailSection(
-                        label = "Contacts",
-                        right = { Icon(Icons.Filled.Add, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                            detail.contacts.forEach { contact ->
-                                ContactRow(ContactInfo(contact.name.contactInitials(), contact.name, contact.role, contact.email))
-                            }
-                        }
-                    }
-                }
-            }
-            Column(
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
-            ) {
-                DetailSection(
-                    label = "Notes",
-                    right = { Icon(Icons.Filled.Edit, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
-                ) {
-                    BodyText(
-                        detail.notes,
-                        size = 13.5f.sp,
-                        color = PlColors.fgSecondary,
-                        lineHeight = 21.sp,
-                    )
-                }
-                if (detail.reminders.isNotEmpty()) {
-                    DetailSection(
-                        label = "Reminders",
-                        right = { Icon(Icons.Filled.Add, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
-                    ) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            detail.reminders.forEach { reminder ->
-                                Row(
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .background(PlColors.bgRaised, RoundedCornerShape(2.dp))
-                                        .border(
-                                            1.dp,
-                                            if (reminder.overdue) PlColors.overdueBorder else PlColors.borderDefault,
-                                            RoundedCornerShape(2.dp),
-                                        )
-                                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                ) {
-                                    Dot(color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted)
-                                    BodyText(
-                                        reminder.message,
-                                        size = 13.5f.sp,
-                                        color = PlColors.fgPrimary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                    MonoText(
-                                        reminder.dueDate,
-                                        size = 9.5f.sp,
-                                        color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                if (detail.postingUrl != null) {
-                    DetailSection(label = "Posting") {
-                        PostingLinkRow(detail.postingUrl)
-                    }
-                }
+                StatusChip(detail.status)
+                val activity = "${detail.daysSinceActivity}d since activity" +
+                    (detail.source?.let { " · Source: $it" } ?: "")
+                MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
+    }
+    val actions: @Composable () -> Unit = {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (detail.postingUrl != null) {
+                PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
+            }
+            PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
+            PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
+        }
+    }
+    // Below this, the info block (especially the company name at 39sp) doesn't have room
+    // to share a row with the action buttons without getting crushed into a near-zero
+    // width and wrapping character-by-character; stack them instead.
+    if (maxWidth >= 640.dp) {
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            Box(Modifier.weight(1f)) { info() }
+            actions()
+        }
+    } else {
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            info()
+            actions()
+        }
+    }
+}
+
+@Composable
+private fun DetailPrimaryColumn(detail: ApplicationDetail, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        val overdueReminder = detail.reminders.firstOrNull { it.overdue }
+        if (overdueReminder != null) {
+            OverdueBanner(
+                message = overdueReminder.message,
+                dueDate = overdueReminder.dueDate,
+                modifier = Modifier.padding(start = 24.dp, top = 18.dp, end = 24.dp),
+            )
+        }
+        StatusHistorySection(detail.statusHistory, modifier = Modifier.padding(horizontal = 24.dp))
+        ContactsSection(detail.contacts, modifier = Modifier.padding(horizontal = 24.dp))
+    }
+}
+
+@Composable
+private fun DetailSecondaryColumn(detail: ApplicationDetail, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        DetailSection(
+            label = "Notes",
+            right = { Icon(Icons.Filled.Edit, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
+        ) {
+            BodyText(detail.notes, size = 13.5f.sp, color = PlColors.fgSecondary, lineHeight = 21.sp)
+        }
+        RemindersSection(detail.reminders)
+        if (detail.postingUrl != null) {
+            DetailSection(label = "Posting") {
+                PostingLinkRow(detail.postingUrl)
+            }
+        }
+    }
+}
+
+@Composable
+private fun RemindersSection(reminders: List<ReminderSummary>) {
+    if (reminders.isEmpty()) return
+    DetailSection(
+        label = "Reminders",
+        right = { Icon(Icons.Filled.Add, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            reminders.forEach { reminder -> ReminderRow(reminder) }
+        }
+    }
+}
+
+@Composable
+private fun ReminderRow(reminder: ReminderSummary) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(PlColors.bgRaised, RoundedCornerShape(2.dp))
+            .border(
+                1.dp,
+                if (reminder.overdue) PlColors.overdueBorder else PlColors.borderDefault,
+                RoundedCornerShape(2.dp),
+            )
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Dot(color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted)
+        BodyText(
+            reminder.message,
+            size = 13.5f.sp,
+            color = PlColors.fgPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f),
+        )
+        MonoText(
+            reminder.dueDate,
+            size = 9.5f.sp,
+            color = if (reminder.overdue) PlColors.brandPrimary else PlColors.fgMuted,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
