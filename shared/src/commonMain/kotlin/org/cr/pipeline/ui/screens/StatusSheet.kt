@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,9 +28,9 @@ import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.formatShort
 import org.cr.pipeline.model.todayDate
 import org.cr.pipeline.ui.components.Field
-import org.cr.pipeline.ui.components.PlFilterChip
 import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlSecondaryButton
+import org.cr.pipeline.ui.components.StatusPickerFlowRow
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
@@ -73,17 +72,7 @@ fun StatusSheet(
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             MonoText("New status", size = 9.5f.sp, color = PlColors.fgMuted)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                AppStatus.entries.forEach { status ->
-                    val isSelected = status == selectedStatus
-                    PlFilterChip(
-                        status.label,
-                        active = isSelected,
-                        dotColor = if (isSelected) null else status.color,
-                        onClick = { selectedStatus = status },
-                    )
-                }
-            }
+            StatusPickerFlowRow(selected = selectedStatus, onSelect = { selectedStatus = it })
         }
         Field(
             label = "Note",

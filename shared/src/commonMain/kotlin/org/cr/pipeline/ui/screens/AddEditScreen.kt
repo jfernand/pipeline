@@ -34,6 +34,7 @@ import org.cr.pipeline.ui.components.PlFilterChip
 import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.PlTopBar
+import org.cr.pipeline.ui.components.StatusPickerFlowRow
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 import org.koin.compose.koinInject
@@ -112,17 +113,7 @@ fun AddEditScreen(
             Field("Role", value = role, placeholder = "Job title", onValueChange = { role = it })
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 MonoText("Status", size = 9.5f.sp, color = PlColors.fgMuted)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    AppStatus.entries.forEach { entry ->
-                        val isSelected = entry == status
-                        PlFilterChip(
-                            entry.label,
-                            active = isSelected,
-                            dotColor = if (isSelected) null else entry.color,
-                            onClick = { status = entry },
-                        )
-                    }
-                }
+                StatusPickerFlowRow(selected = status, onSelect = { status = it })
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Field(
