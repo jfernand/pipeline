@@ -118,6 +118,15 @@ kotlin {
         jvmMain.get().dependsOn(roomMain)
         iosMain.get().dependsOn(roomMain)
 
+        // js and wasmJs share browser storage access (localStorage) but need different bindings
+        // for it: js gets kotlinx.browser for free from kotlin-stdlib-js, wasmJs needs the
+        // separate kotlinx-browser library (wasmJs-only — it doesn't publish a js variant).
+        val webMain by creating {
+            dependsOn(commonMain.get())
+        }
+        jsMain.get().dependsOn(webMain)
+        wasmJsMain.get().dependsOn(webMain)
+
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
@@ -151,6 +160,9 @@ kotlin {
         }
         jsMain.dependencies {
             implementation(libs.wrappers.browser)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.kotlinx.browser)
         }
     }
 }
