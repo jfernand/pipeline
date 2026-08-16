@@ -1,5 +1,6 @@
 package org.cr.pipeline.sync.chain
 
+import kotlin.uuid.Uuid
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,4 +13,8 @@ data class Hash(val value: String)
 
 /** Identifies the device (chain) an [EventEnvelope] was authored on. */
 @Serializable
-data class DeviceId(val value: String)
+data class DeviceId(val value: String) {
+    companion object {
+        fun random(): DeviceId = DeviceId(Uuid.random().toString())
+    }
+}

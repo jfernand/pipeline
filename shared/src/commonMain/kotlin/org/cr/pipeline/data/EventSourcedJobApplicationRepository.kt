@@ -1,5 +1,6 @@
 package org.cr.pipeline.data
 
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.cr.pipeline.model.ApplicationDetail
@@ -9,7 +10,10 @@ import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.model.todayDate
 import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEdited
+import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
+import org.cr.pipeline.sync.event.ApplicationState
+import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.sync.event.StatusChanged
 import org.cr.pipeline.sync.event.applyEvent
 import org.cr.pipeline.sync.event.toApplicationDetail
@@ -17,12 +21,15 @@ import org.cr.pipeline.sync.event.toApplicationInput
 import org.cr.pipeline.sync.event.toJobApplication
 
 /**
- * The single place that turns a UI-facing mutation into an [org.cr.pipeline.sync.event.ApplicationEvent]
- * and folds it through [applyEvent] — [store] just persists the resulting state. This is what
- * keeps event construction from being duplicated per storage backend the same way field-mapping
- * used to be.
+ * The single place that turns a UI-facing mutation into an [ApplicationEvent] and folds it
+ * through [applyEvent] — [store] just persists the resulting state, [eventLog] just hashes and
+ * appends the event itself. This is what keeps event construction from being duplicated per
+ * storage backend the same way field-mapping used to be.
  */
-class EventSourcedJobApplicationRepository(private val store: ApplicationStateStore) : JobApplicationRepository {
+class EventSourcedJobApplicationRepository(
+    private val store: ApplicationStateStore,
+    private val eventLog: EventLog,
+) : JobApplicationRepository {
     override fun observeApplications(): Flow<List<JobApplication>> =
         store.observeAll().map { list -> list.map { (id, state) -> state.toJobApplication(id) } }
 
@@ -41,12 +48,16 @@ class EventSourcedJobApplicationRepository(private val store: ApplicationStateSt
         } else {
             ApplicationEdited(ApplicationId(id.toString()), input)
         }
-        return store.write(id, applyEvent(current, event, todayDate()))
+        return persist(id, current, event)
     }
 
     override suspend fun updateStatus(id: Long, status: AppStatus, note: String) {
         val current = store.getState(id) ?: return
-        val event = StatusChanged(ApplicationId(id.toString()), status, note)
-        store.write(id, applyEvent(current, event, todayDate()))
+        persist(id, current, StatusChanged(ApplicationId(id.toString()), status, note))
+    }
+
+    private suspend fun persist(id: Long?, current: ApplicationState?, event: ApplicationEvent): Long {
+        eventLog.append(event, Clock.System.now().toEpochMilliseconds())
+        return store.write(id, applyEvent(current, event, todayDate()))
     }
 }

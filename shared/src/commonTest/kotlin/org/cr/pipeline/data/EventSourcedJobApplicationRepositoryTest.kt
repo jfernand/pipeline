@@ -5,11 +5,18 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.sync.event.ApplicationCreated
+import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationState
+import org.cr.pipeline.sync.event.InMemoryEventLog
+import org.cr.pipeline.sync.event.StatusChanged
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 private class FakeApplicationStateStore : ApplicationStateStore {
@@ -42,7 +49,7 @@ class EventSourcedJobApplicationRepositoryTest {
     @Test
     fun `saveApplication with no id constructs the application and persists it`() = runTest {
         val store = FakeApplicationStateStore()
-        val repository = EventSourcedJobApplicationRepository(store)
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
 
         val id = repository.saveApplication(null, input)
 
@@ -55,7 +62,7 @@ class EventSourcedJobApplicationRepositoryTest {
     @Test
     fun `saveApplication with an existing id edits in place through the same reducer`() = runTest {
         val store = FakeApplicationStateStore()
-        val repository = EventSourcedJobApplicationRepository(store)
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
         val id = repository.saveApplication(null, input)
 
         repository.saveApplication(id, input.copy(company = "Northwind Labs", status = AppStatus.OFFER))
@@ -69,7 +76,7 @@ class EventSourcedJobApplicationRepositoryTest {
     @Test
     fun `updateStatus appends a history entry with its note`() = runTest {
         val store = FakeApplicationStateStore()
-        val repository = EventSourcedJobApplicationRepository(store)
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
         val id = repository.saveApplication(null, input)
 
         repository.updateStatus(id, AppStatus.INTERVIEW, "Recruiter screen went well")
@@ -82,7 +89,7 @@ class EventSourcedJobApplicationRepositoryTest {
     @Test
     fun `updateStatus on an unknown id is a no-op`() = runTest {
         val store = FakeApplicationStateStore()
-        val repository = EventSourcedJobApplicationRepository(store)
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
 
         repository.updateStatus(999, AppStatus.OFFER, "shouldn't happen")
 
@@ -92,11 +99,27 @@ class EventSourcedJobApplicationRepositoryTest {
     @Test
     fun `observeApplicationDetail reflects the stored state and is null when nothing is stored`() = runTest {
         val store = FakeApplicationStateStore()
-        val repository = EventSourcedJobApplicationRepository(store)
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
         val id = repository.saveApplication(null, input)
 
         val detail = repository.observeApplicationDetail(id).first()
         assertEquals(input.company, detail?.company)
         assertNull(repository.observeApplicationDetail(404).first())
+    }
+
+    @Test
+    fun `every mutation appends a correctly chained envelope to the event log`() = runTest {
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(FakeApplicationStateStore(), eventLog)
+
+        val id = repository.saveApplication(null, input)
+        repository.updateStatus(id, AppStatus.OFFER, "Verbal offer")
+
+        val chain = eventLog.observeChain().first()
+        assertEquals(2, chain.size)
+        assertEquals(emptyList(), chain[0].parentHashes)
+        assertEquals(listOf(chain[0].hash), chain[1].parentHashes)
+        assertIs<ApplicationCreated>(Json.decodeFromString<ApplicationEvent>(chain[0].payload))
+        assertIs<StatusChanged>(Json.decodeFromString<ApplicationEvent>(chain[1].payload))
     }
 }
