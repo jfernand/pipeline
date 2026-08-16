@@ -9,8 +9,15 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 
 @Database(
-    entities = [Application::class, StatusEvent::class, Contact::class, Reminder::class],
-    version = 1,
+    entities = [
+        Application::class,
+        StatusEvent::class,
+        Contact::class,
+        Reminder::class,
+        DeviceIdentity::class,
+        EventEnvelopeEntity::class,
+    ],
+    version = 2,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -20,6 +27,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun statusEventDao(): StatusEventDao
     abstract fun contactDao(): ContactDao
     abstract fun reminderDao(): ReminderDao
+    abstract fun deviceIdentityDao(): DeviceIdentityDao
+    abstract fun eventEnvelopeDao(): EventEnvelopeDao
 }
 
 /**
@@ -38,4 +47,8 @@ expect fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase>
 fun buildDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase = builder
     .setDriver(BundledSQLiteDriver())
     .setQueryCoroutineContext(Dispatchers.IO)
+    // No migration story yet (pre-release, exportSchema = false) — a schema bump just recreates
+    // the local DB. Seed data repopulates automatically; nothing durable is lost that a future
+    // synced install couldn't recover.
+    .fallbackToDestructiveMigration(dropAllTables = true)
     .build()

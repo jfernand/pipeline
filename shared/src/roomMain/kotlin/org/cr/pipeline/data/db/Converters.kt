@@ -17,4 +17,12 @@ class Converters {
 
     @TypeConverter
     fun instantToEpochMillis(instant: Instant?): Long? = instant?.toEpochMilliseconds()
+
+    /** Hash values are hex digests, so a bare comma-join is an unambiguous, dependency-free
+     *  encoding — no need for JSON here. */
+    @TypeConverter
+    fun stringToHashList(value: String): List<String> = value.takeIf { it.isNotEmpty() }?.split(",") ?: emptyList()
+
+    @TypeConverter
+    fun hashListToString(hashes: List<String>): String = hashes.joinToString(",")
 }
