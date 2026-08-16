@@ -34,4 +34,5 @@ plugins {
 include(":androidApp")
 include(":desktopApp")
 include(":shared")
+include(":sync-core")
 include(":webApp")
