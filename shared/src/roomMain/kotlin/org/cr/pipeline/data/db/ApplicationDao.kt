@@ -24,8 +24,9 @@ data class ApplicationWithDetails(
 
 @Dao
 interface ApplicationDao {
+    @Transaction
     @Query("SELECT * FROM applications ORDER BY createdAt DESC")
-    fun observeAll(): Flow<List<Application>>
+    fun observeAllWithDetails(): Flow<List<ApplicationWithDetails>>
 
     @Transaction
     @Query("SELECT * FROM applications WHERE id = :id")

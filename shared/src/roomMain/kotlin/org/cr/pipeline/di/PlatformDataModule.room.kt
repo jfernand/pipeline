@@ -1,7 +1,9 @@
 package org.cr.pipeline.di
 
+import org.cr.pipeline.data.ApplicationStateStore
+import org.cr.pipeline.data.EventSourcedJobApplicationRepository
 import org.cr.pipeline.data.JobApplicationRepository
-import org.cr.pipeline.data.RoomJobApplicationRepository
+import org.cr.pipeline.data.RoomApplicationStateStore
 import org.cr.pipeline.data.db.AppDatabase
 import org.cr.pipeline.data.db.buildDatabase
 import org.cr.pipeline.data.db.getDatabaseBuilder
@@ -14,5 +16,6 @@ actual val platformDataModule: Module = module {
     single { get<AppDatabase>().statusEventDao() }
     single { get<AppDatabase>().contactDao() }
     single { get<AppDatabase>().reminderDao() }
-    single<JobApplicationRepository> { RoomJobApplicationRepository(get(), get(), get(), get()) }
+    single<ApplicationStateStore> { RoomApplicationStateStore(get(), get(), get(), get()) }
+    single<JobApplicationRepository> { EventSourcedJobApplicationRepository(get()) }
 }
