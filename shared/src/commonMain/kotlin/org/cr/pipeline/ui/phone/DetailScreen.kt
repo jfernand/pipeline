@@ -42,6 +42,8 @@ import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 
+/** Stateful: owns the [applicationId] -> [ApplicationDetail] lookup and hoists it into
+ *  [DetailScreenContent], which does the actual rendering. */
 @Composable
 fun DetailScreen(
     applicationId: Long?,
@@ -52,7 +54,19 @@ fun DetailScreen(
     onEdit: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
+    DetailScreenContent(detail, modifier, dimmed, onBack, onUpdate, onEdit)
+}
 
+/** Stateless: renders whatever [detail] it's given, with no knowledge of where it came from. */
+@Composable
+private fun DetailScreenContent(
+    detail: ApplicationDetail?,
+    modifier: Modifier = Modifier,
+    dimmed: Boolean = false,
+    onBack: () -> Unit = {},
+    onUpdate: () -> Unit = {},
+    onEdit: () -> Unit = {},
+) {
     DimmedOverlay(dimmed, modifier.background(PlColors.bgBase)) {
         if (detail == null) {
             Box(Modifier.fillMaxSize()) {

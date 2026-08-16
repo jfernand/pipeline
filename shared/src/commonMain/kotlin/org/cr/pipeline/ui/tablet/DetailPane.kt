@@ -47,6 +47,8 @@ import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
 import org.cr.pipeline.ui.theme.drawRightBorder
 
+/** Stateful: owns the [applicationId] -> [org.cr.pipeline.model.ApplicationDetail] lookup and
+ *  hoists it into [DetailPaneContent], which does the actual rendering. */
 @Composable
 fun DetailPane(
     applicationId: Long?,
@@ -55,7 +57,17 @@ fun DetailPane(
     onEdit: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
+    DetailPaneContent(detail, modifier, onUpdateStatus, onEdit)
+}
 
+/** Stateless: renders whatever [detail] it's given, with no knowledge of where it came from. */
+@Composable
+private fun DetailPaneContent(
+    detail: ApplicationDetail?,
+    modifier: Modifier = Modifier,
+    onUpdateStatus: () -> Unit = {},
+    onEdit: () -> Unit = {},
+) {
     Column(modifier.fillMaxHeight().fillMaxWidth().background(PlColors.bgBase)) {
         if (detail == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
