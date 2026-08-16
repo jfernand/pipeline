@@ -86,44 +86,48 @@ fun DetailPane(
 
 @Composable
 private fun DetailHeader(detail: ApplicationDetail, maxWidth: Dp, onUpdateStatus: () -> Unit, onEdit: () -> Unit) {
-    val info: @Composable () -> Unit = {
-        Column {
-            DisplayText(detail.company, size = 39.sp, lineHeight = 39.sp)
-            BodyText(detail.role, size = 16.sp, color = PlColors.fgSecondary, modifier = Modifier.padding(top = 6.dp))
-            Row(
-                Modifier.padding(top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                StatusChip(detail.status)
-                val activity = "${detail.daysSinceActivity}d since activity" +
-                    (detail.source?.let { " · Source: $it" } ?: "")
-                MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
-    }
-    val actions: @Composable () -> Unit = {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (detail.postingUrl != null) {
-                PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
-            }
-            PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
-            PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
-        }
-    }
     // Below this, the info block (especially the company name at 39sp) doesn't have room
     // to share a row with the action buttons without getting crushed into a near-zero
     // width and wrapping character-by-character; stack them instead.
     if (maxWidth >= 640.dp) {
         Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-            Box(Modifier.weight(1f)) { info() }
-            actions()
+            Box(Modifier.weight(1f)) { HeaderInfo(detail) }
+            HeaderActions(detail, onUpdateStatus, onEdit)
         }
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            info()
-            actions()
+            HeaderInfo(detail)
+            HeaderActions(detail, onUpdateStatus, onEdit)
         }
+    }
+}
+
+@Composable
+private fun HeaderInfo(detail: ApplicationDetail) {
+    Column {
+        DisplayText(detail.company, size = 39.sp, lineHeight = 39.sp)
+        BodyText(detail.role, size = 16.sp, color = PlColors.fgSecondary, modifier = Modifier.padding(top = 6.dp))
+        Row(
+            Modifier.padding(top = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            StatusChip(detail.status)
+            val activity = "${detail.daysSinceActivity}d since activity" +
+                (detail.source?.let { " · Source: $it" } ?: "")
+            MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun HeaderActions(detail: ApplicationDetail, onUpdateStatus: () -> Unit, onEdit: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (detail.postingUrl != null) {
+            PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
+        }
+        PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
+        PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
     }
 }
 
