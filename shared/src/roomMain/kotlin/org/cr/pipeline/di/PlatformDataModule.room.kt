@@ -1,12 +1,16 @@
 package org.cr.pipeline.di
 
+import com.russhwolf.settings.Settings
 import org.cr.pipeline.data.ApplicationStateStore
 import org.cr.pipeline.data.DeviceIdentityStore
 import org.cr.pipeline.data.EventSourcedJobApplicationRepository
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.RoomApplicationStateStore
 import org.cr.pipeline.data.RoomDeviceIdentityStore
 import org.cr.pipeline.data.RoomEventLog
+import org.cr.pipeline.data.SettingsPreferencesStore
+import org.cr.pipeline.data.createPreferencesSettings
 import org.cr.pipeline.data.db.AppDatabase
 import org.cr.pipeline.data.db.buildDatabase
 import org.cr.pipeline.data.db.getDatabaseBuilder
@@ -26,4 +30,6 @@ actual val platformDataModule: Module = module {
     single<DeviceIdentityStore> { RoomDeviceIdentityStore(get()) }
     single<EventLog> { RoomEventLog(get(), get()) }
     single<JobApplicationRepository> { EventSourcedJobApplicationRepository(get(), get()) }
+    single<Settings> { createPreferencesSettings() }
+    single<PreferencesStore> { SettingsPreferencesStore(get()) }
 }

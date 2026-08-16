@@ -1,0 +1,7 @@
+package org.cr.pipeline.data
+
+import com.russhwolf.settings.PreferencesSettings
+import com.russhwolf.settings.Settings
+import java.util.prefs.Preferences
+
+actual fun createPreferencesSettings(): Settings = PreferencesSettings(Preferences.userRoot().node("org/cr/pipeline"))

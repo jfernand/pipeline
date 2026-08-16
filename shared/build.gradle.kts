@@ -149,6 +149,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation.compose)
+            implementation(libs.multiplatform.settings)
         }
         roomMain.dependencies {
             implementation(libs.room.runtime)

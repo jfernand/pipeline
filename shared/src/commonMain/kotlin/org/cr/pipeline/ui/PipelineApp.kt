@@ -33,8 +33,11 @@ import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
 import org.cr.pipeline.ui.nav.FollowUpsRoute
 import org.cr.pipeline.ui.nav.ListRoute
+import org.cr.pipeline.ui.nav.PairRoute
 import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.nav.SyncRoute
+import org.cr.pipeline.ui.phone.PairingScreen
+import org.cr.pipeline.ui.phone.SettingsScreen
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.cr.pipeline.ui.tablet.NavDestination
@@ -104,7 +107,10 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                 }
                 composable<SyncRoute> { TabletSyncContent() }
                 composable<FollowUpsRoute> { PlaceholderPane("Follow-ups") }
-                composable<SettingsRoute> { PlaceholderPane("Settings") }
+                composable<SettingsRoute> {
+                    SettingsScreen(onBack = { navController.popBackStack() }, onPair = { navController.navigate(PairRoute) })
+                }
+                composable<PairRoute> { PairingScreen(onBack = { navController.popBackStack() }) }
             }
             // Runs in the same composition pass as the NavHost above (both are children of this
             // Box), so navController.graph is guaranteed to already be set here — unlike calling

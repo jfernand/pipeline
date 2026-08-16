@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +30,10 @@ fun SettingsRow(
     value: String? = null,
     icon: ImageVector? = null,
     chevron: Boolean = true,
+    /** Replaces the chevron with a small mono label (e.g. "ON"/"OFF") — for rows that toggle in
+     *  place on tap rather than navigating anywhere. */
+    trailingText: String? = null,
+    trailingColor: Color = PlColors.fgMuted,
     onClick: (() -> Unit)? = null,
 ) {
     Row(
@@ -46,6 +51,10 @@ fun SettingsRow(
             BodyText(label, size = 14.5f.sp, color = PlColors.fgPrimary)
             if (value != null) MonoText(value, size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
         }
-        if (chevron) Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
+        if (trailingText != null) {
+            MonoText(trailingText, size = 9.5f.sp, color = trailingColor)
+        } else if (chevron) {
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
+        }
     }
 }
