@@ -65,10 +65,10 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
         NavDestination.entries.forEach { destination ->
             if (destination == NavDestination.SETTINGS) return@forEach
             val isActive = destination == active
-            val itemShape = RoundedCornerShape(2.dp)
-            DestinationIcon(destination, itemShape, isActive, onSelect)
+            DestinationIcon(destination, isActive, onSelect)
         }
         Spacer(Modifier.weight(1f))
+        DestinationIcon(NavDestination.SETTINGS, active == NavDestination.SETTINGS, onSelect)
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Dot(color = AppStatus.OFFER.color)
             MonoText("Synced", size = 8.sp, color = PlColors.fgMuted)
@@ -87,10 +87,10 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
 @Composable
 private fun DestinationIcon(
     destination: NavDestination,
-    itemShape: RoundedCornerShape,
     isActive: Boolean,
     onSelect: (NavDestination) -> Unit,
 ) {
+    val itemShape = RoundedCornerShape(2.dp)
     Column(
         Modifier
             .padding(vertical = 2.dp)
