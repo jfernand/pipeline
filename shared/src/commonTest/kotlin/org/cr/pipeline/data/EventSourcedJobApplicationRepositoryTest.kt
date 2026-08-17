@@ -1,8 +1,6 @@
 package org.cr.pipeline.data
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.decodeFromString
@@ -11,28 +9,12 @@ import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEvent
-import org.cr.pipeline.sync.event.ApplicationState
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import org.cr.pipeline.sync.event.StatusChanged
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
-
-private class FakeApplicationStateStore : ApplicationStateStore {
-    val states = mutableMapOf<Long, ApplicationState>()
-    private var nextId = 1L
-
-    override fun observeAll(): Flow<List<Pair<Long, ApplicationState>>> = flowOf(states.toList())
-    override fun observeState(id: Long): Flow<ApplicationState?> = flowOf(states[id])
-    override suspend fun getState(id: Long): ApplicationState? = states[id]
-
-    override suspend fun write(id: Long?, state: ApplicationState): Long {
-        val actualId = id ?: nextId++
-        states[actualId] = state
-        return actualId
-    }
-}
 
 class EventSourcedJobApplicationRepositoryTest {
     private val input = ApplicationInput(
