@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Info
@@ -39,6 +40,8 @@ import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.DeviceIdentityStore
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.SyncNetworkMode
+import org.cr.pipeline.data.mcp.McpServerController
+import org.cr.pipeline.data.mcp.McpServerStatus
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.ui.components.Dot
@@ -57,8 +60,10 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
     val preferencesStore = koinInject<PreferencesStore>()
     val deviceIdentityStore = koinInject<DeviceIdentityStore>()
     val eventLog = koinInject<EventLog>()
+    val mcpServerController = koinInject<McpServerController>()
     val preferences by preferencesStore.observePreferences().collectAsState(initial = AppPreferences())
     val chain by eventLog.observeChain().collectAsState(initial = emptyList())
+    val mcpStatus by mcpServerController.observeStatus().collectAsState(initial = McpServerStatus.Stopped)
     var deviceId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(preferences.developerMode) {
@@ -126,6 +131,28 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
                 icon = Icons.Filled.Storage,
                 chevron = false,
             )
+        }
+        if (mcpServerController.isSupported) {
+            Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("MCP server") }
+            SettingsRow(
+                "MCP server",
+                icon = Icons.Filled.Dns,
+                chevron = false,
+                trailingText = if (preferences.mcpServerEnabled) "ON" else "OFF",
+                trailingColor = if (preferences.mcpServerEnabled) PlColors.brandPrimary else PlColors.fgMuted,
+                onClick = { scope.launch { preferencesStore.setMcpServerEnabled(!preferences.mcpServerEnabled) } },
+            )
+            if (preferences.mcpServerEnabled) {
+                SettingsRow(
+                    "Address",
+                    value = when (val status = mcpStatus) {
+                        is McpServerStatus.Running -> "${status.host}:${status.port}/mcp"
+                        is McpServerStatus.Error -> "Error — ${status.message}"
+                        McpServerStatus.Stopped -> "Starting…"
+                    },
+                    chevron = false,
+                )
+            }
         }
         Column(Modifier.padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 32.dp)) {
             MonoText("No account. No server. No telemetry.", size = 9.sp, color = PlColors.fgMuted)
