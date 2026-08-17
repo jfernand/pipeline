@@ -40,6 +40,8 @@ import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.DeviceIdentityStore
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.SyncNetworkMode
+import org.cr.pipeline.data.io.DataPortController
+import org.cr.pipeline.data.io.DataPortResult
 import org.cr.pipeline.data.mcp.McpServerController
 import org.cr.pipeline.data.mcp.McpServerStatus
 import org.cr.pipeline.model.AppStatus
@@ -61,10 +63,13 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
     val deviceIdentityStore = koinInject<DeviceIdentityStore>()
     val eventLog = koinInject<EventLog>()
     val mcpServerController = koinInject<McpServerController>()
+    val dataPortController = koinInject<DataPortController>()
     val preferences by preferencesStore.observePreferences().collectAsState(initial = AppPreferences())
     val chain by eventLog.observeChain().collectAsState(initial = emptyList())
     val mcpStatus by mcpServerController.observeStatus().collectAsState(initial = McpServerStatus.Stopped)
     var deviceId by remember { mutableStateOf<String?>(null) }
+    var exportStatus by remember { mutableStateOf<String?>(null) }
+    var importStatus by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(preferences.developerMode) {
         if (preferences.developerMode && deviceId == null) {
@@ -108,8 +113,20 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
             },
         )
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("Data") }
-        SettingsRow("Export as JSON", value = "Everything, unencrypted, yours", icon = Icons.Filled.Download)
-        SettingsRow("Import from file", icon = Icons.Filled.Upload)
+        SettingsRow(
+            "Export as JSON",
+            value = exportStatus ?: "Everything, unencrypted, yours",
+            icon = Icons.Filled.Download,
+            chevron = false,
+            onClick = { scope.launch { exportStatus = dataPortController.export().describe() } },
+        )
+        SettingsRow(
+            "Import from file",
+            value = importStatus,
+            icon = Icons.Filled.Upload,
+            chevron = false,
+            onClick = { scope.launch { importStatus = dataPortController.import().describe() } },
+        )
         SettingsRow("Follow-up reminders", value = "9:00, weekdays", icon = Icons.Filled.NotificationsActive)
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("About") }
         SettingsRow("Pipeline 1.4.0", value = "Build 2026.06.24", icon = Icons.Filled.Info, chevron = false)
@@ -159,4 +176,11 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
             MonoText("Your data stays on your devices.", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 4.dp))
         }
     }
+}
+
+private fun DataPortResult.describe(): String? = when (this) {
+    is DataPortResult.Exported -> "Exported $count application${if (count == 1) "" else "s"}"
+    is DataPortResult.Imported -> "Imported $count application${if (count == 1) "" else "s"}"
+    DataPortResult.Cancelled -> null
+    is DataPortResult.Error -> "Error — $message"
 }
