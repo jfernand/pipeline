@@ -168,6 +168,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.http4k.core)
             implementation(libs.http4k.ai.mcp.sdk)
+            implementation(libs.kotlinx.coroutinesSwing)
         }
         jvmTest.dependencies {
             implementation(libs.forkhandles.result4k)
