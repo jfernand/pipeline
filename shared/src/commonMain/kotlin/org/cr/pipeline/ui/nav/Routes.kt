@@ -27,3 +27,6 @@ data object SettingsRoute
 
 @Serializable
 data object PairRoute
+
+@Serializable
+data object DevToolsRoute

@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,31 +63,10 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
             modifier = Modifier.padding(top = 6.dp, bottom = 18.dp),
         )
         NavDestination.entries.forEach { destination ->
+            if (destination == NavDestination.SETTINGS) return@forEach
             val isActive = destination == active
             val itemShape = RoundedCornerShape(2.dp)
-            Column(
-                Modifier
-                    .padding(vertical = 2.dp)
-                    .width(68.dp)
-                    .clip(itemShape)
-                    .background(if (isActive) PlColors.brandSubtle else androidx.compose.ui.graphics.Color.Transparent)
-                    .border(1.dp, if (isActive) PlColors.overdueBorder else androidx.compose.ui.graphics.Color.Transparent, itemShape)
-                    .clickable { onSelect(destination) }
-                    .padding(vertical = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                if (NavDestination.SETTINGS == destination) {
-                    Spacer(Modifier.height(60.dp))
-                }
-                Icon(
-                    destination.icon,
-                    contentDescription = destination.label,
-                    tint = if (isActive) PlColors.brandPrimary else PlColors.fgMuted,
-                    modifier = Modifier.size(20.dp),
-                )
-                Spacer(Modifier.height(6.dp))
-                MonoText(destination.label, size = 8.5f.sp, color = if (isActive) PlColors.brandPrimary else PlColors.fgMuted)
-            }
+            DestinationIcon(destination, itemShape, isActive, onSelect)
         }
         Spacer(Modifier.weight(1f))
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -101,5 +81,34 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
                 overflow = TextOverflow.Ellipsis,
             )
         }
+    }
+}
+
+@Composable
+private fun DestinationIcon(
+    destination: NavDestination,
+    itemShape: RoundedCornerShape,
+    isActive: Boolean,
+    onSelect: (NavDestination) -> Unit,
+) {
+    Column(
+        Modifier
+            .padding(vertical = 2.dp)
+            .width(68.dp)
+            .clip(itemShape)
+            .background(if (isActive) PlColors.brandSubtle else Color.Transparent)
+            .border(1.dp, if (isActive) PlColors.overdueBorder else Color.Transparent, itemShape)
+            .clickable { onSelect(destination) }
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            destination.icon,
+            contentDescription = destination.label,
+            tint = if (isActive) PlColors.brandPrimary else PlColors.fgMuted,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(Modifier.height(6.dp))
+        MonoText(destination.label, size = 8.5f.sp, color = if (isActive) PlColors.brandPrimary else PlColors.fgMuted)
     }
 }
