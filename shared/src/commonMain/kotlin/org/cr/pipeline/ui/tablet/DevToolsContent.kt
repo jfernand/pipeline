@@ -1,0 +1,127 @@
+package org.cr.pipeline.ui.tablet
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlin.time.Instant
+import org.cr.pipeline.data.DeviceIdentityStore
+import org.cr.pipeline.sync.chain.EventEnvelope
+import org.cr.pipeline.sync.event.EventLog
+import org.cr.pipeline.ui.components.SectionLabel
+import org.cr.pipeline.ui.theme.BodyText
+import org.cr.pipeline.ui.theme.DisplayText
+import org.cr.pipeline.ui.theme.MonoText
+import org.cr.pipeline.ui.theme.PlColors
+import org.cr.pipeline.ui.theme.drawBottomBorder
+import org.koin.compose.koinInject
+
+/** Live internal state, not a mockup — this device's real identity and its real append-only
+ *  event chain, straight from DeviceIdentityStore/EventLog. Only reachable when developer mode
+ *  is on (see NavRail). */
+@Composable
+fun DevToolsContent(modifier: Modifier = Modifier) {
+    val deviceIdentityStore = koinInject<DeviceIdentityStore>()
+    val eventLog = koinInject<EventLog>()
+    var deviceId by remember { mutableStateOf<String?>(null) }
+    val chain by eventLog.observeChain().collectAsState(initial = emptyList())
+
+    LaunchedEffect(Unit) { deviceId = deviceIdentityStore.getOrCreateDeviceId().value }
+
+    Column(
+        modifier
+            .fillMaxSize()
+            .background(PlColors.bgBase)
+            .padding(horizontal = 40.dp, vertical = 32.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Column {
+            DisplayText("Developer tools", size = 31.sp)
+            BodyText(
+                "This device's identity and its append-only event chain, live.",
+                size = 14.sp,
+                color = PlColors.fgSecondary,
+                modifier = Modifier.padding(top = 10.dp),
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionLabel("Device")
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                    .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+            ) {
+                MonoText("DEVICE ID", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.width(120.dp))
+                MonoText(deviceId ?: "…", size = 12.sp, color = PlColors.fgPrimary)
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionLabel("Event log", count = chain.size)
+            if (chain.isEmpty()) {
+                BodyText("No events yet — make a change (create, edit, or update status) to see one here.", size = 13.sp, color = PlColors.fgMuted)
+            } else {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                        .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp)),
+                ) {
+                    chain.forEach { envelope -> EventRow(envelope) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EventRow(envelope: EventEnvelope) {
+    Column(Modifier.fillMaxWidth().drawBottomBorder(PlColors.borderSubtle).padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            MonoText("#${envelope.sequence}", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.width(36.dp))
+            MonoText("hash ${envelope.hash.value.take(8)}", size = 9.sp, color = PlColors.fgPrimary)
+            MonoText(
+                if (envelope.parentHashes.isEmpty()) "genesis" else "parent ${envelope.parentHashes.joinToString(", ") { it.value.take(8) }}",
+                size = 9.sp,
+                color = PlColors.fgMuted,
+            )
+            MonoText(
+                Instant.fromEpochMilliseconds(envelope.timestampEpochMillis).toString(),
+                size = 9.sp,
+                color = PlColors.fgMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+        }
+        MonoText(
+            envelope.payload,
+            size = 9.5f.sp,
+            color = PlColors.fgSecondary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+}

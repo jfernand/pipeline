@@ -28,9 +28,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import kotlinx.coroutines.launch
+import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
+import org.cr.pipeline.ui.nav.DevToolsRoute
 import org.cr.pipeline.ui.nav.FollowUpsRoute
 import org.cr.pipeline.ui.nav.ListRoute
 import org.cr.pipeline.ui.nav.PairRoute
@@ -40,6 +43,7 @@ import org.cr.pipeline.ui.phone.PairingScreen
 import org.cr.pipeline.ui.phone.SettingsScreen
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.StatusSheet
+import org.cr.pipeline.ui.tablet.DevToolsContent
 import org.cr.pipeline.ui.tablet.NavDestination
 import org.cr.pipeline.ui.tablet.NavRail
 import org.cr.pipeline.ui.tablet.TabletDetailScreen
@@ -53,8 +57,10 @@ import org.koin.compose.koinInject
 @Composable
 fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String? = null) {
     val repository = koinInject<JobApplicationRepository>()
+    val preferencesStore = koinInject<PreferencesStore>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
+    val preferences by preferencesStore.observePreferences().collectAsState(initial = AppPreferences())
     var activeRailDestination by remember { mutableStateOf(NavDestination.LIST) }
     var lastViewedId by remember { mutableStateOf<Long?>(null) }
     var statusSheetApplicationId by remember { mutableStateOf<Long?>(null) }
@@ -63,6 +69,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
     Row(Modifier.fillMaxSize().background(PlColors.bgBase).statusBarsPadding()) {
         NavRail(
             active = activeRailDestination,
+            showDevTools = preferences.developerMode,
             onSelect = { destination ->
                 activeRailDestination = destination
                 val route = when (destination) {
@@ -70,6 +77,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     NavDestination.FOLLOWUPS -> FollowUpsRoute
                     NavDestination.SYNC -> SyncRoute
                     NavDestination.SETTINGS -> SettingsRoute
+                    NavDestination.DEVTOOLS -> DevToolsRoute
                 }
                 navController.navigate(route) {
                     popUpTo(ListRoute)
@@ -111,6 +119,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     SettingsScreen(onBack = { navController.popBackStack() }, onPair = { navController.navigate(PairRoute) })
                 }
                 composable<PairRoute> { PairingScreen(onBack = { navController.popBackStack() }) }
+                composable<DevToolsRoute> { DevToolsContent() }
             }
             // Runs in the same composition pass as the NavHost above (both are children of this
             // Box), so navController.graph is guaranteed to already be set here — unlike calling

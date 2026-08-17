@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.QrCode
@@ -42,10 +43,18 @@ enum class NavDestination(val icon: ImageVector, val label: String) {
     FOLLOWUPS(Icons.Filled.Notifications, "Follow-ups"),
     SYNC(Icons.Filled.QrCode, "Sync"),
     SETTINGS(Icons.Filled.Settings, "Settings"),
+    DEVTOOLS(Icons.Filled.Code, "Dev Tools"),
 }
 
+/** [showDevTools] gates the Dev Tools item on the developer-mode preference — off by default,
+ *  same as the debug rows it leads to in Settings. */
 @Composable
-fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier: Modifier = Modifier) {
+fun NavRail(
+    active: NavDestination,
+    onSelect: (NavDestination) -> Unit,
+    showDevTools: Boolean,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier
             .width(84.dp)
@@ -63,11 +72,14 @@ fun NavRail(active: NavDestination, onSelect: (NavDestination) -> Unit, modifier
             modifier = Modifier.padding(top = 6.dp, bottom = 18.dp),
         )
         NavDestination.entries.forEach { destination ->
-            if (destination == NavDestination.SETTINGS) return@forEach
+            if (destination == NavDestination.SETTINGS || destination == NavDestination.DEVTOOLS) return@forEach
             val isActive = destination == active
             DestinationIcon(destination, isActive, onSelect)
         }
         Spacer(Modifier.weight(1f))
+        if (showDevTools) {
+            DestinationIcon(NavDestination.DEVTOOLS, active == NavDestination.DEVTOOLS, onSelect)
+        }
         DestinationIcon(NavDestination.SETTINGS, active == NavDestination.SETTINGS, onSelect)
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Dot(color = AppStatus.OFFER.color)
