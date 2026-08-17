@@ -165,6 +165,11 @@ kotlin {
         wasmJsMain.dependencies {
             implementation(libs.kotlinx.browser)
         }
+        jvmMain.dependencies {
+            implementation(libs.mcp.kotlin.sdk.server)
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.cio)
+        }
     }
 }
 
