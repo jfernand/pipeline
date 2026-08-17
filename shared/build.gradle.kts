@@ -166,9 +166,11 @@ kotlin {
             implementation(libs.kotlinx.browser)
         }
         jvmMain.dependencies {
-            implementation(libs.mcp.kotlin.sdk.server)
-            implementation(libs.ktor.server.core)
-            implementation(libs.ktor.server.cio)
+            implementation(libs.http4k.core)
+            implementation(libs.http4k.ai.mcp.sdk)
+        }
+        jvmTest.dependencies {
+            implementation(libs.forkhandles.result4k)
         }
     }
 }
