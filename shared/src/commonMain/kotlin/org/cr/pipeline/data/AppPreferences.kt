@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class AppPreferences(
     val syncNetworkMode: SyncNetworkMode = SyncNetworkMode.LOCAL_NETWORK_ONLY,
     val developerMode: Boolean = false,
+    val mcpServerEnabled: Boolean = false,
 )
 
 @Serializable

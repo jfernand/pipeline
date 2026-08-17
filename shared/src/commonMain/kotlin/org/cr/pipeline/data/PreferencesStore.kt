@@ -9,4 +9,5 @@ interface PreferencesStore {
     fun observePreferences(): Flow<AppPreferences>
     suspend fun setSyncNetworkMode(mode: SyncNetworkMode)
     suspend fun setDeveloperMode(enabled: Boolean)
+    suspend fun setMcpServerEnabled(enabled: Boolean)
 }

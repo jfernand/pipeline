@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val KEY_SYNC_NETWORK_MODE = "syncNetworkMode"
 private const val KEY_DEVELOPER_MODE = "developerMode"
+private const val KEY_MCP_SERVER_ENABLED = "mcpServerEnabled"
 
 /**
  * The one [PreferencesStore] implementation, shared across every platform — [Settings]'s plain
@@ -30,6 +31,11 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
         state.value = state.value.copy(developerMode = enabled)
     }
 
+    override suspend fun setMcpServerEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_MCP_SERVER_ENABLED, enabled)
+        state.value = state.value.copy(mcpServerEnabled = enabled)
+    }
+
     private fun readPreferences(): AppPreferences {
         val mode = settings.getStringOrNull(KEY_SYNC_NETWORK_MODE)
             ?.let { runCatching { SyncNetworkMode.valueOf(it) }.getOrNull() }
@@ -37,6 +43,7 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
         return AppPreferences(
             syncNetworkMode = mode,
             developerMode = settings.getBoolean(KEY_DEVELOPER_MODE, false),
+            mcpServerEnabled = settings.getBoolean(KEY_MCP_SERVER_ENABLED, false),
         )
     }
 }
