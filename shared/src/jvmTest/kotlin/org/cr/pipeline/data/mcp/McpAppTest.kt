@@ -8,13 +8,16 @@ import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.orThrow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.EventSourcedJobApplicationRepository
 import org.cr.pipeline.data.FakeApplicationStateStore
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.SyncNetworkMode
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.nav.DeepLinkBus
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import org.http4k.ai.mcp.McpError
 import org.http4k.ai.mcp.ToolRequest
@@ -65,6 +68,16 @@ internal class FakePreferencesStore(initial: AppPreferences = AppPreferences()) 
     }
 }
 
+internal class FakeDeepLinkBus : DeepLinkBus {
+    val navigatedTo = mutableListOf<String>()
+
+    override val deepLinks: SharedFlow<String> = MutableSharedFlow()
+
+    override suspend fun navigate(deepLink: String) {
+        navigatedTo.add(deepLink)
+    }
+}
+
 /**
  * Stands up the real MCP app and drives it entirely in-process: [buildMcpApp] returns a plain
  * `HttpHandler`, and http4k's own [HttpNonStreamingMcpClient] accepts any `HttpHandler` in place
@@ -75,19 +88,25 @@ class McpAppTest {
     private fun clientAgainst(
         store: FakeApplicationStateStore,
         preferencesStore: PreferencesStore = FakePreferencesStore(),
+        deepLinkBus: DeepLinkBus = FakeDeepLinkBus(),
     ): HttpNonStreamingMcpClient {
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
-        return HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), http = buildMcpApp(repository, preferencesStore))
-            .also { it.start().orFail() }
+        return HttpNonStreamingMcpClient(
+            Uri.of("http://in-memory/mcp"),
+            http = buildMcpApp(repository, preferencesStore, deepLinkBus),
+        ).also { it.start().orFail() }
     }
 
     @Test
-    fun `lists add_application, edit_application, list_applications and list_settings`() {
+    fun `lists add_application, edit_application, list_applications, list_settings and open_application`() {
         val client = clientAgainst(FakeApplicationStateStore())
 
         val names = client.tools().list().orFail().map { it.name.value }
 
-        assertEquals(setOf("add_application", "edit_application", "list_applications", "list_settings"), names.toSet())
+        assertEquals(
+            setOf("add_application", "edit_application", "list_applications", "list_settings", "open_application"),
+            names.toSet(),
+        )
     }
 
     @Test
@@ -143,6 +162,34 @@ class McpAppTest {
         assertTrue(message.text.contains("Developer mode: on"))
         assertTrue(message.text.contains("enabled"))
         assertTrue(message.text.contains("localhost:34687"))
+    }
+
+    @Test
+    fun `open_application pushes a deep link for the given id onto the bus`() {
+        val store = FakeApplicationStateStore()
+        val deepLinkBus = FakeDeepLinkBus()
+        val client = clientAgainst(store, deepLinkBus = deepLinkBus)
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+
+        val result = client.tools().call(ToolName.of("open_application"), ToolRequest(mapOf("id" to id))).orFail()
+
+        assertIs<ToolResponse.Ok>(result)
+        assertEquals(listOf("pipeline://app/$id"), deepLinkBus.navigatedTo)
+    }
+
+    @Test
+    fun `open_application without an id is rejected, not silently navigated`() {
+        val deepLinkBus = FakeDeepLinkBus()
+        val client = clientAgainst(FakeApplicationStateStore(), deepLinkBus = deepLinkBus)
+
+        val result = client.tools().call(ToolName.of("open_application"), ToolRequest(emptyMap()))
+
+        assertIs<Failure<*>>(result)
+        assertEquals(emptyList(), deepLinkBus.navigatedTo)
     }
 
     @Test
@@ -247,7 +294,7 @@ class McpAppTest {
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
         val client = HttpNonStreamingMcpClient(
             Uri.of("http://in-memory/mcp"),
-            http = buildMcpApp(repository, FakePreferencesStore(), testLogger),
+            http = buildMcpApp(repository, FakePreferencesStore(), FakeDeepLinkBus(), testLogger),
         )
         client.start().orFail()
 

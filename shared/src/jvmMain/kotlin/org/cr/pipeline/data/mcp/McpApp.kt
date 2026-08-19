@@ -8,6 +8,7 @@ import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.nav.DeepLinkBus
 import org.http4k.ai.mcp.ToolRequest
 import org.http4k.ai.mcp.ToolResponse
 import org.http4k.ai.mcp.model.Tool
@@ -32,6 +33,7 @@ import org.http4k.routing.mcpHttpNonStreaming
 fun buildMcpApp(
     repository: JobApplicationRepository,
     preferencesStore: PreferencesStore,
+    deepLinkBus: DeepLinkBus,
     logger: Logger = Logger.withTag("McpApp"),
 ): HttpHandler {
     val addApplication = Tool("add_application", "Add a new job application to Pipeline.", *applicationArgs(includeId = false))
@@ -42,6 +44,7 @@ fun buildMcpApp(
     )
     val listApplications = Tool("list_applications", "List all job applications currently tracked in Pipeline.")
     val listSettings = Tool("list_settings", "List Pipeline's current app-level settings for this device.")
+    val openApplication = Tool("open_application", "Open a job application's detail screen in the running Pipeline app.", idArg)
 
     val serverHandler = mcpHttpNonStreaming(
         ServerMetaData("pipeline", "1.0.0"),
@@ -85,6 +88,14 @@ fun buildMcpApp(
             runBlocking { repository.saveApplication(id, input) }
             val message = "Updated application #$id: ${input.company} — ${input.role} (${input.status})."
             logger.d { "MCP tool response: edit_application -> #$id" }
+            ToolResponse.Ok(message)
+        },
+        openApplication bind { request: ToolRequest ->
+            val id = idArg(request)
+            logger.d { "MCP tool call: open_application with id=$id" }
+            runBlocking { deepLinkBus.navigate("pipeline://app/$id") }
+            val message = "Opened application #$id in Pipeline."
+            logger.d { "MCP tool response: open_application -> #$id" }
             ToolResponse.Ok(message)
         },
     )

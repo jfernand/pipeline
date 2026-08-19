@@ -26,6 +26,7 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.nav.DeepLinkBus
 import org.cr.pipeline.ui.components.PlFab
 import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
@@ -40,6 +41,7 @@ import org.koin.compose.koinInject
 @Composable
 fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modifier, initialDeepLink: String? = null) {
     val repository = koinInject<JobApplicationRepository>()
+    val deepLinkBus = koinInject<DeepLinkBus>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var sheetApplicationId by remember { mutableStateOf<Long?>(null) }
@@ -86,6 +88,14 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
         LaunchedEffect(initialDeepLink) {
             if (initialDeepLink != null) {
                 navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(initialDeepLink)).build())
+            }
+        }
+        // Same graph-readiness requirement as the initialDeepLink effect above, but this one runs
+        // for the composable's whole lifetime: the MCP server's open_application tool can push a
+        // deep link at any point while the app is running, not just at cold start.
+        LaunchedEffect(deepLinkBus) {
+            deepLinkBus.deepLinks.collect { deepLink ->
+                navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(deepLink)).build())
             }
         }
         if (onListRoute && sheetApplication == null) {

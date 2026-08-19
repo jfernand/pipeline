@@ -7,20 +7,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
+import org.cr.pipeline.nav.DeepLinkBus
 import org.http4k.server.Http4kServer
 import org.http4k.server.asServer
 
 actual fun createMcpServerController(
     repository: JobApplicationRepository,
     preferencesStore: PreferencesStore,
+    deepLinkBus: DeepLinkBus,
     logger: Logger,
-): McpServerController = JvmMcpServerController(repository, preferencesStore, logger)
+): McpServerController = JvmMcpServerController(repository, preferencesStore, deepLinkBus, logger)
 
 private const val LOOPBACK_HOST = "127.0.0.1"
 
 private class JvmMcpServerController(
     private val repository: JobApplicationRepository,
     private val preferencesStore: PreferencesStore,
+    private val deepLinkBus: DeepLinkBus,
     private val logger: Logger = Logger.withTag("McpServer"),
 ) : McpServerController {
     override val isSupported: Boolean = true
@@ -37,7 +40,7 @@ private class JvmMcpServerController(
         }
         try {
             logger.d { "Starting MCP server on $LOOPBACK_HOST..." }
-            val started = buildMcpApp(repository, preferencesStore, logger).asServer(LoopbackNetty(port)).start()
+            val started = buildMcpApp(repository, preferencesStore, deepLinkBus, logger).asServer(LoopbackNetty(port)).start()
             server = started
             val port = started.port()
             logger.d { "MCP server started on $LOOPBACK_HOST:$port" }

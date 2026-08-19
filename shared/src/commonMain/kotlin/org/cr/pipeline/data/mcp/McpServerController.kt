@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
+import org.cr.pipeline.nav.DeepLinkBus
 
 /** Controls an in-process MCP server exposing tools to add/edit applications. Only the JVM
  *  (desktop) target actually runs a server — the MCP Kotlin SDK's server module has no
@@ -26,12 +27,13 @@ sealed interface McpServerStatus {
     data class Error(val message: String) : McpServerStatus
 }
 
-/** [repository] and [preferencesStore] are only used by the real (JVM) implementation, to back
- *  the application tools and `list_settings` — stub implementations on other platforms ignore
- *  them. */
+/** [repository], [preferencesStore] and [deepLinkBus] are only used by the real (JVM)
+ *  implementation, to back the application tools, `list_settings` and `open_application` — stub
+ *  implementations on other platforms ignore them. */
 expect fun createMcpServerController(
     repository: JobApplicationRepository,
     preferencesStore: PreferencesStore,
+    deepLinkBus: DeepLinkBus,
     logger: Logger = Logger.withTag("McpServer"),
 ): McpServerController
 
