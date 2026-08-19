@@ -51,12 +51,45 @@ class McpAppTest {
     }
 
     @Test
-    fun `lists add_application and edit_application`() {
+    fun `lists add_application, edit_application and list_applications`() {
         val client = clientAgainst(FakeApplicationStateStore())
 
         val names = client.tools().list().orFail().map { it.name.value }
 
-        assertEquals(setOf("add_application", "edit_application"), names.toSet())
+        assertEquals(setOf("add_application", "edit_application", "list_applications"), names.toSet())
+    }
+
+    @Test
+    fun `list_applications reports no applications yet when the store is empty`() {
+        val client = clientAgainst(FakeApplicationStateStore())
+
+        val result = client.tools().call(ToolName.of("list_applications"), ToolRequest(emptyMap())).orFail()
+
+        assertIs<ToolResponse.Ok>(result)
+        val message = result.content.orEmpty().single()
+        assertIs<Content.Text>(message)
+        assertEquals("No applications yet.", message.text)
+    }
+
+    @Test
+    fun `list_applications reflects applications added through the real repository`() {
+        val store = FakeApplicationStateStore()
+        val client = clientAgainst(store)
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+
+        val result = client.tools().call(ToolName.of("list_applications"), ToolRequest(emptyMap())).orFail()
+
+        assertIs<ToolResponse.Ok>(result)
+        val message = result.content.orEmpty().single()
+        assertIs<Content.Text>(message)
+        assertTrue(message.text.contains("#$id"))
+        assertTrue(message.text.contains("Acme Rockets"))
+        assertTrue(message.text.contains("Staff Engineer"))
+        assertTrue(message.text.contains("APPLIED"))
     }
 
     @Test

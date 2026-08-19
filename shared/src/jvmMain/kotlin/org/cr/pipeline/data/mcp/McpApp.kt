@@ -1,6 +1,7 @@
 package org.cr.pipeline.data.mcp
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.toKotlinLocalDate
 import org.cr.pipeline.data.JobApplicationRepository
@@ -37,10 +38,24 @@ fun buildMcpApp(
         "Edit an existing job application in Pipeline, identified by id.",
         *applicationArgs(includeId = true),
     )
+    val listApplications = Tool("list_applications", "List all job applications currently tracked in Pipeline.")
 
     val serverHandler = mcpHttpNonStreaming(
         ServerMetaData("pipeline", "1.0.0"),
         NoMcpSecurity,
+        listApplications bind { _: ToolRequest ->
+            logger.d { "MCP tool call: list_applications" }
+            val applications = runBlocking { repository.observeApplications().first() }
+            val message = if (applications.isEmpty()) {
+                "No applications yet."
+            } else {
+                applications.joinToString("\n") { app ->
+                    "#${app.id} ${app.company} — ${app.role} (${app.status}) — ${app.meta}"
+                }
+            }
+            logger.d { "MCP tool response: list_applications -> ${applications.size} application(s)" }
+            ToolResponse.Ok(message)
+        },
         addApplication bind { request: ToolRequest ->
             logger.d { "MCP tool call: add_application with args ${request.args}" }
             val input = request.toApplicationInput()
