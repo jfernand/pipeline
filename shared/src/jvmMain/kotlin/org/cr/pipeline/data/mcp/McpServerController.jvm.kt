@@ -34,7 +34,7 @@ private class JvmMcpServerController(
         }
         try {
             logger.d { "Starting MCP server on $LOOPBACK_HOST..." }
-            val started = buildMcpApp(repository, logger).asServer(LoopbackSunHttp(port)).start()
+            val started = buildMcpApp(repository, logger).asServer(LoopbackNetty(port)).start()
             server = started
             val port = started.port()
             logger.d { "MCP server started on $LOOPBACK_HOST:$port" }

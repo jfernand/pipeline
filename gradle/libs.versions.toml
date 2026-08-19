@@ -69,6 +69,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 http4k-core = { module = "org.http4k:http4k-core", version.ref = "http4k" }
 http4k-ai-mcp-sdk = { module = "org.http4k:http4k-ai-mcp-sdk", version.ref = "http4k" }
+http4k-server-netty = { module = "org.http4k:http4k-server-netty", version.ref = "http4k" }
 forkhandles-result4k = { module = "dev.forkhandles:result4k", version.ref = "forkhandlesResult4k" }
 
 [plugins]
