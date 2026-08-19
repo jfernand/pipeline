@@ -2,22 +2,18 @@ package org.cr.pipeline.data.mcp
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.ChannelFuture
-import io.netty.channel.ChannelInitializer
-import io.netty.channel.ChannelOption
+import io.netty.channel.ChannelOption.SO_BACKLOG
+import io.netty.channel.ChannelOption.SO_KEEPALIVE
 import io.netty.channel.MultiThreadIoEventLoopGroup
 import io.netty.channel.nio.NioIoHandler
-import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.handler.codec.http.HttpObjectAggregator
-import io.netty.handler.codec.http.HttpServerCodec
-import io.netty.handler.codec.http.HttpServerKeepAliveHandler
-import io.netty.handler.stream.ChunkedWriteHandler
 import org.http4k.core.HttpHandler
-import org.http4k.server.Http4kChannelHandler
+import org.http4k.server.Http4kChannelInitializer
 import org.http4k.server.Http4kServer
 import org.http4k.server.ServerConfig
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 /**
  * http4k's stock `Netty` server config binds `bootstrap.bind(port)` — every interface, not just
@@ -33,9 +29,14 @@ import java.net.InetSocketAddress
  * Netty doesn't have that problem.
  */
 class LoopbackNetty(private val port: Int = 0) : ServerConfig {
+    // http4k's own `MAX_REQUEST_SIZE` default is `internal`, so it isn't visible across the
+    // module boundary — this mirrors its value (10MB) rather than reimplementing request sizing.
+    private val maxRequestSize = 10 * 1024 * 1024
+
     override fun toServer(http: HttpHandler): Http4kServer = object : Http4kServer {
         private val masterGroup = MultiThreadIoEventLoopGroup(0, NioIoHandler.newFactory())
         private val workerGroup = MultiThreadIoEventLoopGroup(0, NioIoHandler.newFactory())
+        private val childHandler = Http4kChannelInitializer(null, http, maxRequestSize)
 
         private var closeFuture: ChannelFuture? = null
         private lateinit var address: InetSocketAddress
@@ -44,17 +45,9 @@ class LoopbackNetty(private val port: Int = 0) : ServerConfig {
             val bootstrap = ServerBootstrap()
             bootstrap.group(masterGroup, workerGroup)
                 .channelFactory { NioServerSocketChannel() }
-                .childHandler(object : ChannelInitializer<SocketChannel>() {
-                    public override fun initChannel(ch: SocketChannel) {
-                        ch.pipeline().addLast("codec", HttpServerCodec())
-                        ch.pipeline().addLast("keepAlive", HttpServerKeepAliveHandler())
-                        ch.pipeline().addLast("aggregator", HttpObjectAggregator(Int.MAX_VALUE))
-                        ch.pipeline().addLast("streamer", ChunkedWriteHandler())
-                        ch.pipeline().addLast("httpHandler", Http4kChannelHandler(http))
-                    }
-                })
-                .option(ChannelOption.SO_BACKLOG, 1000)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childHandler(childHandler)
+                .option(SO_BACKLOG, 1000)
+                .childOption(SO_KEEPALIVE, true)
 
             val channel = bootstrap.bind(InetSocketAddress(InetAddress.getLoopbackAddress(), port)).sync().channel()
             address = channel.localAddress() as InetSocketAddress
@@ -63,8 +56,9 @@ class LoopbackNetty(private val port: Int = 0) : ServerConfig {
 
         override fun stop() = apply {
             closeFuture?.cancel(false)
-            workerGroup.shutdownGracefully(0, 2000, java.util.concurrent.TimeUnit.MILLISECONDS).sync()
-            masterGroup.shutdownGracefully(0, 2000, java.util.concurrent.TimeUnit.MILLISECONDS).sync()
+            childHandler.close()
+            workerGroup.shutdownGracefully(0, 2000, MILLISECONDS).sync()
+            masterGroup.shutdownGracefully(0, 2000, MILLISECONDS).sync()
         }
 
         override fun port(): Int = if (port > 0) port else address.port

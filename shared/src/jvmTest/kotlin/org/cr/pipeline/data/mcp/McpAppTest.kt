@@ -47,7 +47,7 @@ private class RecordingLogWriter : LogWriter() {
 class McpAppTest {
     private fun clientAgainst(store: FakeApplicationStateStore): HttpNonStreamingMcpClient {
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
-        return HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), buildMcpApp(repository))
+        return HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), http = buildMcpApp(repository)).also { it.start().orFail() }
     }
 
     @Test
@@ -159,7 +159,8 @@ class McpAppTest {
             tag = "McpAppTest",
         )
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
-        val client = HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), buildMcpApp(repository, testLogger))
+        val client = HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), http = buildMcpApp(repository, testLogger))
+        client.start().orFail()
 
         client.tools().call(
             ToolName.of("add_application"),

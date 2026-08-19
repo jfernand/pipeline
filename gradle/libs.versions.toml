@@ -22,10 +22,11 @@ kotlinx-serialization = "1.11.0"
 koin = "4.2.2"
 kermit = "2.1.0"
 ksp = "2.3.11"
-# Pinned to match http4k-ai-mcp-sdk's own compile-time http4k-core dependency — http4k-core has
-# newer releases (the http4k monorepo's main release train), but the ai-mcp-* modules have only
-# ever published 6.16.0.0. Bumping http4k-core alone would risk API drift against that build.
-http4k = "6.16.0.0"
+# http4k-ai-mcp-sdk moved from org.http4k (Apache 2, last published 6.16.0.0) to org.http4k.pro
+# (http4k Commercial License, free for small teams under its evaluation/free tier) from 6.17.0.0
+# onward. The BOM keeps every module — core, server engines, and the pro MCP SDK — in lockstep,
+# so there's no version-drift risk to pin around any more.
+http4k = "6.57.2.0"
 forkhandlesResult4k = "2.22.4.0"
 material3 = "1.11.0-alpha07"
 navigationCompose = "2.9.2"
@@ -67,9 +68,10 @@ navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-co
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
-http4k-core = { module = "org.http4k:http4k-core", version.ref = "http4k" }
-http4k-ai-mcp-sdk = { module = "org.http4k:http4k-ai-mcp-sdk", version.ref = "http4k" }
-http4k-server-netty = { module = "org.http4k:http4k-server-netty", version.ref = "http4k" }
+http4k-bom = { module = "org.http4k:http4k-bom", version.ref = "http4k" }
+http4k-core = { module = "org.http4k:http4k-core" }
+http4k-ai-mcp-sdk = { module = "org.http4k.pro:http4k-ai-mcp-sdk" }
+http4k-server-netty = { module = "org.http4k:http4k-server-netty" }
 forkhandles-result4k = { module = "dev.forkhandles:result4k", version.ref = "forkhandlesResult4k" }
 
 [plugins]

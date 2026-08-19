@@ -169,6 +169,7 @@ kotlin {
             implementation(libs.kotlinx.browser)
         }
         jvmMain.dependencies {
+            implementation(project.dependencies.platform(libs.http4k.bom))
             implementation(libs.http4k.core)
             implementation(libs.http4k.ai.mcp.sdk)
             implementation(libs.http4k.server.netty)
