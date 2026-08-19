@@ -1,5 +1,9 @@
 package org.cr.pipeline.data.mcp
 
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import co.touchlab.kermit.StaticConfig
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.orThrow
@@ -24,6 +28,15 @@ import kotlin.test.assertTrue
  *  to `Any` via covariance, discarding the failure's real type. `orThrow` is the correct unwrap
  *  for mismatched types. */
 private fun <T> Result4k<T, McpError>.orFail(): T = orThrow { AssertionError(it.toString()) }
+
+private class RecordingLogWriter : LogWriter() {
+    val records = mutableListOf<Record>()
+    data class Record(val severity: Severity, val message: String, val tag: String)
+
+    override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+        records.add(Record(severity, message, tag))
+    }
+}
 
 /**
  * Stands up the real MCP app and drives it entirely in-process: [buildMcpApp] returns a plain
@@ -132,5 +145,36 @@ class McpAppTest {
 
         assertIs<Failure<*>>(result)
         assertEquals(AppStatus.APPLIED, store.states.values.single().status)
+    }
+
+    @Test
+    fun `debug logs MCP requests and tool execution`() {
+        val store = FakeApplicationStateStore()
+        val writer = RecordingLogWriter()
+        val testLogger = Logger(
+            config = StaticConfig(
+                minSeverity = Severity.Debug,
+                logWriterList = listOf(writer),
+            ),
+            tag = "McpAppTest",
+        )
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+        val client = HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), buildMcpApp(repository, testLogger))
+
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(
+                mapOf(
+                    "company" to "Acme Rockets",
+                    "role" to "Staff Engineer",
+                    "status" to "APPLIED",
+                ),
+            ),
+        ).orFail()
+
+        assertTrue(writer.records.any { it.message.contains("MCP tool call: add_application") && it.severity == Severity.Debug })
+        assertTrue(writer.records.any { it.message.contains("MCP tool response: add_application") && it.severity == Severity.Debug })
+        assertTrue(writer.records.any { it.message.contains("MCP HTTP request") && it.severity == Severity.Debug })
+        assertTrue(writer.records.any { it.message.contains("MCP HTTP response") && it.severity == Severity.Debug })
     }
 }

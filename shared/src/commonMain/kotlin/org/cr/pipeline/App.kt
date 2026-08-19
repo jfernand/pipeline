@@ -17,6 +17,7 @@ import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.mcp.McpServerController
 import org.cr.pipeline.di.dataPortModule
+import org.cr.pipeline.di.loggingModule
 import org.cr.pipeline.di.mcpDataModule
 import org.cr.pipeline.di.platformDataModule
 import org.cr.pipeline.ui.PipelineTabletApp
@@ -44,7 +45,7 @@ fun App(
     initialDeepLink: String? = null,
     onNavHostReady: suspend (NavHostController) -> Unit = {},
 ) {
-    KoinApplication(koinConfiguration { modules(platformDataModule, mcpDataModule, dataPortModule) }) {
+    KoinApplication(koinConfiguration { modules(loggingModule, platformDataModule, mcpDataModule, dataPortModule) }) {
         MaterialTheme(colorScheme = pipeDarkColorScheme) {
             val navController = rememberNavController()
             val preferencesStore = koinInject<PreferencesStore>()
@@ -55,7 +56,7 @@ fun App(
             // navigated away from) so the server's lifecycle matches the app's, not the screen's.
             LaunchedEffect(preferences.mcpServerEnabled) {
                 if (mcpServerController.isSupported) {
-                    if (preferences.mcpServerEnabled) mcpServerController.start() else mcpServerController.stop()
+                    if (preferences.mcpServerEnabled) mcpServerController.start(preferences.mcpServerPort) else mcpServerController.stop()
                 }
             }
             BoxWithConstraints(Modifier.fillMaxSize()) {

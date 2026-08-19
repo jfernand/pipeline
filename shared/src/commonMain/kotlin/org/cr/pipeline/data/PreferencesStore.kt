@@ -10,4 +10,5 @@ interface PreferencesStore {
     suspend fun setSyncNetworkMode(mode: SyncNetworkMode)
     suspend fun setDeveloperMode(enabled: Boolean)
     suspend fun setMcpServerEnabled(enabled: Boolean)
+    suspend fun setMcpServerPort(port: Int)
 }

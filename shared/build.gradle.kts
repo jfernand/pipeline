@@ -117,6 +117,8 @@ kotlin {
         androidMain.get().dependsOn(roomMain)
         jvmMain.get().dependsOn(roomMain)
         iosMain.get().dependsOn(roomMain)
+        iosArm64Main.get().dependsOn(iosMain.get())
+        iosSimulatorArm64Main.get().dependsOn(iosMain.get())
 
         // js and wasmJs share browser storage access (localStorage) but need different bindings
         // for it: js gets kotlinx.browser for free from kotlin-stdlib-js, wasmJs needs the
@@ -150,6 +152,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation.compose)
             implementation(libs.multiplatform.settings)
+            implementation(libs.kermit)
         }
         roomMain.dependencies {
             implementation(libs.room.runtime)

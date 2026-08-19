@@ -1,5 +1,6 @@
 package org.cr.pipeline.data.mcp
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.cr.pipeline.data.JobApplicationRepository
@@ -14,7 +15,7 @@ interface McpServerController {
 
     fun observeStatus(): Flow<McpServerStatus>
 
-    suspend fun start()
+    suspend fun start(port: Int)
     suspend fun stop()
 }
 
@@ -26,7 +27,10 @@ sealed interface McpServerStatus {
 
 /** [repository] is only used by the real (JVM) implementation, to back the add/edit-application
  *  tools — stub implementations on other platforms ignore it. */
-expect fun createMcpServerController(repository: JobApplicationRepository): McpServerController
+expect fun createMcpServerController(
+    repository: JobApplicationRepository,
+    logger: Logger = Logger.withTag("McpServer"),
+): McpServerController
 
 /** Shared by every non-JVM platform actual — there's no per-platform state to hold since these
  *  targets never start a real server. */
@@ -35,6 +39,6 @@ object UnsupportedMcpServerController : McpServerController {
 
     override fun observeStatus(): Flow<McpServerStatus> = flowOf(McpServerStatus.Stopped)
 
-    override suspend fun start() = Unit
+    override suspend fun start(port: Int) = Unit
     override suspend fun stop() = Unit
 }

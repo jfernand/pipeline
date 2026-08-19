@@ -1,5 +1,6 @@
 package org.cr.pipeline.data.mcp
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.toKotlinLocalDate
 import org.cr.pipeline.data.JobApplicationRepository
@@ -14,7 +15,9 @@ import org.http4k.ai.mcp.model.localDate
 import org.http4k.ai.mcp.model.string
 import org.http4k.ai.mcp.protocol.ServerMetaData
 import org.http4k.ai.mcp.server.security.NoMcpSecurity
+import org.http4k.core.Filter
 import org.http4k.core.HttpHandler
+import org.http4k.core.then
 import org.http4k.lens.ParamMeta.IntegerParam
 import org.http4k.routing.bind
 import org.http4k.routing.mcpHttpNonStreaming
@@ -24,7 +27,10 @@ import org.http4k.routing.mcpHttpNonStreaming
  * (binding a socket) is [JvmMcpServerController]'s job; this function exists separately so tests
  * can drive the exact same tool graph in-process, with no port ever opened.
  */
-fun buildMcpApp(repository: JobApplicationRepository): HttpHandler {
+fun buildMcpApp(
+    repository: JobApplicationRepository,
+    logger: Logger = Logger.withTag("McpApp"),
+): HttpHandler {
     val addApplication = Tool("add_application", "Add a new job application to Pipeline.", *applicationArgs(includeId = false))
     val editApplication = Tool(
         "edit_application",
@@ -32,21 +38,43 @@ fun buildMcpApp(repository: JobApplicationRepository): HttpHandler {
         *applicationArgs(includeId = true),
     )
 
-    return mcpHttpNonStreaming(
+    val serverHandler = mcpHttpNonStreaming(
         ServerMetaData("pipeline", "1.0.0"),
         NoMcpSecurity,
         addApplication bind { request: ToolRequest ->
+            logger.d { "MCP tool call: add_application with args ${request.args}" }
             val input = request.toApplicationInput()
             val id = runBlocking { repository.saveApplication(null, input) }
-            ToolResponse.Ok("Added application #$id: ${input.company} — ${input.role} (${input.status}).")
+            val message = "Added application #$id: ${input.company} — ${input.role} (${input.status})."
+            logger.d { "MCP tool response: add_application -> #$id" }
+            ToolResponse.Ok(message)
         },
         editApplication bind { request: ToolRequest ->
             val id = idArg(request)
+            logger.d { "MCP tool call: edit_application with id=$id, args ${request.args}" }
             val input = request.toApplicationInput()
             runBlocking { repository.saveApplication(id, input) }
-            ToolResponse.Ok("Updated application #$id: ${input.company} — ${input.role} (${input.status}).")
+            val message = "Updated application #$id: ${input.company} — ${input.role} (${input.status})."
+            logger.d { "MCP tool response: edit_application -> #$id" }
+            ToolResponse.Ok(message)
         },
     )
+
+    val loggingFilter = Filter { next ->
+        { request ->
+            logger.d { "MCP HTTP request: ${request.method} ${request.uri}\n${request.bodyString()}" }
+            val response = try {
+                next(request)
+            } catch (e: Throwable) {
+                logger.e(e) { "MCP HTTP request failed: ${request.method} ${request.uri}" }
+                throw e
+            }
+            logger.d { "MCP HTTP response: ${response.status}\n${response.bodyString()}" }
+            response
+        }
+    }
+
+    return loggingFilter.then(serverHandler)
 }
 
 private val companyArg = Tool.Arg.string().required("company", "Company name")

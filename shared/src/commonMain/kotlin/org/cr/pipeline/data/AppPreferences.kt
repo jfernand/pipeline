@@ -7,6 +7,8 @@ data class AppPreferences(
     val syncNetworkMode: SyncNetworkMode = SyncNetworkMode.LOCAL_NETWORK_ONLY,
     val developerMode: Boolean = false,
     val mcpServerEnabled: Boolean = false,
+    val mcpServerAddress: String = "localhost",
+    val mcpServerPort: Int = 34687,
 )
 
 @Serializable
