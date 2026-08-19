@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.toKotlinLocalDate
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.http4k.ai.mcp.ToolRequest
@@ -30,6 +31,7 @@ import org.http4k.routing.mcpHttpNonStreaming
  */
 fun buildMcpApp(
     repository: JobApplicationRepository,
+    preferencesStore: PreferencesStore,
     logger: Logger = Logger.withTag("McpApp"),
 ): HttpHandler {
     val addApplication = Tool("add_application", "Add a new job application to Pipeline.", *applicationArgs(includeId = false))
@@ -39,6 +41,7 @@ fun buildMcpApp(
         *applicationArgs(includeId = true),
     )
     val listApplications = Tool("list_applications", "List all job applications currently tracked in Pipeline.")
+    val listSettings = Tool("list_settings", "List Pipeline's current app-level settings for this device.")
 
     val serverHandler = mcpHttpNonStreaming(
         ServerMetaData("pipeline", "1.0.0"),
@@ -54,6 +57,17 @@ fun buildMcpApp(
                 }
             }
             logger.d { "MCP tool response: list_applications -> ${applications.size} application(s)" }
+            ToolResponse.Ok(message)
+        },
+        listSettings bind { _: ToolRequest ->
+            logger.d { "MCP tool call: list_settings" }
+            val prefs = runBlocking { preferencesStore.observePreferences().first() }
+            val message = listOf(
+                "Sync network mode: ${prefs.syncNetworkMode}",
+                "Developer mode: ${if (prefs.developerMode) "on" else "off"}",
+                "MCP server: ${if (prefs.mcpServerEnabled) "enabled" else "disabled"}, ${prefs.mcpServerAddress}:${prefs.mcpServerPort}",
+            ).joinToString("\n")
+            logger.d { "MCP tool response: list_settings -> $message" }
             ToolResponse.Ok(message)
         },
         addApplication bind { request: ToolRequest ->

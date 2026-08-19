@@ -7,8 +7,13 @@ import co.touchlab.kermit.StaticConfig
 import dev.forkhandles.result4k.Failure
 import dev.forkhandles.result4k.Result4k
 import dev.forkhandles.result4k.orThrow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.EventSourcedJobApplicationRepository
 import org.cr.pipeline.data.FakeApplicationStateStore
+import org.cr.pipeline.data.PreferencesStore
+import org.cr.pipeline.data.SyncNetworkMode
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import org.http4k.ai.mcp.McpError
@@ -38,6 +43,28 @@ private class RecordingLogWriter : LogWriter() {
     }
 }
 
+internal class FakePreferencesStore(initial: AppPreferences = AppPreferences()) : PreferencesStore {
+    private val state = MutableStateFlow(initial)
+
+    override fun observePreferences(): Flow<AppPreferences> = state
+
+    override suspend fun setSyncNetworkMode(mode: SyncNetworkMode) {
+        state.value = state.value.copy(syncNetworkMode = mode)
+    }
+
+    override suspend fun setDeveloperMode(enabled: Boolean) {
+        state.value = state.value.copy(developerMode = enabled)
+    }
+
+    override suspend fun setMcpServerEnabled(enabled: Boolean) {
+        state.value = state.value.copy(mcpServerEnabled = enabled)
+    }
+
+    override suspend fun setMcpServerPort(port: Int) {
+        state.value = state.value.copy(mcpServerPort = port)
+    }
+}
+
 /**
  * Stands up the real MCP app and drives it entirely in-process: [buildMcpApp] returns a plain
  * `HttpHandler`, and http4k's own [HttpNonStreamingMcpClient] accepts any `HttpHandler` in place
@@ -45,18 +72,22 @@ private class RecordingLogWriter : LogWriter() {
  * port, and still exercises the exact request/response path a real MCP client would use.
  */
 class McpAppTest {
-    private fun clientAgainst(store: FakeApplicationStateStore): HttpNonStreamingMcpClient {
+    private fun clientAgainst(
+        store: FakeApplicationStateStore,
+        preferencesStore: PreferencesStore = FakePreferencesStore(),
+    ): HttpNonStreamingMcpClient {
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
-        return HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), http = buildMcpApp(repository)).also { it.start().orFail() }
+        return HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), http = buildMcpApp(repository, preferencesStore))
+            .also { it.start().orFail() }
     }
 
     @Test
-    fun `lists add_application, edit_application and list_applications`() {
+    fun `lists add_application, edit_application, list_applications and list_settings`() {
         val client = clientAgainst(FakeApplicationStateStore())
 
         val names = client.tools().list().orFail().map { it.name.value }
 
-        assertEquals(setOf("add_application", "edit_application", "list_applications"), names.toSet())
+        assertEquals(setOf("add_application", "edit_application", "list_applications", "list_settings"), names.toSet())
     }
 
     @Test
@@ -90,6 +121,28 @@ class McpAppTest {
         assertTrue(message.text.contains("Acme Rockets"))
         assertTrue(message.text.contains("Staff Engineer"))
         assertTrue(message.text.contains("APPLIED"))
+    }
+
+    @Test
+    fun `list_settings reports the current preferences`() {
+        val prefs = AppPreferences(
+            syncNetworkMode = SyncNetworkMode.ANY_NETWORK,
+            developerMode = true,
+            mcpServerEnabled = true,
+            mcpServerAddress = "localhost",
+            mcpServerPort = 34687,
+        )
+        val client = clientAgainst(FakeApplicationStateStore(), FakePreferencesStore(prefs))
+
+        val result = client.tools().call(ToolName.of("list_settings"), ToolRequest(emptyMap())).orFail()
+
+        assertIs<ToolResponse.Ok>(result)
+        val message = result.content.orEmpty().single()
+        assertIs<Content.Text>(message)
+        assertTrue(message.text.contains("ANY_NETWORK"))
+        assertTrue(message.text.contains("Developer mode: on"))
+        assertTrue(message.text.contains("enabled"))
+        assertTrue(message.text.contains("localhost:34687"))
     }
 
     @Test
@@ -192,7 +245,10 @@ class McpAppTest {
             tag = "McpAppTest",
         )
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
-        val client = HttpNonStreamingMcpClient(Uri.of("http://in-memory/mcp"), http = buildMcpApp(repository, testLogger))
+        val client = HttpNonStreamingMcpClient(
+            Uri.of("http://in-memory/mcp"),
+            http = buildMcpApp(repository, FakePreferencesStore(), testLogger),
+        )
         client.start().orFail()
 
         client.tools().call(

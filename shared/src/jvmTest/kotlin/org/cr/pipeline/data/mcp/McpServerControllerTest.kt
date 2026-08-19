@@ -36,7 +36,7 @@ class McpServerControllerTest {
             tag = "McpServerTest",
         )
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
-        val controller = createMcpServerController(repository, testLogger)
+        val controller = createMcpServerController(repository, FakePreferencesStore(), testLogger)
 
         assertTrue(controller.isSupported)
 

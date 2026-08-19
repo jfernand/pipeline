@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.data.PreferencesStore
 
 /** Controls an in-process MCP server exposing tools to add/edit applications. Only the JVM
  *  (desktop) target actually runs a server — the MCP Kotlin SDK's server module has no
@@ -25,10 +26,12 @@ sealed interface McpServerStatus {
     data class Error(val message: String) : McpServerStatus
 }
 
-/** [repository] is only used by the real (JVM) implementation, to back the add/edit-application
- *  tools — stub implementations on other platforms ignore it. */
+/** [repository] and [preferencesStore] are only used by the real (JVM) implementation, to back
+ *  the application tools and `list_settings` — stub implementations on other platforms ignore
+ *  them. */
 expect fun createMcpServerController(
     repository: JobApplicationRepository,
+    preferencesStore: PreferencesStore,
     logger: Logger = Logger.withTag("McpServer"),
 ): McpServerController
 

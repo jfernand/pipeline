@@ -8,5 +8,5 @@ import org.koin.dsl.module
 /** A single commonMain module (unlike [platformDataModule]) since [createMcpServerController] is
  *  itself an expect/actual factory function — no per-platform Koin wiring needed here. */
 val mcpDataModule = module {
-    single<McpServerController> { createMcpServerController(get(), get<Logger>().withTag("McpServer")) }
+    single<McpServerController> { createMcpServerController(get(), get(), get<Logger>().withTag("McpServer")) }
 }
