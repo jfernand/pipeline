@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026 Javier Fernández. All rights reserved.
+ */
+
 import org.gradle.process.ExecOperations
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget

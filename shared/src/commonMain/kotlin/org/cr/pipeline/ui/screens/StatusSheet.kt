@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026 Javier Fernández. All rights reserved.
+ */
+
 package org.cr.pipeline.ui.screens
 
 import androidx.compose.foundation.background

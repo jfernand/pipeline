@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026 Javier Fernández. All rights reserved.
+ */
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {

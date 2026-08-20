@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026 Javier Fernández. All rights reserved.
+ */
+
 package org.cr.pipeline.sync.chain
 
 /** The human-facing read of a [ChainDiff]: are the two chains in sync, and if not, who has what. */

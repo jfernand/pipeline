@@ -1,0 +1,8 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="notice" value="Copyright (c) $today.year Javier Fernández. All rights reserved." />
+    <option name="keyword" value="Copyright" />
+    <option name="allowReplaceRegexp" value="" />
+    <option name="myName" value="Pipeline" />
+  </copyright>
+</component>
