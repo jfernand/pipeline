@@ -257,6 +257,12 @@
   set text(font: body-font, size: 9pt, fill: ink-body)
   table(
     columns: columns,
+    // Zero horizontal inset with no gutter left adjacent `auto` columns
+    // touching — fine for a single wide column, but two narrow ones (e.g.
+    // "Rev" beside "Date") run their header labels straight into each
+    // other with no visible gap. 10pt keeps the flush-left, rules-only
+    // look while giving every column room to breathe.
+    column-gutter: 10pt,
     stroke: none,
     inset: (x: 0pt, y: 5pt),
     fill: (_, y) => if y == 0 { none } else if calc.even(y) { panel } else { none },

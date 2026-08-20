@@ -6,8 +6,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.0",
-  date: "2026-08-19",
+  revision: "1.1",
+  date: "2026-08-20",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -39,6 +39,18 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 - Known rough edges in shipped features are written once, in `issues.typ`, and rendered together
   on the Known Issues page at the end. A feature page never carries its own copy of the text —
   just a short linked pointer to the matching entries there, and each of those links back.
+
+== Revision History
+
+#data-table(
+  columns: (auto, auto, 1fr),
+  header: ("Rev", "Date", "Changes"),
+  [1.0], [2026-08-19], [Initial catalog: PL-001 through PL-031, in four parts — Core Application,
+    Local Storage/Portability/Sync, MCP Integration, Services.],
+  [1.1], [2026-08-20], [Known rough edges in shipped features consolidated into a single Known
+    Issues page, cross-linked to the feature(s) each belongs to. Added PL-032, Editability
+    Affordance Language, as a new planned feature.],
+)
 
 #part(1, "Core Application",
   blurb: [What the app is for. Everything a user opens Pipeline to do, before any of it talks to
