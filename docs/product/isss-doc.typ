@@ -44,6 +44,60 @@
 // `ink`. On the black cover and dividers, amber on #0E0E0E is 10.8:1 and is
 // used for text freely.
 
+// Print-friendly mode: swap the cover's and part dividers' full-bleed solid
+// `ink` fill for a sparse diagonal hatch, so a black-and-white printer isn't
+// laying down a solid page of toner for what's structurally just a dark
+// background. Controlled by a CLI input rather than a hardcoded flag here,
+// so the same source produces either version:
+//   typst compile pipeline-features.typ                     (solid, default)
+//   typst compile --input print=true pipeline-features.typ  (hatched)
+#let print-friendly = sys.inputs.at("print", default: "false") == "true"
+#let hatch-fill = tiling(size: (30pt, 30pt))[
+  #rect(width: 30pt, height: 30pt, stroke: none, fill: paper-bg)
+  #place(line(start: (0pt, 30pt), end: (30pt, 0pt), stroke: 0.5pt + black))
+]
+#let cover-fill = if print-friendly { hatch-fill } else { ink }
+
+// Text colors on the cover/dividers were chosen for contrast against solid
+// black; against the hatch they'd be reading light-on-light instead. Same
+// roles, mapped to the equivalents this file already uses for text on paper
+// (amber-deep, ink-body, ink-muted) rather than a bespoke print-only
+// palette. Graphic strokes (rules, box borders, the small logo mark) are
+// left alone — amber already reads fine as a *line* on the paper-colored
+// body pages throughout this document; it's specifically small anti-aliased
+// text competing with the hatch's own lines that goes illegible.
+#let cover-text(color) = if not print-friendly {
+  color
+} else if color == amber {
+  amber-deep
+} else if color == paper-bg {
+  ink-body
+} else if color == rgb("#AAAAAA") {
+  ink-muted
+} else {
+  color
+}
+
+// In print-friendly mode, sits a solid paper-bg card behind one content
+// block so the hatch runs up to its edges instead of through it — cheaper
+// to read than hatch lines crossing small text, without giving up the ink
+// savings everywhere else on the page. A no-op in the normal (solid black)
+// mode: `body` still needs to flow normally either way, so this always
+// returns it, just with a placed rect painted first (underneath) when the
+// panel is wanted. `width` must match whatever width `body` will actually
+// render at on the page — cover and part() are both hardcoded to A4's
+// 483pt content width (595pt page − 54pt/58pt margins), same as the rest
+// of this file's geometry.
+#let bg-panel(body, pad: 16pt, width: 483pt) = if print-friendly {
+  context {
+    let h = measure(body, width: width).height
+    place(top + left, dy: -pad / 2, rect(width: 100%, height: h + pad, fill: paper-bg, stroke: none))
+    body
+  }
+} else {
+  body
+}
+
 // --------------------------------------------------------------- type --------
 // `typst fonts --variants` (against the real Barlow Condensed TTFs in
 // fonts/, pulled from Google Fonts to match ISSS Document Design.dc.html's
@@ -255,20 +309,22 @@
 #let part(number, name, blurb: none) = {
   pagebreak(weak: true, to: "odd")
   page(
-    fill: ink, margin: (left: 54pt, right: 58pt, top: 42pt, bottom: 42pt),
+    fill: cover-fill, margin: (left: 54pt, right: 58pt, top: 42pt, bottom: 42pt),
     header: none, footer: none,
   )[
     #v(300pt)
-    #label([Part #number], color: amber, size: 8pt)
-    #v(10pt)
-    #text(font: display-font, size: 57pt, weight: 800, fill: paper-bg,
-      tracking: 0.005em)[#upper(name)]
-    #v(16pt)
-    #box(width: 90pt, height: rule-w, fill: amber)
-    #if blurb != none [
+    #bg-panel[
+      #label([Part #number], color: cover-text(amber), size: 8pt)
+      #v(10pt)
+      #text(font: display-font, size: 57pt, weight: 800, fill: cover-text(paper-bg),
+        tracking: 0.005em)[#upper(name)]
       #v(16pt)
-      #block(width: 300pt, par(leading: 6pt, text(font: body-font, size: 12pt,
-        fill: rgb("#AAAAAA"), blurb)))
+      #box(width: 90pt, height: rule-w, fill: amber)
+      #if blurb != none [
+        #v(16pt)
+        #block(width: 300pt, par(leading: 6pt, text(font: body-font, size: 12pt,
+          fill: cover-text(rgb("#AAAAAA")), blurb)))
+      ]
     ]
   ]
   _blank-back()
@@ -278,7 +334,7 @@
 #let _cover(m) = {
   let g = m.geo
   page(
-    fill: ink, margin: (left: g.inner, right: g.outer, top: g.top, bottom: g.bottom),
+    fill: cover-fill, margin: (left: g.inner, right: g.outer, top: g.top, bottom: g.bottom),
     header: none, footer: none,
   )[
     // Hairline grid keyed to the text block: the cover shows the page geometry.
@@ -292,50 +348,56 @@
         stroke: rule-w + rgb("#3A3A3A")))
     ])
 
-    #grid(columns: (1fr, auto), align: horizon,
-      grid(columns: (auto, auto), column-gutter: 10pt, align: horizon,
-        box(width: 16pt, height: 16pt, stroke: 1pt + amber,
-          align(center + horizon, box(width: 6pt, height: 6pt, fill: amber))),
-        text(font: mono-font, size: 7.5pt, tracking: 0.2em, fill: paper-bg)[
-          INDUSTRIAL STRENGTH SOFTWARE SERVICES],
-      ),
-      if m.classification != "" {
-        box(stroke: rule-w + amber, inset: (x: 6pt, y: 3pt),
-          label(m.classification, color: amber, size: 7pt))
-      },
-    )
+    #bg-panel(pad: 10pt)[
+      #grid(columns: (1fr, auto), align: horizon,
+        grid(columns: (auto, auto), column-gutter: 10pt, align: horizon,
+          box(width: 16pt, height: 16pt, stroke: 1pt + amber,
+            align(center + horizon, box(width: 6pt, height: 6pt, fill: amber))),
+          text(font: mono-font, size: 7.5pt, tracking: 0.2em, fill: cover-text(paper-bg))[
+            INDUSTRIAL STRENGTH SOFTWARE SERVICES],
+        ),
+        if m.classification != "" {
+          box(stroke: rule-w + amber, inset: (x: 6pt, y: 3pt),
+            label(m.classification, color: cover-text(amber), size: 7pt))
+        },
+      )
+    ]
 
     #v(255pt)
-    #label(m.class, color: amber, size: 8pt)
-    #v(11pt)
-    #block(stroke: (left: 1.5pt + amber), inset: (left: 18pt))[
-      #text(font: display-font, size: 66pt, weight: 800, fill: paper-bg,
-        tracking: 0.005em)[#upper(m.title)]
-      #if m.subtitle != none [
-        #v(13pt)
-        #block(width: 250pt, par(leading: 6pt, text(font: body-font, size: 14pt,
-          fill: rgb("#AAAAAA"), m.subtitle)))
+    #bg-panel[
+      #label(m.class, color: cover-text(amber), size: 8pt)
+      #v(11pt)
+      #block(stroke: (left: 1.5pt + amber), inset: (left: 18pt))[
+        #text(font: display-font, size: 66pt, weight: 800, fill: cover-text(paper-bg),
+          tracking: 0.005em)[#upper(m.title)]
+        #if m.subtitle != none [
+          #v(13pt)
+          #block(width: 250pt, par(leading: 6pt, text(font: body-font, size: 14pt,
+            fill: cover-text(rgb("#AAAAAA")), m.subtitle)))
+        ]
       ]
     ]
 
     #place(bottom + left, dy: -74pt, box(width: 100%)[
-      #line(length: 100%, stroke: rule-w + amber)
-      #v(18pt)
-      #let f(k, v, c: paper-bg) = [
-        #label(k, size: 7pt)
-        #linebreak()
-        #text(font: mono-font, size: 8.5pt, fill: c)[#v]
+      #bg-panel[
+        #line(length: 100%, stroke: rule-w + amber)
+        #v(18pt)
+        #let f(k, v, c: cover-text(paper-bg)) = [
+          #label(k, size: 7pt)
+          #linebreak()
+          #text(font: mono-font, size: 8.5pt, fill: c)[#v]
+        ]
+        #grid(columns: (1fr, 1fr), column-gutter: 40pt,
+          stack(spacing: 12pt,
+            f("Revision", m.revision),
+            f("Date", m.date),
+            f("Status", m.status, c: cover-text(amber))),
+          stack(spacing: 12pt,
+            f("Document ID", m.doc-id),
+            f("Applies to", m.applies-to),
+            f("Owner", m.owner)),
+        )
       ]
-      #grid(columns: (1fr, 1fr), column-gutter: 40pt,
-        stack(spacing: 12pt,
-          f("Revision", m.revision),
-          f("Date", m.date),
-          f("Status", m.status, c: amber)),
-        stack(spacing: 12pt,
-          f("Document ID", m.doc-id),
-          f("Applies to", m.applies-to),
-          f("Owner", m.owner)),
-      )
     ])
 
     #place(bottom + left, box(width: 100%)[

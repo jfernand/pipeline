@@ -10,7 +10,7 @@
   date: "2026-08-19",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
-  owner: "Javier",
+  owner: "Javier Fernández",
   classification: "",
 )
 
@@ -38,8 +38,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   body text for the reader's eye.
 
 #part(1, "Core Application",
-  blurb: [PL-001–PL-010. What the app is for. Everything a user opens Pipeline to do, before any
-    of it talks to an agent.])
+  blurb: [What the app is for. Everything a user opens Pipeline to do, before any of it talks to
+    an agent.])
 
 #include "features/PL-001-design-system-foundation.typ"
 #include "features/PL-002-browse-applications.typ"
@@ -51,20 +51,38 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-008-search-filter-applications.typ"
 #include "features/PL-009-in-app-navigation-deep-links.typ"
 #include "features/PL-010-follow-ups-placeholder.typ"
+#include "features/PL-021-remember-last-route.typ"
+#include "features/PL-023-negative-search-filters.typ"
+#include "features/PL-024-delete-application.typ"
+#include "features/PL-026-user-manual.typ"
+#include "features/PL-027-app-password.typ"
+#include "features/PL-028-calendar-integration.typ"
+#include "features/PL-029-interview-events-notes.typ"
+#include "features/PL-030-internationalization.typ"
 
 #part(2, "Local Storage, \nData Portability & Data Sync",
-  blurb: [PL-011, PL-012, PL-014. What happens to the data after it is entered — where it lives,
-    what the user controls, and how it gets out again.])
+  blurb: [What happens to the data after it is entered — where it lives, what the user controls,
+    and how it gets out again.])
 
 #include "features/PL-011-event-sourced-local-storage.typ"
 #include "features/PL-012-app-preferences-developer-mode.typ"
 #include "features/PL-014-export-import-applications.typ"
+#include "features/PL-018-document-attachments.typ"
+#include "features/PL-019-fake-data-mode.typ"
+#include "features/PL-020-file-picker-module.typ"
 
 #part(3, "MCP Integration",
-  blurb: [PL-013, PL-015–PL-017. Same data, same actions, no separate API. An agent drives the
-    pipeline the way a tap would.])
+  blurb: [Same data, same actions, no separate API. An agent drives the pipeline the way a tap
+    would.])
 
 #include "features/PL-013-mcp-server-infrastructure.typ"
 #include "features/PL-015-list-applications.typ"
 #include "features/PL-016-list-settings.typ"
 #include "features/PL-017-open-application.typ"
+
+#part(4, "Services",
+  blurb: [Work the app does for itself — discovered on the network or run on a schedule, not
+    opened by hand.])
+
+#include "features/PL-022-backup-service.typ"
+#include "features/PL-025-multi-device-sync-service.typ"
