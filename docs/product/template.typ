@@ -3,6 +3,7 @@
 // calls this once so entries stay structurally consistent — add a field
 // here, every entry gets it.
 #import "isss-doc.typ": label, ink, ink-faint, amber, amber-deep, xref, rule-w
+#import "issues.typ": issue-label, issues-for
 
 // A bordered stamp, same construction as the cover's own classification
 // stamp — makes Shipped/Planned scannable at a glance across the whole
@@ -24,7 +25,21 @@
 ) = {
   // The designator gets its own line — sharing a line with a long name was
   // wrapping mid-title, breaking the designator away from its own name.
-  heading(level: 1, numbering: none)[#designator #linebreak() #name]
+  //
+  // The label right after it is what makes `link(label("PL-002"))` jump
+  // here from the Known Issues page. Two things make this work: it has to
+  // sit inside a markup content block (`[...]`) — a dynamically-built label
+  // only attaches to the preceding element when joined the way markup joins
+  // adjacent content, not via a bare statement in a `{...}` code block
+  // (Typst rejects that join outright). And it has to be `std.label`, not
+  // the bare `label(...)` call: this file imports `label` from isss-doc.typ
+  // as the mono-caps text styler used just below, which shadows the
+  // built-in label constructor — `std` reaches past that back to the real
+  // one.
+  [
+    #heading(level: 1, numbering: none)[#designator #linebreak() #name]
+    #std.label(designator)
+  ]
   block(below: 12pt, status-stamp(status))
 
   summary
@@ -40,6 +55,16 @@
   if implementation.len() > 0 {
     heading(level: 4, numbering: none)[Implementation]
     list(..implementation.map(item => raw(item)))
+  }
+
+  // Known rough edges in what's already shipped — pulled from the one
+  // registry in issues.typ by designator, not passed in here, so the text
+  // lives in exactly one place: the Known Issues page. This is just a
+  // linked pointer to it.
+  let my-issues = issues-for(designator)
+  if my-issues.len() > 0 {
+    heading(level: 4, numbering: none)[Known Issues]
+    list(..my-issues.map(it => link(issue-label(it.id))[#it.title]))
   }
 
   if related.len() > 0 {

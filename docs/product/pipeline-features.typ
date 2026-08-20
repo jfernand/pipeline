@@ -36,6 +36,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   you have to relearn the shape of each time is not a reference.
 - Related designators live in the margin, as cross-references. Not a bulleted list fighting the
   body text for the reader's eye.
+- Known rough edges in shipped features are written once, in `issues.typ`, and rendered together
+  on the Known Issues page at the end. A feature page never carries its own copy of the text —
+  just a short linked pointer to the matching entries there, and each of those links back.
 
 #part(1, "Core Application",
   blurb: [What the app is for. Everything a user opens Pipeline to do, before any of it talks to
@@ -59,6 +62,7 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-028-calendar-integration.typ"
 #include "features/PL-029-interview-events-notes.typ"
 #include "features/PL-030-internationalization.typ"
+#include "features/PL-032-editability-affordance-language.typ"
 
 #part(2, "Local Storage, \nData Portability & Data Sync",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
@@ -87,3 +91,6 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-022-backup-service.typ"
 #include "features/PL-025-multi-device-sync-service.typ"
 #include "features/PL-031-file-management-service.typ"
+
+#pagebreak(weak: true, to: "odd")
+#include "known-issues.typ"
