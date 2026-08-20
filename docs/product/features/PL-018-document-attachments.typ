@@ -14,5 +14,9 @@
     "resume-v3-final-actually," and becomes part of the record — where it belonged from the start.
   ],
   implementation: (),
-  related: (("PL-004", [Local Application Database]), ("PL-020", [File Picker Module])),
+  related: (
+    ("PL-004", [Local Application Database]),
+    ("PL-020", [File Picker Module]),
+    ("PL-031", [File Management Service]),
+  ),
 )

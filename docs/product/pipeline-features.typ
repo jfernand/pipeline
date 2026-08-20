@@ -86,3 +86,4 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 
 #include "features/PL-022-backup-service.typ"
 #include "features/PL-025-multi-device-sync-service.typ"
+#include "features/PL-031-file-management-service.typ"
