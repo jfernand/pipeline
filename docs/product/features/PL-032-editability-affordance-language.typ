@@ -14,6 +14,10 @@
     a shared signifier, each screen invents its own way to say "tap this to change it" — and the
     user can't tell an editable field from a static one until they try.
   ],
-  implementation: (),
+  implementation: (
+    "docs/design/editable-affordance/Editable Affordance.dc.html — the design exploration, 1a–1g",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/components/EditableAffordance.kt — 1e/1f built: EditableAffordanceState, Modifier.editableAffordance, EditableAffordanceBox",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/theme/PlColors.kt — danger, fgDisabled tokens added for the Rejected/Locked states",
+  ),
   related: (("PL-001", [Design System Foundation]), ("PL-002", [Browse Applications (List & Detail)]), ("PL-007", [Edit Application])),
 )
