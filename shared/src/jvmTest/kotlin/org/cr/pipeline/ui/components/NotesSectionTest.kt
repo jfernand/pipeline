@@ -9,13 +9,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
+import androidx.compose.ui.test.withKeyDown
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -106,6 +112,47 @@ class NotesSectionTest {
         waitForIdle()
 
         assertNull(saved)
+    }
+
+    @Test
+    fun `pressing Return commits the edit without needing to lose focus`() = runComposeUiTest {
+        val saves = mutableListOf<String>()
+        setContent {
+            var currentNotes by remember { mutableStateOf("Original note") }
+            NotesSection(
+                notes = currentNotes,
+                onSave = {
+                    saves += it
+                    currentNotes = it
+                },
+            )
+        }
+
+        onNodeWithText("Original note").performClick()
+        waitForIdle()
+        onNode(hasSetTextAction()).performTextReplacement("Called back, offer pending")
+        onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertEquals(listOf("Called back, offer pending"), saves)
+        onNodeWithText("Called back, offer pending").assertExists()
+    }
+
+    @Test
+    fun `shift+Return inserts a newline instead of committing`() = runComposeUiTest {
+        val saves = mutableListOf<String>()
+        setContent { NotesSection(notes = "", onSave = { saves += it }) }
+
+        onNodeWithText("Add notes").performClick()
+        waitForIdle()
+        onNode(hasSetTextAction()).performTextInput("First line")
+        onNode(hasSetTextAction()).performKeyInput { withKeyDown(Key.ShiftLeft) { pressKey(Key.Enter) } }
+        onNode(hasSetTextAction()).performTextInput("Second line")
+        waitForIdle()
+
+        // Still editing — Shift+Return didn't commit — and the field holds both lines.
+        onNode(hasSetTextAction()).assertTextEquals("First line\nSecond line")
+        assertEquals(emptyList(), saves)
     }
 
     @Test

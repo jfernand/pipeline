@@ -23,6 +23,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +55,9 @@ fun StatusHistorySection(statusHistory: List<StatusHistoryEntry>, modifier: Modi
 /**
  * The "Notes" block shown on both phone and tablet detail views. Tap the text to edit it in
  * place — the corner-marked affordance (PL-032) signals it's editable instead of a persistent
- * pencil icon; [onSave] fires once, with the final text, when editing ends by losing focus.
+ * pencil icon; [onSave] fires once, with the final text, when editing ends by losing focus or by
+ * pressing Return. Return only commits when Shift isn't also held, so Shift+Return still inserts
+ * a newline for notes that need more than one line.
  */
 @Composable
 fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = Modifier) {
@@ -61,6 +69,15 @@ fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = M
     // this only counts a callback as a real blur once the field has actually been focused.
     var hasFocused by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+
+    // Shared by the blur path and the Return-key path; guarded by `editing` so whichever fires
+    // second — unmounting the field on commit can still trigger one more onFocusChanged(false) —
+    // is a no-op rather than a duplicate onSave.
+    fun commit() {
+        if (!editing) return
+        editing = false
+        if (draft != notes) onSave(draft)
+    }
 
     DetailSection(label = "Notes", modifier = modifier) {
         EditableAffordanceBox(
@@ -90,12 +107,20 @@ fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = M
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester)
+                        .onPreviewKeyEvent { keyEvent ->
+                            val isReturn = keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter
+                            if (isReturn && keyEvent.type == KeyEventType.KeyDown && !keyEvent.isShiftPressed) {
+                                commit()
+                                true
+                            } else {
+                                false
+                            }
+                        }
                         .onFocusChanged { focus ->
                             if (focus.isFocused) {
                                 hasFocused = true
                             } else if (hasFocused) {
-                                editing = false
-                                if (draft != notes) onSave(draft)
+                                commit()
                             }
                         },
                 )
