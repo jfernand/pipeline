@@ -181,6 +181,11 @@ kotlin {
         }
         jvmTest.dependencies {
             implementation(libs.forkhandles.result4k)
+            implementation(libs.compose.uiTest)
+            // Compose Desktop UI tests (runComposeUiTest, via Skia) need the platform Skiko
+            // runtime — desktopApp gets it for free from the `application` plugin; a plain
+            // library module like this one has to ask for it explicitly, same as desktopApp does.
+            implementation(compose.desktop.currentOs)
         }
     }
 }
