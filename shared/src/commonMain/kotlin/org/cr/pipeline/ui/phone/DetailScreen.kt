@@ -22,17 +22,20 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.ui.components.ContactsSection
 import org.cr.pipeline.ui.components.DetailSection
 import org.cr.pipeline.ui.components.DimmedOverlay
+import org.cr.pipeline.ui.components.NotesSection
 import org.cr.pipeline.ui.components.OverdueBanner
 import org.cr.pipeline.ui.components.PlIconButton
 import org.cr.pipeline.ui.components.PlPrimaryButton
@@ -45,6 +48,7 @@ import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
+import org.koin.compose.koinInject
 
 /** Stateful: owns the [applicationId] -> [ApplicationDetail] lookup and hoists it into
  *  [DetailScreenContent], which does the actual rendering. */
@@ -58,7 +62,23 @@ fun DetailScreen(
     onEdit: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
-    DetailScreenContent(detail, modifier, dimmed, onBack, onUpdate, onEdit)
+    val repository = koinInject<JobApplicationRepository>()
+    val scope = rememberCoroutineScope()
+    DetailScreenContent(
+        detail,
+        modifier,
+        dimmed,
+        onBack,
+        onUpdate,
+        onEdit,
+        onSaveNotes = { notes ->
+            val id = applicationId ?: return@DetailScreenContent
+            scope.launch {
+                val input = repository.getApplicationInput(id) ?: return@launch
+                repository.saveApplication(id, input.copy(notes = notes))
+            }
+        },
+    )
 }
 
 /** Stateless: renders whatever [detail] it's given, with no knowledge of where it came from. */
@@ -70,6 +90,7 @@ private fun DetailScreenContent(
     onBack: () -> Unit = {},
     onUpdate: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onSaveNotes: (String) -> Unit = {},
 ) {
     DimmedOverlay(dimmed, modifier.background(PlColors.bgBase)) {
         if (detail == null) {
@@ -97,13 +118,7 @@ private fun DetailScreenContent(
             Spacer(Modifier.height(18.dp))
             StatusHistorySection(detail.statusHistory, modifier = Modifier.padding(horizontal = 16.dp))
             ContactsSection(detail.contacts, modifier = Modifier.padding(horizontal = 16.dp))
-            DetailSection(
-                label = "Notes",
-                right = { Icon(Icons.Filled.Edit, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                BodyText(detail.notes, size = 13.5f.sp, color = PlColors.fgSecondary, lineHeight = 20.sp)
-            }
+            NotesSection(detail.notes, onSaveNotes, modifier = Modifier.padding(horizontal = 16.dp))
             PostingSection(detail, modifier = Modifier.padding(horizontal = 16.dp))
         }
     }

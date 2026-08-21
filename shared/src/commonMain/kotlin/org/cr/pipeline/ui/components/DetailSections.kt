@@ -6,18 +6,32 @@ package org.cr.pipeline.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.ContactSummary
 import org.cr.pipeline.model.StatusHistoryEntry
+import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
+import org.cr.pipeline.ui.theme.PlType
 
 /** The "Status history" timeline block shown on both phone and tablet detail views. */
 @Composable
@@ -29,6 +43,72 @@ fun StatusHistorySection(statusHistory: List<StatusHistoryEntry>, modifier: Modi
         modifier = modifier,
     ) {
         Timeline(entries = statusHistory.map { TimelineEntry(it.status, it.date, it.note, it.current) })
+    }
+}
+
+/**
+ * The "Notes" block shown on both phone and tablet detail views. Tap the text to edit it in
+ * place — the corner-marked affordance (PL-032) signals it's editable instead of a persistent
+ * pencil icon; [onSave] fires once, with the final text, when editing ends by losing focus.
+ */
+@Composable
+fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = Modifier) {
+    var editing by remember { mutableStateOf(false) }
+    var draft by remember(notes) { mutableStateOf(notes) }
+    // BasicTextField's own onFocusChanged fires once, isFocused = false, the instant it first
+    // composes — before the LaunchedEffect below ever gets to request focus. Treating every
+    // "not focused" callback as a blur closed the field again immediately on every click, so
+    // this only counts a callback as a real blur once the field has actually been focused.
+    var hasFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    DetailSection(label = "Notes", modifier = modifier) {
+        EditableAffordanceBox(
+            empty = !editing && notes.isBlank(),
+            editing = editing,
+            onClick = if (editing) {
+                null
+            } else {
+                {
+                    draft = notes
+                    hasFocused = false
+                    editing = true
+                }
+            },
+        ) {
+            if (editing) {
+                BasicTextField(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    textStyle = TextStyle(
+                        fontFamily = PlType.body(),
+                        fontSize = 13.5.sp,
+                        lineHeight = 20.sp,
+                        color = PlColors.fgPrimary,
+                    ),
+                    cursorBrush = SolidColor(PlColors.brandPrimary),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focus ->
+                            if (focus.isFocused) {
+                                hasFocused = true
+                            } else if (hasFocused) {
+                                editing = false
+                                if (draft != notes) onSave(draft)
+                            }
+                        },
+                )
+                LaunchedEffect(Unit) { focusRequester.requestFocus() }
+            } else {
+                BodyText(
+                    notes.ifBlank { "Add notes" },
+                    size = 13.5f.sp,
+                    color = if (notes.isBlank()) PlColors.fgMuted else PlColors.fgSecondary,
+                    lineHeight = 20.sp,
+                )
+            }
+        }
     }
 }
 

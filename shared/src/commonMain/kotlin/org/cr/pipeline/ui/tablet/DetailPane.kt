@@ -25,17 +25,21 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ReminderSummary
 import org.cr.pipeline.ui.components.ContactsSection
 import org.cr.pipeline.ui.components.DetailSection
 import org.cr.pipeline.ui.components.Dot
+import org.cr.pipeline.ui.components.NotesSection
 import org.cr.pipeline.ui.components.OverdueBanner
 import org.cr.pipeline.ui.components.PlIconButton
 import org.cr.pipeline.ui.components.PlPrimaryButton
@@ -50,6 +54,7 @@ import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 import org.cr.pipeline.ui.theme.drawBottomBorder
 import org.cr.pipeline.ui.theme.drawRightBorder
+import org.koin.compose.koinInject
 
 /** Stateful: owns the [applicationId] -> [org.cr.pipeline.model.ApplicationDetail] lookup and
  *  hoists it into [DetailPaneContent], which does the actual rendering. */
@@ -61,7 +66,21 @@ fun DetailPane(
     onEdit: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
-    DetailPaneContent(detail, modifier, onUpdateStatus, onEdit)
+    val repository = koinInject<JobApplicationRepository>()
+    val scope = rememberCoroutineScope()
+    DetailPaneContent(
+        detail,
+        modifier,
+        onUpdateStatus,
+        onEdit,
+        onSaveNotes = { notes ->
+            val id = applicationId ?: return@DetailPaneContent
+            scope.launch {
+                val input = repository.getApplicationInput(id) ?: return@launch
+                repository.saveApplication(id, input.copy(notes = notes))
+            }
+        },
+    )
 }
 
 /** Stateless: renders whatever [detail] it's given, with no knowledge of where it came from. */
@@ -71,6 +90,7 @@ private fun DetailPaneContent(
     modifier: Modifier = Modifier,
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onSaveNotes: (String) -> Unit = {},
 ) {
     Column(modifier.fillMaxHeight().fillMaxWidth().background(PlColors.bgBase)) {
         if (detail == null) {
@@ -94,6 +114,7 @@ private fun DetailPaneContent(
             )
             DetailSecondaryColumn(
                 detail,
+                onSaveNotes,
                 modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
             )
         }
@@ -164,14 +185,9 @@ private fun DetailPrimaryColumn(detail: ApplicationDetail, modifier: Modifier = 
 }
 
 @Composable
-private fun DetailSecondaryColumn(detail: ApplicationDetail, modifier: Modifier = Modifier) {
+private fun DetailSecondaryColumn(detail: ApplicationDetail, onSaveNotes: (String) -> Unit, modifier: Modifier = Modifier) {
     Column(modifier) {
-        DetailSection(
-            label = "Notes",
-            right = { Icon(Icons.Filled.Edit, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
-        ) {
-            BodyText(detail.notes, size = 13.5f.sp, color = PlColors.fgSecondary, lineHeight = 21.sp)
-        }
+        NotesSection(detail.notes, onSaveNotes)
         RemindersSection(detail.reminders)
         if (detail.postingUrl != null) {
             DetailSection(label = "Posting") {
