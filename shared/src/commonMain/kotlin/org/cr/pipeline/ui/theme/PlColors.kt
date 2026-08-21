@@ -29,5 +29,8 @@ object PlColors {
     val overdueBorder = Color(0xFF3E3320)
     val overdueBg = Color(0x14F5B800)
 
+    val danger = Color(0xFFCC2200)
+    val fgDisabled = Color(0xFF3A3A3A)
+
     val paper = Color(0xFFF0EBE1)
 }
