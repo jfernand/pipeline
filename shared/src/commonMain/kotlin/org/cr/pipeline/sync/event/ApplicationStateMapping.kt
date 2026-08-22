@@ -35,6 +35,7 @@ fun ApplicationState.toJobApplication(id: Long, today: LocalDate = todayDate()):
         daysAgo = daysAgo.toInt(),
         meta = meta,
         overdueDays = overdueDays?.toInt(),
+        source = source,
     )
 }
 

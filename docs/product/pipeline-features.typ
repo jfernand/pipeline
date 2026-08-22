@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.7",
+  revision: "1.8",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -71,6 +71,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     one combined string prone to wrapping mid-line on narrow widths — closes "'Applied' line
     wraps" on the Known Issues page. Now a structured two-line block; tablet also gained the
     "Added" date it was previously missing entirely.],
+  [1.8], [2026-08-22], [Extended the same fix to the application list: `AppCard` previously
+    dropped the job source entirely — it now shows a small icon for it (Referral, LinkedIn,
+    Company site, Recruiter, Other), with the full text still on the detail screen.],
 )
 
 #part(1, "Core Application",

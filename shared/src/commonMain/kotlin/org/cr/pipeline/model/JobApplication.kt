@@ -24,4 +24,5 @@ data class JobApplication(
     val daysAgo: Int,
     val meta: String,
     val overdueDays: Int? = null,
+    val source: String? = null,
 )

@@ -13,11 +13,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -26,6 +35,17 @@ import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
+
+// Mirrors AddEditScreen's SOURCE_OPTIONS ("Referral", "LinkedIn", "Company site", "Recruiter",
+// "Other") — anything that doesn't match one of the named options (older data, free text) falls
+// back to the same glyph as "Other" rather than showing nothing.
+private fun sourceIcon(source: String): ImageVector = when (source) {
+    "Referral" -> Icons.Filled.Groups
+    "LinkedIn" -> Icons.Filled.Public
+    "Company site" -> Icons.Filled.Business
+    "Recruiter" -> Icons.Filled.PersonSearch
+    else -> Icons.Filled.MoreHoriz
+}
 
 @Composable
 fun AppCard(
@@ -67,6 +87,9 @@ fun AppCard(
             StatusChip(app.status)
             app.overdueDays?.let { OverdueBadge(it) }
             Spacer(Modifier.weight(1f))
+            app.source?.let {
+                Icon(sourceIcon(it), contentDescription = it, tint = PlColors.fgMuted, modifier = Modifier.size(12.dp))
+            }
             MonoText(
                 app.meta,
                 size = 9.5f.sp,
