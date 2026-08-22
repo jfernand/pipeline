@@ -20,6 +20,7 @@
   status: "Shipped",
   summary: [],
   purpose: [],
+  description: [],
   implementation: (),
   related: (), // array of (designator, description-content) pairs
 ) = {
@@ -80,5 +81,10 @@
     let to = related.map(r => r.at(0)).join(", ")
     let body = related.map(r => r.at(1)).join([; ])
     xref(to, body)
+  }
+
+  if description != none {
+      heading(level: 4, numbering: none)[Description]
+      description
   }
 }
