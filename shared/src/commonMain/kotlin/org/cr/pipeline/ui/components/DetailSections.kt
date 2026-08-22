@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
@@ -30,6 +32,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.ContactSummary
@@ -55,9 +58,16 @@ fun StatusHistorySection(statusHistory: List<StatusHistoryEntry>, modifier: Modi
 /**
  * The "Notes" block shown on both phone and tablet detail views. Tap the text to edit it in
  * place — the corner-marked affordance (PL-032) signals it's editable instead of a persistent
- * pencil icon; [onSave] fires once, with the final text, when editing ends by losing focus or by
- * pressing Return. Return only commits when Shift isn't also held, so Shift+Return still inserts
- * a newline for notes that need more than one line.
+ * pencil icon; [onSave] fires once, with the final text, when editing ends by losing focus, by
+ * pressing Return, or by tapping a soft keyboard's Done key.
+ *
+ * Two separate mechanisms commit on Return/Done, because no single one covers both input paths:
+ * `onPreviewKeyEvent` sees hardware key presses (desktop, a physical/Bluetooth keyboard on
+ * Android) — Return commits there unless Shift is also held, so Shift+Return still inserts a
+ * newline. Android's on-screen keyboard, though, doesn't dispatch a `KeyEvent` for its own Return
+ * key on a multi-line field by default — it just inserts `\n` straight into the composition,
+ * `onPreviewKeyEvent` never fires — so `keyboardOptions`/`keyboardActions` (the IME-action
+ * mechanism) is what makes it show a Done glyph instead and actually commit.
  */
 @Composable
 fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = Modifier) {
@@ -104,6 +114,8 @@ fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = M
                         color = PlColors.fgPrimary,
                     ),
                     cursorBrush = SolidColor(PlColors.brandPrimary),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { commit() }),
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester)

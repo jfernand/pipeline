@@ -16,6 +16,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -132,6 +133,35 @@ class NotesSectionTest {
         waitForIdle()
         onNode(hasSetTextAction()).performTextReplacement("Called back, offer pending")
         onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+
+        assertEquals(listOf("Called back, offer pending"), saves)
+        onNodeWithText("Called back, offer pending").assertExists()
+    }
+
+    @Test
+    fun `tapping the soft keyboard's Done action commits the edit`() = runComposeUiTest {
+        // This is the path a real Android on-screen keyboard actually takes: it doesn't dispatch
+        // a hardware KeyEvent for its own Return/Done key on a multi-line field, so
+        // onPreviewKeyEvent (exercised by the Return-key test above) never sees it — only the IME
+        // action (keyboardOptions/keyboardActions) does. A prior fix that only handled
+        // onPreviewKeyEvent looked correct on desktop and didn't work on-device.
+        val saves = mutableListOf<String>()
+        setContent {
+            var currentNotes by remember { mutableStateOf("Original note") }
+            NotesSection(
+                notes = currentNotes,
+                onSave = {
+                    saves += it
+                    currentNotes = it
+                },
+            )
+        }
+
+        onNodeWithText("Original note").performClick()
+        waitForIdle()
+        onNode(hasSetTextAction()).performTextReplacement("Called back, offer pending")
+        onNode(hasSetTextAction()).performImeAction()
         waitForIdle()
 
         assertEquals(listOf("Called back, offer pending"), saves)

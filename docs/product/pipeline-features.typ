@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.2",
+  revision: "1.3",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -53,6 +53,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.2], [2026-08-22], [Fixed: notes on PL-002's detail screen are editable in place, using
     PL-032's corner-marker affordance — closes the "Notes aren't editable" entry on the Known
     Issues page.],
+  [1.3], [2026-08-22], [Fixed: Return-to-commit on the Notes field didn't work from an Android
+    on-screen keyboard — it inserts a newline directly, without dispatching the `KeyEvent` the
+    fix relied on. Now also commits via the field's IME "Done" action, which the soft keyboard
+    does send.],
 )
 
 #part(1, "Core Application",
