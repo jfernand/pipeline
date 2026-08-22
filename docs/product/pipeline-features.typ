@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.4",
+  revision: "1.5",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -62,6 +62,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     to the Notes field (all platforms) both discard the draft without saving. The button is
     marked non-focusable — otherwise clicking it blurred and committed the field before the
     button's own click ever ran.],
+  [1.5], [2026-08-22], [Every entry on the Known Issues page now carries a stable PL-XXXX-YYY
+    number — XXXX the issue's primary feature, YYY its sequence within that feature — instead of
+    being identified only by title.],
 )
 
 #part(1, "Core Application",
