@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.8",
+  revision: "1.9",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -74,6 +74,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.8], [2026-08-22], [Extended the same fix to the application list: `AppCard` previously
     dropped the job source entirely — it now shows a small icon for it (Referral, LinkedIn,
     Company site, Recruiter, Other), with the full text still on the detail screen.],
+  [1.9], [2026-08-22], [Added PL-034, Event Provenance Indicator, as a new planned feature: a
+    small human/AI icon on the list card, alongside the job-source one, showing who or what made
+    an application's most recent change. Depends on PL-033 for the underlying data.],
 )
 
 #part(1, "Core Application",
@@ -99,6 +102,7 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-029-interview-events-notes.typ"
 #include "features/PL-030-internationalization.typ"
 #include "features/PL-032-editability-affordance-language.typ"
+#include "features/PL-034-event-provenance-indicator.typ"
 
 #part(2, "Local Storage, \nData Portability & Data Sync",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
