@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
@@ -166,6 +167,37 @@ class NotesSectionTest {
 
         assertEquals(listOf("Called back, offer pending"), saves)
         onNodeWithText("Called back, offer pending").assertExists()
+    }
+
+    @Test
+    fun `pressing Escape discards the draft and does not save`() = runComposeUiTest {
+        var saved: String? = null
+        setContent { NotesSection(notes = "Original note", onSave = { saved = it }) }
+
+        onNodeWithText("Original note").performClick()
+        waitForIdle()
+        onNode(hasSetTextAction()).performTextReplacement("Accidental edit")
+        onNode(hasSetTextAction()).performKeyInput { pressKey(Key.Escape) }
+        waitForIdle()
+
+        assertNull(saved)
+        // Back to static display showing the original text, not the discarded draft.
+        onNodeWithText("Original note").assertExists()
+    }
+
+    @Test
+    fun `tapping the cancel button discards the draft and does not save`() = runComposeUiTest {
+        var saved: String? = null
+        setContent { NotesSection(notes = "Original note", onSave = { saved = it }) }
+
+        onNodeWithText("Original note").performClick()
+        waitForIdle()
+        onNode(hasSetTextAction()).performTextReplacement("Accidental edit")
+        onNodeWithContentDescription("Cancel").performClick()
+        waitForIdle()
+
+        assertNull(saved)
+        onNodeWithText("Original note").assertExists()
     }
 
     @Test

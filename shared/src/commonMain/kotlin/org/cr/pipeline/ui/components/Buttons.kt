@@ -87,6 +87,7 @@ fun PlIconButton(
     iconSize: Dp = 16.dp,
     tint: Color = PlColors.fgSecondary,
     bordered: Boolean = false,
+    contentDescription: String? = null,
 ) {
     Box(
         modifier
@@ -96,6 +97,6 @@ fun PlIconButton(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = tint, modifier = Modifier.size(iconSize))
+        Icon(icon, contentDescription, tint = tint, modifier = Modifier.size(iconSize))
     }
 }

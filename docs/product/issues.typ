@@ -47,6 +47,12 @@
     Notes on the detail screen (`detail.notes`, shown via `BodyText`) are read-only. No inline edit
     path — a change means leaving for the Add/Edit form.
   ]),
+  (id: "escape-to-cancel", pl: ("PL-032", "PL-002"), title: [No Escape-to-cancel], body: [
+    Editable affordances have no cancel path. `NotesSection`'s `BasicTextField`
+    (`DetailSections.kt`) only ever commits — on blur or on Return — there's no key that discards
+    the draft and restores the original text. Escape should do that: leave the data unchanged and
+    drop back to the static display, the way it does in most inline editors.
+  ]),
 )
 
 // Every issue label lives in this one function so the Known Issues page and

@@ -6,13 +6,14 @@ package org.cr.pipeline.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,8 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
@@ -68,6 +71,20 @@ fun StatusHistorySection(statusHistory: List<StatusHistoryEntry>, modifier: Modi
  * key on a multi-line field by default — it just inserts `\n` straight into the composition,
  * `onPreviewKeyEvent` never fires — so `keyboardOptions`/`keyboardActions` (the IME-action
  * mechanism) is what makes it show a Done glyph instead and actually commit.
+ *
+ * Cancel — discard the draft, restore the original text, no [onSave] call — has no keyboard
+ * equivalent on touch: there's no Escape key on a soft keyboard, and the one IME action slot is
+ * already spoken for by Done. So Escape (hardware keyboards only) and a small ✕ button next to
+ * the field (visible while editing, works everywhere) are two separate, non-overlapping paths to
+ * the same [cancel] call, not one mechanism covering both like commit's does.
+ *
+ * The ✕ button is marked `focusProperties { canFocus = false }`. Without that, tapping it — a
+ * plain `clickable` — first steals focus from the field (`clickable` requests focus for itself
+ * on press, ahead of its own `onClick`), which blurs the field and commits *before* the button's
+ * click ever fires, unmounting the button mid-gesture so [cancel] never runs at all — clicking
+ * Cancel silently saved instead. No amount of reordering commit-on-blur fixes this: the button's
+ * press alone triggers it, strictly before release/click, so the field simply has to keep focus
+ * throughout the tap for [cancel] to ever run.
  */
 @Composable
 fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = Modifier) {
@@ -89,6 +106,15 @@ fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = M
         if (draft != notes) onSave(draft)
     }
 
+    // Unmounting the field on cancel triggers the same possible extra onFocusChanged(false) as
+    // commit() does — guarded by `editing` for the same reason, so it can't also fire commit()'s
+    // save on the way out.
+    fun cancel() {
+        if (!editing) return
+        editing = false
+        draft = notes
+    }
+
     DetailSection(label = "Notes", modifier = modifier) {
         EditableAffordanceBox(
             empty = !editing && notes.isBlank(),
@@ -104,38 +130,56 @@ fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = M
             },
         ) {
             if (editing) {
-                BasicTextField(
-                    value = draft,
-                    onValueChange = { draft = it },
-                    textStyle = TextStyle(
-                        fontFamily = PlType.body(),
-                        fontSize = 13.5.sp,
-                        lineHeight = 20.sp,
-                        color = PlColors.fgPrimary,
-                    ),
-                    cursorBrush = SolidColor(PlColors.brandPrimary),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { commit() }),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .onPreviewKeyEvent { keyEvent ->
-                            val isReturn = keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter
-                            if (isReturn && keyEvent.type == KeyEventType.KeyDown && !keyEvent.isShiftPressed) {
-                                commit()
-                                true
-                            } else {
-                                false
+                Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    BasicTextField(
+                        value = draft,
+                        onValueChange = { draft = it },
+                        textStyle = TextStyle(
+                            fontFamily = PlType.body(),
+                            fontSize = 13.5.sp,
+                            lineHeight = 20.sp,
+                            color = PlColors.fgPrimary,
+                        ),
+                        cursorBrush = SolidColor(PlColors.brandPrimary),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { commit() }),
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester)
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (keyEvent.type != KeyEventType.KeyDown) {
+                                    false
+                                } else if (keyEvent.key == Key.Escape) {
+                                    cancel()
+                                    true
+                                } else if (
+                                    (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) &&
+                                    !keyEvent.isShiftPressed
+                                ) {
+                                    commit()
+                                    true
+                                } else {
+                                    false
+                                }
                             }
-                        }
-                        .onFocusChanged { focus ->
-                            if (focus.isFocused) {
-                                hasFocused = true
-                            } else if (hasFocused) {
-                                commit()
-                            }
-                        },
-                )
+                            .onFocusChanged { focus ->
+                                if (focus.isFocused) {
+                                    hasFocused = true
+                                } else if (hasFocused) {
+                                    commit()
+                                }
+                            },
+                    )
+                    PlIconButton(
+                        Icons.Filled.Close,
+                        onClick = ::cancel,
+                        modifier = Modifier.focusProperties { canFocus = false },
+                        size = 28.dp,
+                        iconSize = 14.dp,
+                        tint = PlColors.fgMuted,
+                        contentDescription = "Cancel",
+                    )
+                }
                 LaunchedEffect(Unit) { focusRequester.requestFocus() }
             } else {
                 BodyText(

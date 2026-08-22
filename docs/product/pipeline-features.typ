@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.3",
+  revision: "1.4",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -57,6 +57,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     on-screen keyboard — it inserts a newline directly, without dispatching the `KeyEvent` the
     fix relied on. Now also commits via the field's IME "Done" action, which the soft keyboard
     does send.],
+  [1.4], [2026-08-22], [Fixed: editable affordances had no cancel path — closes "No
+    Escape-to-cancel" on the Known Issues page. Escape (hardware keyboards) and a ✕ button next
+    to the Notes field (all platforms) both discard the draft without saving. The button is
+    marked non-focusable — otherwise clicking it blurred and committed the field before the
+    button's own click ever ran.],
 )
 
 #part(1, "Core Application",
