@@ -16,10 +16,6 @@
     combined string — `"Source: X · Added <date>"` — and wraps mid-line on narrow widths instead of
     laying out as a structured two-line label/value row.
   ]),
-  (id: "notes-read-only", pl: ("PL-002",), title: [Notes aren't editable], body: [
-    Notes on the detail screen (`detail.notes`, shown via `BodyText`) are read-only. No inline edit
-    path — a change means leaving for the Add/Edit form.
-  ]),
   (id: "date-applied-picker", pl: ("PL-007",), title: [Date applied has no picker], body: [
     Date applied (`AddEditScreen.kt`, `Field("Date applied", ...)`) is a plain ISO-8601 text field —
     no calendar picker. Make it properly editable from the front end instead of freehand-typed text.
@@ -40,6 +36,16 @@
     The "MCP server" toggle and "Address" `SettingsRow`s (`SettingsScreen.kt`) are two separate
     rows. Should collapse into one — with the port editable inline — and a port change should
     restart the running MCP server on the new port, not just relabel it.
+  ]),
+)
+
+// Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
+// the record of what the issue actually said, not a changelog blurb about it. `known-issues.typ`
+// renders these in their own "Fixed" section, separate from the still-open list above.
+#let fixed-issues = (
+  (id: "notes-read-only", pl: ("PL-002",), title: [Notes aren't editable], body: [
+    Notes on the detail screen (`detail.notes`, shown via `BodyText`) are read-only. No inline edit
+    path — a change means leaving for the Add/Edit form.
   ]),
 )
 

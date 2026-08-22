@@ -6,8 +6,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.1",
-  date: "2026-08-20",
+  revision: "1.2",
+  date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -50,6 +50,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.1], [2026-08-20], [Known rough edges in shipped features consolidated into a single Known
     Issues page, cross-linked to the feature(s) each belongs to. Added PL-032, Editability
     Affordance Language, as a new planned feature.],
+  [1.2], [2026-08-22], [Fixed: notes on PL-002's detail screen are editable in place, using
+    PL-032's corner-marker affordance — closes the "Notes aren't editable" entry on the Known
+    Issues page.],
 )
 
 #part(1, "Core Application",

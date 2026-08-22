@@ -1,4 +1,5 @@
-#import "issues.typ": issues, issue-entry
+#import "isss-doc.typ": ink-faint
+#import "issues.typ": issues, fixed-issues, issue-entry
 
 #heading(level: 1, numbering: none)[Known Issues]
 
@@ -8,4 +9,13 @@ below links the other way, back to the feature it belongs to.
 
 #for it in issues [
   #issue-entry(it)
+]
+
+#heading(level: 2, numbering: none)[Fixed]
+
+Resolved issues, moved here verbatim rather than deleted — what the issue actually said, not a
+summary of the fix. See the catalog's Revision History for when and what changed.
+
+#for it in fixed-issues [
+  #text(fill: ink-faint, issue-entry(it))
 ]
