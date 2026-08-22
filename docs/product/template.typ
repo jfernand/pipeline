@@ -3,7 +3,7 @@
 // calls this once so entries stay structurally consistent — add a field
 // here, every entry gets it.
 #import "isss-doc.typ": label, ink, ink-faint, amber, amber-deep, xref, rule-w
-#import "issues.typ": issue-label, issues-for
+#import "issues.typ": issue-label, issue-number, issues-for
 
 // A bordered stamp, same construction as the cover's own classification
 // stamp — makes Shipped/Planned scannable at a glance across the whole
@@ -64,7 +64,7 @@
   let my-issues = issues-for(designator)
   if my-issues.len() > 0 {
     heading(level: 4, numbering: none)[Known Issues]
-    list(..my-issues.map(it => link(issue-label(it.id))[#it.title]))
+    list(..my-issues.map(it => link(issue-label(it.id))[#issue-number(it) — #it.title]))
   }
 
   if related.len() > 0 {
