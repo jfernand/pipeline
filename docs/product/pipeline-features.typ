@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.6",
+  revision: "1.7",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -67,6 +67,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     being identified only by title.],
   [1.6], [2026-08-22], [Added PL-033, Event Provenance, as a new planned feature: recording which
     device or AI/MCP client made each event-log change, not just what changed.],
+  [1.7], [2026-08-22], [Fixed: the Source/Added line on the detail screen (phone and tablet) was
+    one combined string prone to wrapping mid-line on narrow widths — closes "'Applied' line
+    wraps" on the Known Issues page. Now a structured two-line block; tablet also gained the
+    "Added" date it was previously missing entirely.],
 )
 
 #part(1, "Core Application",

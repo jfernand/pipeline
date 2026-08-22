@@ -17,11 +17,6 @@
     `OverdueBadge` (`StatusChip.kt`), as rendered next to the status chip on `AppCard`, should be
     smaller, and just tab over the top edge of the status chip it sits beside.
   ]),
-  (id: "applied-line-wrap", pl: ("PL-002",), num: 2, title: ['Applied' line wraps], body: [
-    The Source/Added line in the detail screen (`DetailScreen.kt`, `DetailPane.kt`) is built as one
-    combined string — `"Source: X · Added <date>"` — and wraps mid-line on narrow widths instead of
-    laying out as a structured two-line label/value row.
-  ]),
   (id: "date-applied-picker", pl: ("PL-007",), num: 1, title: [Date applied has no picker], body: [
     Date applied (`AddEditScreen.kt`, `Field("Date applied", ...)`) is a plain ISO-8601 text field —
     no calendar picker. Make it properly editable from the front end instead of freehand-typed text.
@@ -58,6 +53,11 @@
     (`DetailSections.kt`) only ever commits — on blur or on Return — there's no key that discards
     the draft and restores the original text. Escape should do that: leave the data unchanged and
     drop back to the static display, the way it does in most inline editors.
+  ]),
+  (id: "applied-line-wrap", pl: ("PL-002",), num: 2, title: ['Applied' line wraps], body: [
+    The Source/Added line in the detail screen (`DetailScreen.kt`, `DetailPane.kt`) is built as one
+    combined string — `"Source: X · Added <date>"` — and wraps mid-line on narrow widths instead of
+    laying out as a structured two-line label/value row.
   ]),
 )
 

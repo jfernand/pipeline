@@ -150,9 +150,13 @@ private fun HeaderInfo(detail: ApplicationDetail) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             StatusChip(detail.status)
-            val activity = "${detail.daysSinceActivity}d since activity" +
-                (detail.source?.let { " · Source: $it" } ?: "")
-            MonoText(activity, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            MonoText(
+                "${detail.daysSinceActivity}d since activity",
+                size = 9.5f.sp,
+                color = PlColors.fgMuted,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
@@ -192,6 +196,16 @@ private fun DetailSecondaryColumn(detail: ApplicationDetail, onSaveNotes: (Strin
         if (detail.postingUrl != null) {
             DetailSection(label = "Posting") {
                 PostingLinkRow(detail.postingUrl)
+                if (detail.source != null || detail.dateApplied != null) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        detail.source?.let {
+                            MonoText("Source: $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                        detail.dateApplied?.let {
+                            MonoText("Added $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
             }
         }
     }

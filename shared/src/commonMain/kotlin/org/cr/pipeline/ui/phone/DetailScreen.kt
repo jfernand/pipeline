@@ -156,12 +156,15 @@ private fun PostingSection(detail: ApplicationDetail, modifier: Modifier = Modif
     if (detail.postingUrl == null) return
     DetailSection(label = "Posting", modifier = modifier) {
         PostingLinkRow(detail.postingUrl)
-        val sourceLine = listOfNotNull(
-            detail.source?.let { "Source: $it" },
-            detail.dateApplied?.let { "Added $it" },
-        ).joinToString(" · ")
-        if (sourceLine.isNotEmpty()) {
-            MonoText(sourceLine, size = 9.sp, color = PlColors.fgMuted)
+        if (detail.source != null || detail.dateApplied != null) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                detail.source?.let {
+                    MonoText("Source: $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                detail.dateApplied?.let {
+                    MonoText("Added $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
         }
     }
 }
