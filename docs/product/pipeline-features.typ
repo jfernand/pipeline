@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.5",
+  revision: "1.6",
   date: "2026-08-22",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -65,6 +65,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.5], [2026-08-22], [Every entry on the Known Issues page now carries a stable PL-XXXX-YYY
     number — XXXX the issue's primary feature, YYY its sequence within that feature — instead of
     being identified only by title.],
+  [1.6], [2026-08-22], [Added PL-033, Event Provenance, as a new planned feature: recording which
+    device or AI/MCP client made each event-log change, not just what changed.],
 )
 
 #part(1, "Core Application",
@@ -101,6 +103,7 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-018-document-attachments.typ"
 #include "features/PL-019-fake-data-mode.typ"
 #include "features/PL-020-file-picker-module.typ"
+#include "features/PL-033-event-provenance.typ"
 
 #part(3, "MCP Integration",
   blurb: [Same data, same actions, no separate API. An agent drives the pipeline the way a tap
