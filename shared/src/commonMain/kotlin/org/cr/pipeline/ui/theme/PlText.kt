@@ -52,7 +52,9 @@ object PlType {
     }
 }
 
-/** The design's ".label"/".mono" style: uppercase, wide tracking, monospace. */
+/** The design's ".label"/".mono" style: uppercase, wide tracking, monospace. [uppercase] defaults
+ *  to true for the usual short-label case; set it false for text whose actual casing is data —
+ *  e.g. a raw event payload — where transforming it would misrepresent what's stored. */
 @Composable
 fun MonoText(
     text: String,
@@ -63,9 +65,10 @@ fun MonoText(
     letterSpacing: TextUnit = 0.14f.em,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
+    uppercase: Boolean = true,
 ) {
     Text(
-        text = text.uppercase(),
+        text = if (uppercase) text.uppercase() else text,
         modifier = modifier,
         color = color,
         fontSize = size,
