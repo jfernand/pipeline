@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.16",
+  revision: "1.18",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -109,6 +109,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.17], [2026-08-23], [Every part now opens with an intro explaining what it's for and the
     design principles behind it — also gives each part a proper name in the table of contents,
     where it previously didn't appear at all.],
+  [1.18], [2026-08-23], [Added a Feature Index appendix — every PL, its status, and its page,
+    driven off each feature's own designator/name/status rather than a second hand-kept list.],
 )
 
 #part(1, "Core Application",
@@ -229,3 +231,31 @@ started by hand.
 
 #pagebreak(weak: true, to: "odd")
 #include "known-issues.typ"
+
+#pagebreak(weak: true, to: "odd")
+#heading(level: 1, numbering: none)[Feature Index]
+
+Every feature in this catalog, its current status, and the page it's on — in designator order,
+not the shipping/reading order the parts above use.
+
+#context {
+  let entries = query(<feature-meta>).map(e => (
+    designator: e.value.designator,
+    name: e.value.name,
+    status: e.value.status,
+    loc: e.location(),
+  ))
+  let sorted = entries.sorted(key: e => int(e.designator.split("-").at(1)))
+  data-table(
+    columns: (auto, 1fr, auto, auto),
+    header: ("PL", "Name", "Status", "Page"),
+    ..sorted
+      .map(e => (
+        link(e.loc)[#e.designator],
+        e.name,
+        e.status,
+        link(e.loc)[#counter(page).at(e.loc).first()],
+      ))
+      .flatten(),
+  )
+}
