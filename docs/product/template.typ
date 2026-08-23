@@ -40,6 +40,12 @@
   [
     #heading(level: 1, numbering: none)[#designator #linebreak() #name]
     #std.label(designator)
+    // Feeds the Feature Index appendix — designator, name and status read
+    // straight off this call rather than duplicated into a second table
+    // somewhere, so the index can't drift out of sync with the entry
+    // itself. Page number comes from this element's own location once the
+    // appendix queries for it.
+    #metadata((designator: designator, name: name, status: status)) <feature-meta>
   ]
   block(below: 12pt, status-stamp(status))
 
