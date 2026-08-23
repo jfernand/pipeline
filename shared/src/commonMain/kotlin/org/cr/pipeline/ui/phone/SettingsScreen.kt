@@ -245,50 +245,61 @@ private fun McpServerRow(
         Icon(Icons.Filled.Dns, null, tint = PlColors.fgMuted, modifier = Modifier.size(18.dp))
         Column(Modifier.weight(1f)) {
             BodyText("MCP server", size = 14.5f.sp, color = PlColors.fgPrimary)
-            EditableAffordanceBox(
-                editing = editing,
-                locked = !enabled,
-                onClick = if (editing || !enabled) null else { { editing = true; hasFocused = false } },
-                modifier = Modifier.padding(top = 3.dp),
-            ) {
-                if (editing) {
-                    BasicTextField(
-                        value = draft,
-                        onValueChange = { draft = it.filter(Char::isDigit).take(5) },
-                        textStyle = TextStyle(fontFamily = PlType.mono(), fontSize = 9.sp, color = PlColors.fgPrimary),
-                        cursorBrush = SolidColor(PlColors.brandPrimary),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { commit() }),
-                        modifier = Modifier
-                            .focusRequester(focusRequester)
-                            .onPreviewKeyEvent { keyEvent ->
-                                if (keyEvent.type != KeyEventType.KeyDown) {
-                                    false
-                                } else if (keyEvent.key == Key.Escape) {
-                                    cancel()
-                                    true
-                                } else if (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) {
-                                    commit()
-                                    true
-                                } else {
-                                    false
+            // The corner-marked affordance sits on just the port digits, not the whole address —
+            // "127.0.0.1:" and "/mcp" around it are fixed, not something tapping edits.
+            Row(Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (!editing && enabled && status is McpServerStatus.Running) {
+                    MonoText("${status.host}:", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                }
+                EditableAffordanceBox(
+                    editing = editing,
+                    locked = !enabled,
+                    onClick = if (editing || !enabled) null else { { editing = true; hasFocused = false } },
+                ) {
+                    if (editing) {
+                        BasicTextField(
+                            value = draft,
+                            onValueChange = { draft = it.filter(Char::isDigit).take(5) },
+                            textStyle = TextStyle(fontFamily = PlType.mono(), fontSize = 9.sp, color = PlColors.fgPrimary),
+                            cursorBrush = SolidColor(PlColors.brandPrimary),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(onDone = { commit() }),
+                            modifier = Modifier
+                                .focusRequester(focusRequester)
+                                .onPreviewKeyEvent { keyEvent ->
+                                    if (keyEvent.type != KeyEventType.KeyDown) {
+                                        false
+                                    } else if (keyEvent.key == Key.Escape) {
+                                        cancel()
+                                        true
+                                    } else if (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) {
+                                        commit()
+                                        true
+                                    } else {
+                                        false
+                                    }
                                 }
-                            }
-                            .onFocusChanged { focus ->
-                                if (focus.isFocused) {
-                                    hasFocused = true
-                                } else if (hasFocused) {
-                                    commit()
-                                }
-                            },
-                    )
-                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
-                } else {
-                    MonoText(
-                        if (enabled) status.addressText() else "Port $port",
-                        size = 9.sp,
-                        color = PlColors.fgMuted,
-                    )
+                                .onFocusChanged { focus ->
+                                    if (focus.isFocused) {
+                                        hasFocused = true
+                                    } else if (hasFocused) {
+                                        commit()
+                                    }
+                                },
+                        )
+                        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                    } else {
+                        MonoText(port.toString(), size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                    }
+                }
+                if (!editing) {
+                    when {
+                        enabled && status is McpServerStatus.Running ->
+                            MonoText("/mcp", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                        enabled && status is McpServerStatus.Error ->
+                            MonoText("  Error — ${status.message}", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                        enabled -> MonoText("  Starting…", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                    }
                 }
             }
         }
@@ -299,10 +310,4 @@ private fun McpServerRow(
             modifier = Modifier.clickable(onClick = onToggle),
         )
     }
-}
-
-private fun McpServerStatus.addressText(): String = when (this) {
-    is McpServerStatus.Running -> "$host:$port/mcp"
-    is McpServerStatus.Error -> "Error — $message"
-    McpServerStatus.Stopped -> "Starting…"
 }
