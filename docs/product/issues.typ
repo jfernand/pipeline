@@ -25,11 +25,6 @@
     Filtering tops out at text search plus status chips. Needs an additional button next to the
     chip row that expands into a fuller filter dialog — likely multi-field, not just status.
   ]),
-  (id: "mcp-settings-row", pl: ("PL-013",), num: 1, title: [MCP toggle/address should merge], body: [
-    The "MCP server" toggle and "Address" `SettingsRow`s (`SettingsScreen.kt`) are two separate
-    rows. Should collapse into one — with the port editable inline — and a port change should
-    restart the running MCP server on the new port, not just relabel it.
-  ]),
 )
 
 // Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
@@ -54,6 +49,11 @@
   (id: "dev-log-caps", pl: ("PL-012",), num: 1, title: [Dev log capitalizes payloads], body: [
     The event log in Dev Tools (`DevToolsContent.kt`, `EventRow`) renders payload data capitalized.
     It shouldn't transform the underlying data at all.
+  ]),
+  (id: "mcp-settings-row", pl: ("PL-013",), num: 1, title: [MCP toggle/address should merge], body: [
+    The "MCP server" toggle and "Address" `SettingsRow`s (`SettingsScreen.kt`) are two separate
+    rows. Should collapse into one — with the port editable inline — and a port change should
+    restart the running MCP server on the new port, not just relabel it.
   ]),
 )
 

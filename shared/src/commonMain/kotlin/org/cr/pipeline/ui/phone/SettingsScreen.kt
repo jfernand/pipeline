@@ -6,14 +6,20 @@ package org.cr.pipeline.ui.phone
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,6 +33,7 @@ import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +44,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -51,6 +70,7 @@ import org.cr.pipeline.data.mcp.McpServerStatus
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.ui.components.Dot
+import org.cr.pipeline.ui.components.EditableAffordanceBox
 import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.PlTopBar
 import org.cr.pipeline.ui.components.SectionLabel
@@ -58,6 +78,8 @@ import org.cr.pipeline.ui.components.SettingsRow
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
+import org.cr.pipeline.ui.theme.PlType
+import org.cr.pipeline.ui.theme.drawBottomBorder
 import org.koin.compose.koinInject
 
 @Composable
@@ -155,25 +177,13 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
         }
         if (mcpServerController.isSupported) {
             Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("MCP server") }
-            SettingsRow(
-                "MCP server",
-                icon = Icons.Filled.Dns,
-                chevron = false,
-                trailingText = if (preferences.mcpServerEnabled) "ON" else "OFF",
-                trailingColor = if (preferences.mcpServerEnabled) PlColors.brandPrimary else PlColors.fgMuted,
-                onClick = { scope.launch { preferencesStore.setMcpServerEnabled(!preferences.mcpServerEnabled) } },
+            McpServerRow(
+                enabled = preferences.mcpServerEnabled,
+                port = preferences.mcpServerPort,
+                status = mcpStatus,
+                onToggle = { scope.launch { preferencesStore.setMcpServerEnabled(!preferences.mcpServerEnabled) } },
+                onPortChange = { port -> scope.launch { preferencesStore.setMcpServerPort(port) } },
             )
-            if (preferences.mcpServerEnabled) {
-                SettingsRow(
-                    "Address",
-                    value = when (val status = mcpStatus) {
-                        is McpServerStatus.Running -> "${status.host}:${status.port}/mcp"
-                        is McpServerStatus.Error -> "Error — ${status.message}"
-                        McpServerStatus.Stopped -> "Starting…"
-                    },
-                    chevron = false,
-                )
-            }
         }
         Column(Modifier.padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 32.dp)) {
             MonoText("No account. No server. No telemetry.", size = 9.sp, color = PlColors.fgMuted)
@@ -187,4 +197,112 @@ private fun DataPortResult.describe(): String? = when (this) {
     is DataPortResult.Imported -> "Imported $count application${if (count == 1) "" else "s"}"
     DataPortResult.Cancelled -> null
     is DataPortResult.Error -> "Error — $message"
+}
+
+/**
+ * The "MCP server" toggle and its "Address" used to be two separate [SettingsRow]s — this merges
+ * them into one, with the port editable in place (PL-013-001) instead of read-only. Tapping the
+ * ON/OFF label still flips [enabled]; tapping the address/port line below it edits [port], same
+ * commit-on-Return/Done/blur and Escape-to-cancel behavior as [org.cr.pipeline.ui.components.NotesSection].
+ * A committed port change actually restarts the running server on the new port (see
+ * [org.cr.pipeline.data.mcp.McpServerController.start]) rather than just relabeling the display.
+ */
+@Composable
+private fun McpServerRow(
+    enabled: Boolean,
+    port: Int,
+    status: McpServerStatus,
+    onToggle: () -> Unit,
+    onPortChange: (Int) -> Unit,
+) {
+    var editing by remember { mutableStateOf(false) }
+    var draft by remember(port) { mutableStateOf(port.toString()) }
+    var hasFocused by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    fun commit() {
+        if (!editing) return
+        editing = false
+        val parsed = draft.toIntOrNull()
+        if (parsed != null && parsed in 1..65535 && parsed != port) onPortChange(parsed)
+    }
+
+    fun cancel() {
+        if (!editing) return
+        editing = false
+        draft = port.toString()
+    }
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .drawBottomBorder(PlColors.borderSubtle)
+            .padding(horizontal = 16.dp, vertical = 14.dp)
+            .defaultMinSize(minHeight = 56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(Icons.Filled.Dns, null, tint = PlColors.fgMuted, modifier = Modifier.size(18.dp))
+        Column(Modifier.weight(1f)) {
+            BodyText("MCP server", size = 14.5f.sp, color = PlColors.fgPrimary)
+            EditableAffordanceBox(
+                editing = editing,
+                locked = !enabled,
+                onClick = if (editing || !enabled) null else { { editing = true; hasFocused = false } },
+                modifier = Modifier.padding(top = 3.dp),
+            ) {
+                if (editing) {
+                    BasicTextField(
+                        value = draft,
+                        onValueChange = { draft = it.filter(Char::isDigit).take(5) },
+                        textStyle = TextStyle(fontFamily = PlType.mono(), fontSize = 9.sp, color = PlColors.fgPrimary),
+                        cursorBrush = SolidColor(PlColors.brandPrimary),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { commit() }),
+                        modifier = Modifier
+                            .focusRequester(focusRequester)
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (keyEvent.type != KeyEventType.KeyDown) {
+                                    false
+                                } else if (keyEvent.key == Key.Escape) {
+                                    cancel()
+                                    true
+                                } else if (keyEvent.key == Key.Enter || keyEvent.key == Key.NumPadEnter) {
+                                    commit()
+                                    true
+                                } else {
+                                    false
+                                }
+                            }
+                            .onFocusChanged { focus ->
+                                if (focus.isFocused) {
+                                    hasFocused = true
+                                } else if (hasFocused) {
+                                    commit()
+                                }
+                            },
+                    )
+                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                } else {
+                    MonoText(
+                        if (enabled) status.addressText() else "Port $port",
+                        size = 9.sp,
+                        color = PlColors.fgMuted,
+                    )
+                }
+            }
+        }
+        MonoText(
+            if (enabled) "ON" else "OFF",
+            size = 9.5f.sp,
+            color = if (enabled) PlColors.brandPrimary else PlColors.fgMuted,
+            modifier = Modifier.clickable(onClick = onToggle),
+        )
+    }
+}
+
+private fun McpServerStatus.addressText(): String = when (this) {
+    is McpServerStatus.Running -> "$host:$port/mcp"
+    is McpServerStatus.Error -> "Error — $message"
+    McpServerStatus.Stopped -> "Starting…"
 }

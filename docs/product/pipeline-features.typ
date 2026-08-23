@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.12",
+  revision: "1.13",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -89,6 +89,12 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     the "Add animation" entry on the Known Issues page — a shared-element/shared-outline
     transition for opening an application belongs as a feature in its own right, not a rough edge
     of PL-009.],
+  [1.13], [2026-08-23], [Fixed: the "MCP server" toggle and "Address" rows on Settings were
+    separate — closes "MCP toggle/address should merge" on the Known Issues page. Now one row,
+    the port editable inline. A port change now actually restarts the running server on the new
+    port too — previously `start()` no-oped whenever a server was already running, regardless of
+    which port it was asked for, and the effect that calls it wasn't even keyed on the port to
+    begin with.],
 )
 
 #part(1, "Core Application",
