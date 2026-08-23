@@ -29,10 +29,6 @@
     Screen transitions have no animation — opening an application (list → detail, including via
     deep link) should use a shared-element/shared-outline transition instead of a hard cut.
   ]),
-  (id: "dev-log-caps", pl: ("PL-012",), num: 1, title: [Dev log capitalizes payloads], body: [
-    The event log in Dev Tools (`DevToolsContent.kt`, `EventRow`) renders payload data capitalized.
-    It shouldn't transform the underlying data at all.
-  ]),
   (id: "mcp-settings-row", pl: ("PL-013",), num: 1, title: [MCP toggle/address should merge], body: [
     The "MCP server" toggle and "Address" `SettingsRow`s (`SettingsScreen.kt`) are two separate
     rows. Should collapse into one — with the port editable inline — and a port change should
@@ -58,6 +54,10 @@
     The Source/Added line in the detail screen (`DetailScreen.kt`, `DetailPane.kt`) is built as one
     combined string — `"Source: X · Added <date>"` — and wraps mid-line on narrow widths instead of
     laying out as a structured two-line label/value row.
+  ]),
+  (id: "dev-log-caps", pl: ("PL-012",), num: 1, title: [Dev log capitalizes payloads], body: [
+    The event log in Dev Tools (`DevToolsContent.kt`, `EventRow`) renders payload data capitalized.
+    It shouldn't transform the underlying data at all.
   ]),
 )
 

@@ -6,8 +6,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.9",
-  date: "2026-08-22",
+  revision: "1.10",
+  date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -77,6 +77,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.9], [2026-08-22], [Added PL-034, Event Provenance Indicator, as a new planned feature: a
     small human/AI icon on the list card, alongside the job-source one, showing who or what made
     an application's most recent change. Depends on PL-033 for the underlying data.],
+  [1.10], [2026-08-23], [Fixed: the Dev Tools event log capitalized payload text — closes "Dev log
+    capitalizes payloads" on the Known Issues page. `MonoText` gained an `uppercase` opt-out for
+    text whose casing is data, not a label; the event payload is the first (and only) caller to
+    use it.],
 )
 
 #part(1, "Core Application",

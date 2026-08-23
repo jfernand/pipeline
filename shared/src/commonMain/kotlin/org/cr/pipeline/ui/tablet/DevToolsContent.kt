@@ -126,6 +126,7 @@ private fun EventRow(envelope: EventEnvelope) {
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 6.dp),
+            uppercase = false,
         )
     }
 }
