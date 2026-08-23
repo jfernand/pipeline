@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.11",
+  revision: "1.12",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -85,6 +85,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     display, instead of the compact single-line form it's stored and hashed as. Display-only —
     the stored envelope payload is untouched, since it's part of the hash input that gives each
     event its identity.],
+  [1.12], [2026-08-23], [Added PL-035, Opening Animation, as a new planned feature: promoted from
+    the "Add animation" entry on the Known Issues page — a shared-element/shared-outline
+    transition for opening an application belongs as a feature in its own right, not a rough edge
+    of PL-009.],
 )
 
 #part(1, "Core Application",
@@ -111,6 +115,7 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-030-internationalization.typ"
 #include "features/PL-032-editability-affordance-language.typ"
 #include "features/PL-034-event-provenance-indicator.typ"
+#include "features/PL-035-opening-animation.typ"
 
 #part(2, "Local Storage, \nData Portability & Data Sync",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
