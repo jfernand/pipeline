@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.15",
+  revision: "1.16",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -102,6 +102,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.15], [2026-08-23], [Added PL-036, Advanced Filter Dialog, as a new planned feature: promoted
     from the "No advanced filter dialog" entry on the Known Issues page — multi-field filtering
     belongs as a feature in its own right, not a rough edge of PL-008.],
+  [1.16], [2026-08-23], [Split Sync out of the old "Local Storage, Data Portability & Data Sync"
+    part into its own: PL-003 (Device Pairing & Multi-Device Sync UI) moves from Core Application,
+    PL-025 (Multi-Device Sync Service) moves from Services — both were sync features filed under
+    parts that otherwise had nothing to do with syncing.],
 )
 
 #part(1, "Core Application",
@@ -110,7 +114,6 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 
 #include "features/PL-001-design-system-foundation.typ"
 #include "features/PL-002-browse-applications.typ"
-#include "features/PL-003-device-pairing-sync-scaffold.typ"
 #include "features/PL-004-local-application-database.typ"
 #include "features/PL-005-update-application-status.typ"
 #include "features/PL-006-add-application.typ"
@@ -131,7 +134,7 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-035-opening-animation.typ"
 #include "features/PL-036-advanced-filter-dialog.typ"
 
-#part(2, "Local Storage, \nData Portability & Data Sync",
+#part(2, "Local Storage & \nData Portability",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
     and how it gets out again.])
 
@@ -143,7 +146,14 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-020-file-picker-module.typ"
 #include "features/PL-033-event-provenance.typ"
 
-#part(3, "MCP Integration",
+#part(3, "Sync",
+  blurb: [One pipeline, not a copy per device left to drift. Peer-to-peer, no server in the
+    middle.])
+
+#include "features/PL-003-device-pairing-sync-scaffold.typ"
+#include "features/PL-025-multi-device-sync-service.typ"
+
+#part(4, "MCP Integration",
   blurb: [Same data, same actions, no separate API. An agent drives the pipeline the way a tap
     would.])
 
@@ -152,12 +162,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-016-list-settings.typ"
 #include "features/PL-017-open-application.typ"
 
-#part(4, "Services",
+#part(5, "Services",
   blurb: [Work the app does for itself — discovered on the network or run on a schedule, not
     opened by hand.])
 
 #include "features/PL-022-backup-service.typ"
-#include "features/PL-025-multi-device-sync-service.typ"
 #include "features/PL-031-file-management-service.typ"
 
 #pagebreak(weak: true, to: "odd")
