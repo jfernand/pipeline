@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.14",
+  revision: "1.15",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -99,6 +99,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     bottom — closes "Dev log entries should be reverse order" on the Known Issues page. Now
     reversed for display; the underlying chain stays in append order, since that's what the hash
     chain and sync's diffChains rely on.],
+  [1.15], [2026-08-23], [Added PL-036, Advanced Filter Dialog, as a new planned feature: promoted
+    from the "No advanced filter dialog" entry on the Known Issues page — multi-field filtering
+    belongs as a feature in its own right, not a rough edge of PL-008.],
 )
 
 #part(1, "Core Application",
@@ -126,6 +129,7 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #include "features/PL-032-editability-affordance-language.typ"
 #include "features/PL-034-event-provenance-indicator.typ"
 #include "features/PL-035-opening-animation.typ"
+#include "features/PL-036-advanced-filter-dialog.typ"
 
 #part(2, "Local Storage, \nData Portability & Data Sync",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
