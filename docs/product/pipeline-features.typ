@@ -106,11 +106,27 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     part into its own: PL-003 (Device Pairing & Multi-Device Sync UI) moves from Core Application,
     PL-025 (Multi-Device Sync Service) moves from Services — both were sync features filed under
     parts that otherwise had nothing to do with syncing.],
+  [1.17], [2026-08-23], [Every part now opens with an intro explaining what it's for and the
+    design principles behind it — also gives each part a proper name in the table of contents,
+    where it previously didn't appear at all.],
 )
 
 #part(1, "Core Application",
   blurb: [What the app is for. Everything a user opens Pipeline to do, before any of it talks to
     an agent.])
+
+#heading(level: 2, numbering: none)[Core Application]
+
+This is the whole reason to open Pipeline: one place a job search lives, instead of a spreadsheet,
+a pile of bookmarked postings, and whatever a memory holds onto. Browse, add, edit, filter, delete
+— the complete set of things a user does to the data themselves, with nothing here waiting on a
+network to respond.
+
+Two principles hold the part together. First, one shared design system (PL-001) and one shared
+list/detail structure across phone and tablet — a user who's learned one screen has learned the
+shape of all of them, not a new layout to decode per feature. Second, small edits happen in place:
+an editable affordance (PL-032) that turns text into a field on tap, not a separate edit-mode
+dialog for every field that might change.
 
 #include "features/PL-001-design-system-foundation.typ"
 #include "features/PL-002-browse-applications.typ"
@@ -138,6 +154,18 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
     and how it gets out again.])
 
+#heading(level: 2, numbering: none)[Local Storage & Data Portability]
+
+Data stays on-device, stays yours, and stays whole — export it, import it, and it's the same data,
+not a lossy snapshot. "No account. No server. No telemetry." isn't a footnote; it's the reason this
+part exists at all.
+
+Everything here reads or writes one thing: the event log (PL-011). Not the list view's current
+snapshot, not a sync-specific copy — the actual append-only history everything else derives from,
+including MCP's tools and, eventually, sync (see Part 3). Developer mode (PL-012) exposes that log
+directly rather than hiding it, on the theory that a tool that won't show its own history isn't
+one worth trusting with a job search.
+
 #include "features/PL-011-event-sourced-local-storage.typ"
 #include "features/PL-012-app-preferences-developer-mode.typ"
 #include "features/PL-014-export-import-applications.typ"
@@ -150,12 +178,35 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   blurb: [One pipeline, not a copy per device left to drift. Peer-to-peer, no server in the
     middle.])
 
+#heading(level: 2, numbering: none)[Sync]
+
+A job search happens across more than one device — phone in a waiting room, tablet at a desk — and
+a second, unsynced copy on each is worse than no sync at all: two histories that quietly disagree.
+This part is what keeps them the same pipeline.
+
+It's built as a direct extension of Part 2, not a parallel system: sync moves the same event log
+(PL-011) from one device to another, so what merges is exactly what was already the source of
+truth, not a bespoke sync representation that could itself drift from it. Pairing is peer-to-peer
+by design — a QR-carried key between two devices, no account and no server in the middle — the
+same "no server" stance the data itself is held to.
+
 #include "features/PL-003-device-pairing-sync-scaffold.typ"
 #include "features/PL-025-multi-device-sync-service.typ"
 
 #part(4, "MCP Integration",
   blurb: [Same data, same actions, no separate API. An agent drives the pipeline the way a tap
     would.])
+
+#heading(level: 2, numbering: none)[MCP Integration]
+
+An AI assistant reads and writes the exact pipeline a human uses — the same repository, the same
+event log — not a shadow copy reachable only through a bespoke integration API that has to be kept
+in sync with the real one by hand.
+
+The server binds to loopback only; nothing it does is reachable off the device it runs on, matching
+the no-server stance the rest of the data model holds to. Every MCP tool call becomes a normal
+event in PL-011's log, indistinguishable today from one a human made by tapping — which is exactly
+the gap PL-033 and PL-034 exist to close.
 
 #include "features/PL-013-mcp-server-infrastructure.typ"
 #include "features/PL-015-list-applications.typ"
@@ -165,6 +216,13 @@ UI does — not a copy, not an export. The same pipeline, through a different do
 #part(5, "Services",
   blurb: [Work the app does for itself — discovered on the network or run on a schedule, not
     opened by hand.])
+
+#heading(level: 2, numbering: none)[Services]
+
+Work that happens on a user's behalf without opening the app — backups, file management — so the
+tool meant to cut overhead doesn't add its own. A service that needs supervision to keep working
+isn't one; these run unattended, and Settings is where to check on one, not where one has to be
+started by hand.
 
 #include "features/PL-022-backup-service.typ"
 #include "features/PL-031-file-management-service.typ"
