@@ -54,17 +54,22 @@ enum class EditableAffordanceState {
  * directly behind the content, at the modifier's own layout bounds. Apply padding *before* this
  * modifier in the chain (i.e. `.editableAffordance(state).padding(...)`) so the marks sit with
  * some breathing room from the text rather than touching the glyphs.
+ *
+ * [restColor] only affects [EditableAffordanceState.Rest] — defaults to the brand amber, since
+ * plain grey dots read as inconspicuous; pass [PlColors.fgMuted] at a call site that wants the
+ * quieter look back.
  */
 fun Modifier.editableAffordance(
     state: EditableAffordanceState,
     dotRadius: Dp = 1.5.dp,
     armLength: Dp = 5.dp,
     strokeWidth: Dp = 1.dp,
+    restColor: Color = PlColors.brandPrimary,
 ): Modifier = drawWithContent {
     val sw = strokeWidth.toPx()
     when (state) {
         EditableAffordanceState.Rest ->
-            drawCornerDots(PlColors.fgMuted, dotRadius)
+            drawCornerDots(restColor, dotRadius)
 
         EditableAffordanceState.Hover -> {
             drawRect(PlColors.brandPrimary.copy(alpha = 0.10f))
@@ -150,6 +155,8 @@ fun rememberEditableAffordanceState(
  * hoverable and clickable. This is the small-item alternative to [Field]'s always-visible box —
  * for a value that reads as plain text until you're on it, not a form input sitting in the layout
  * all the time.
+ *
+ * [restColor] only affects the resting-state dots — see [Modifier.editableAffordance].
  */
 @Composable
 fun EditableAffordanceBox(
@@ -158,6 +165,7 @@ fun EditableAffordanceBox(
     empty: Boolean = false,
     rejected: Boolean = false,
     locked: Boolean = false,
+    restColor: Color = PlColors.brandPrimary,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -173,7 +181,7 @@ fun EditableAffordanceBox(
                     Modifier
                 },
             )
-            .editableAffordance(state)
+            .editableAffordance(state, restColor = restColor)
             .padding(horizontal = 2.dp, vertical = 3.dp),
     ) {
         content()
