@@ -60,4 +60,50 @@ class McpServerControllerTest {
         assertTrue(writer.records.any { it.message.contains("Stopping MCP server") && it.severity == Severity.Debug })
         assertTrue(writer.records.any { it.message.contains("MCP server stopped") && it.severity == Severity.Debug })
     }
+
+    @Test
+    fun `restarts on a different port instead of ignoring the change`() = runTest {
+        val store = FakeApplicationStateStore()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+        val controller = createMcpServerController(
+            repository,
+            FakePreferencesStore(),
+            FakeDeepLinkBus(),
+            Logger.withTag("McpServerTest"),
+        )
+
+        controller.start(0)
+        val first = controller.observeStatus().first { it is McpServerStatus.Running } as McpServerStatus.Running
+
+        // Port 0 again asks the OS for a fresh ephemeral port — guaranteed different from the
+        // first, the same way a user picking a different port in Settings would be.
+        controller.start(0)
+        val second = controller.observeStatus().first { it is McpServerStatus.Running } as McpServerStatus.Running
+
+        assertTrue(second.port != first.port, "expected a new port, got $first again")
+
+        controller.stop()
+    }
+
+    @Test
+    fun `starting again with the port already running is a no-op`() = runTest {
+        val store = FakeApplicationStateStore()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+        val controller = createMcpServerController(
+            repository,
+            FakePreferencesStore(),
+            FakeDeepLinkBus(),
+            Logger.withTag("McpServerTest"),
+        )
+
+        controller.start(0)
+        val first = controller.observeStatus().first { it is McpServerStatus.Running } as McpServerStatus.Running
+
+        controller.start(first.port)
+        val second = controller.observeStatus().first { it is McpServerStatus.Running } as McpServerStatus.Running
+
+        assertEquals(first.port, second.port)
+
+        controller.stop()
+    }
 }

@@ -58,7 +58,9 @@ fun App(
             LaunchedEffect(navController) { onNavHostReady(navController) }
             // Tied to this always-composed root (not the Settings screen, which can be
             // navigated away from) so the server's lifecycle matches the app's, not the screen's.
-            LaunchedEffect(preferences.mcpServerEnabled) {
+            // Keyed on the port too — otherwise a port change while already running never
+            // reaches start() at all, since only mcpServerEnabled toggling would re-fire this.
+            LaunchedEffect(preferences.mcpServerEnabled, preferences.mcpServerPort) {
                 if (mcpServerController.isSupported) {
                     if (preferences.mcpServerEnabled) mcpServerController.start(preferences.mcpServerPort) else mcpServerController.stop()
                 }

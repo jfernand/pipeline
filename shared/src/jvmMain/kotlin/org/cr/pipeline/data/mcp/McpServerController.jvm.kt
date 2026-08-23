@@ -37,10 +37,16 @@ private class JvmMcpServerController(
 
     override fun observeStatus(): Flow<McpServerStatus> = _status.asStateFlow()
 
-    override suspend fun start(port: Int ) {
-        if (server != null) {
-            logger.d { "MCP server already running on port ${server?.port()}" }
-            return
+    override suspend fun start(port: Int) {
+        val running = server
+        if (running != null) {
+            if (running.port() == port) {
+                logger.d { "MCP server already running on port $port" }
+                return
+            }
+            logger.d { "Restarting MCP server: ${running.port()} -> $port" }
+            running.stop()
+            server = null
         }
         try {
             logger.d { "Starting MCP server on $LOOPBACK_HOST..." }
