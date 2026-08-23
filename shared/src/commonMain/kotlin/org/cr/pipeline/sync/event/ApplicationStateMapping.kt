@@ -26,17 +26,30 @@ import org.cr.pipeline.model.todayDate
 fun ApplicationState.toJobApplication(id: Long, today: LocalDate = todayDate()): JobApplication {
     val daysAgo = dateApplied?.let { today.toEpochDays() - it.toEpochDays() } ?: 0
     val overdueDays = nextActionDate?.takeIf { it < today }?.let { today.toEpochDays() - it.toEpochDays() }
-    val meta = dateApplied?.let { "Applied ${it.formatShort()}" } ?: "Saved"
+    // dateApplied may not exist yet, but a creation date always does — the reducer seeds
+    // statusHistory's earliest entry at creation time (applyEvent, ApplicationCreated), so there's
+    // always a date to measure "ago" from, never a placeholder like the old "Saved" label.
+    val activity = if (dateApplied != null) {
+        "Applied" to relativeDays(dateApplied, today)
+    } else {
+        val created = statusHistory.minByOrNull { it.date }?.date ?: today
+        "Created" to relativeDays(created, today)
+    }
     return JobApplication(
         id = id,
         company = company,
         role = role,
         status = status,
         daysAgo = daysAgo.toInt(),
-        meta = meta,
+        activity = activity,
         overdueDays = overdueDays?.toInt(),
         source = source,
     )
+}
+
+private fun relativeDays(date: LocalDate, today: LocalDate): String {
+    val days = (today.toEpochDays() - date.toEpochDays()).toInt()
+    return if (days <= 0) "today" else "${days}d ago"
 }
 
 fun ApplicationState.toApplicationDetail(id: Long, today: LocalDate = todayDate()): ApplicationDetail {

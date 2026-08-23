@@ -87,16 +87,14 @@ fun AppCard(
             StatusChip(app.status)
             app.overdueDays?.let { OverdueBadge(it) }
             Spacer(Modifier.weight(1f))
-            app.source?.let {
-                Icon(sourceIcon(it), contentDescription = it, tint = PlColors.fgMuted, modifier = Modifier.size(12.dp))
+//            app.source?.let {
+//                Icon(sourceIcon(it), contentDescription = it, tint = PlColors.fgMuted, modifier = Modifier.size(12.dp))
+//            }
+            val (label, ago) = app.activity
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                MonoText(label, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                MonoText(ago, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            MonoText(
-                app.meta,
-                size = 9.5f.sp,
-                color = PlColors.fgMuted,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
         }
     }
 }

@@ -60,7 +60,8 @@ fun buildMcpApp(
                 "No applications yet."
             } else {
                 applications.joinToString("\n") { app ->
-                    "#${app.id} ${app.company} — ${app.role} (${app.status}) — ${app.meta}"
+                    val (label, ago) = app.activity
+                    "#${app.id} ${app.company} — ${app.role} (${app.status}) — $label $ago"
                 }
             }
             logger.d { "MCP tool response: list_applications -> ${applications.size} application(s)" }

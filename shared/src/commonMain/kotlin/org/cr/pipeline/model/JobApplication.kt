@@ -22,7 +22,9 @@ data class JobApplication(
     val role: String,
     val status: AppStatus,
     val daysAgo: Int,
-    val meta: String,
+    // "Created" or "Applied" (whichever date we're measuring from) paired with a relative "Nd
+    // ago" string — always computable, unlike a formatted dateApplied, which may not exist yet.
+    val activity: Pair<String, String>,
     val overdueDays: Int? = null,
     val source: String? = null,
 )
