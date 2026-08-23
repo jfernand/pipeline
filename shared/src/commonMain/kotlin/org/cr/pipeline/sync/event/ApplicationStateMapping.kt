@@ -7,6 +7,7 @@ package org.cr.pipeline.sync.event
 import kotlinx.datetime.LocalDate
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
+import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.ContactSummary
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.model.ReminderSummary
@@ -26,14 +27,17 @@ import org.cr.pipeline.model.todayDate
 fun ApplicationState.toJobApplication(id: Long, today: LocalDate = todayDate()): JobApplication {
     val daysAgo = dateApplied?.let { today.toEpochDays() - it.toEpochDays() } ?: 0
     val overdueDays = nextActionDate?.takeIf { it < today }?.let { today.toEpochDays() - it.toEpochDays() }
-    // dateApplied may not exist yet, but a creation date always does — the reducer seeds
-    // statusHistory's earliest entry at creation time (applyEvent, ApplicationCreated), so there's
-    // always a date to measure "ago" from, never a placeholder like the old "Saved" label.
-    val activity = if (dateApplied != null) {
-        "Applied" to relativeDays(dateApplied, today)
-    } else {
-        val created = statusHistory.minByOrNull { it.date }?.date ?: today
+    // Whether this reads "Applied" or "Created" has to key off status, not dateApplied's
+    // presence — AddEditScreen pre-fills dateApplied to today for every new application
+    // regardless of chosen status, so a fresh Wishlist entry has one too even though nothing's
+    // been applied to yet. A creation date always exists either way — the reducer seeds
+    // statusHistory's earliest entry at creation time (applyEvent, ApplicationCreated) — so
+    // there's always a date to measure "ago" from, never a placeholder like the old "Saved" label.
+    val created = statusHistory.minByOrNull { it.date }?.date ?: today
+    val activity = if (status == AppStatus.WISHLIST) {
         "Created" to relativeDays(created, today)
+    } else {
+        "Applied" to relativeDays(dateApplied ?: created, today)
     }
     return JobApplication(
         id = id,
