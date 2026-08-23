@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.runtime.Composable
@@ -33,6 +32,7 @@ import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.todayDate
+import org.cr.pipeline.ui.components.DateField
 import org.cr.pipeline.ui.components.Field
 import org.cr.pipeline.ui.components.PlFilterChip
 import org.cr.pipeline.ui.components.PlPrimaryButton
@@ -45,8 +45,7 @@ import org.koin.compose.koinInject
 
 private val SOURCE_OPTIONS = listOf("Referral", "LinkedIn", "Company site", "Recruiter", "Other")
 
-/** Create (applicationId == null) or edit an existing application. Dates are entered as
- *  ISO-8601 (YYYY-MM-DD) — there's no calendar picker yet, just a plain validated text field. */
+/** Create (applicationId == null) or edit an existing application. */
 @Composable
 fun AddEditScreen(
     applicationId: Long?,
@@ -60,8 +59,8 @@ fun AddEditScreen(
     var company by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
     var status by remember { mutableStateOf(AppStatus.APPLIED) }
-    var dateAppliedText by remember { mutableStateOf(if (isEditing) "" else todayDate().toString()) }
-    var nextActionText by remember { mutableStateOf("") }
+    var dateApplied by remember { mutableStateOf(if (isEditing) null else todayDate()) }
+    var nextActionDate by remember { mutableStateOf<LocalDate?>(null) }
     var postingUrl by remember { mutableStateOf("") }
     var source by remember { mutableStateOf<String?>(null) }
     var notes by remember { mutableStateOf("") }
@@ -72,8 +71,8 @@ fun AddEditScreen(
             company = input.company
             role = input.role
             status = input.status
-            dateAppliedText = input.dateApplied?.toString().orEmpty()
-            nextActionText = input.nextActionDate?.toString().orEmpty()
+            dateApplied = input.dateApplied
+            nextActionDate = input.nextActionDate
             postingUrl = input.postingUrl.orEmpty()
             source = input.source
             notes = input.notes
@@ -88,8 +87,8 @@ fun AddEditScreen(
                     company = company.trim(),
                     role = role.trim(),
                     status = status,
-                    dateApplied = dateAppliedText.toLocalDateOrNull(),
-                    nextActionDate = nextActionText.toLocalDateOrNull(),
+                    dateApplied = dateApplied,
+                    nextActionDate = nextActionDate,
                     postingUrl = postingUrl.trim().ifBlank { null },
                     source = source,
                     notes = notes.trim(),
@@ -120,20 +119,16 @@ fun AddEditScreen(
                 StatusPickerFlowRow(selected = status, onSelect = { status = it })
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Field(
+                DateField(
                     "Date applied",
-                    value = dateAppliedText,
-                    placeholder = "YYYY-MM-DD",
-                    icon = Icons.Filled.CalendarToday,
-                    onValueChange = { dateAppliedText = it },
+                    date = dateApplied,
+                    onDateChange = { dateApplied = it },
                     modifier = Modifier.weight(1f),
                 )
-                Field(
+                DateField(
                     "Next action",
-                    value = nextActionText,
-                    placeholder = "YYYY-MM-DD",
-                    icon = Icons.Filled.CalendarToday,
-                    onValueChange = { nextActionText = it },
+                    date = nextActionDate,
+                    onDateChange = { nextActionDate = it },
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -166,5 +161,3 @@ fun AddEditScreen(
         }
     }
 }
-
-private fun String.toLocalDateOrNull(): LocalDate? = trim().takeIf { it.isNotEmpty() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }

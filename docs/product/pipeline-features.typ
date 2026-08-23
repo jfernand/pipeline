@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.18",
+  revision: "1.19",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -111,6 +111,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     where it previously didn't appear at all.],
   [1.18], [2026-08-23], [Added a Feature Index appendix — every PL, its status, and its page,
     driven off each feature's own designator/name/status rather than a second hand-kept list.],
+  [1.19], [2026-08-23], [Fixed: Date applied and Next action were freehand ISO-8601 text fields —
+    closes "Date applied has no picker" on the Known Issues page. Both now open a real
+    `DatePickerDialog` via a new `DateField` component; converts through epoch days rather than
+    local-timezone millis, avoiding the usual date-picker off-by-one.],
 )
 
 #part(1, "Core Application",

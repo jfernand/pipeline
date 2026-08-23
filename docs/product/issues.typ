@@ -17,10 +17,6 @@
     `OverdueBadge` (`StatusChip.kt`), as rendered next to the status chip on `AppCard`, should be
     smaller, and just tab over the top edge of the status chip it sits beside.
   ]),
-  (id: "date-applied-picker", pl: ("PL-007",), num: 1, title: [Date applied has no picker], body: [
-    Date applied (`AddEditScreen.kt`, `Field("Date applied", ...)`) is a plain ISO-8601 text field —
-    no calendar picker. Make it properly editable from the front end instead of freehand-typed text.
-  ]),
 )
 
 // Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
@@ -55,6 +51,10 @@
     The event log in Dev Tools (`DevToolsContent.kt`, `EventRow`) renders `chain` in append order —
     oldest first, newest at the bottom. It should be reverse order, last on top, so the newest
     entry is the one you see without scrolling.
+  ]),
+  (id: "date-applied-picker", pl: ("PL-007",), num: 1, title: [Date applied has no picker], body: [
+    Date applied (`AddEditScreen.kt`, `Field("Date applied", ...)`) is a plain ISO-8601 text field —
+    no calendar picker. Make it properly editable from the front end instead of freehand-typed text.
   ]),
 )
 
