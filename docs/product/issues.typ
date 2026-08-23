@@ -21,10 +21,6 @@
     Date applied (`AddEditScreen.kt`, `Field("Date applied", ...)`) is a plain ISO-8601 text field —
     no calendar picker. Make it properly editable from the front end instead of freehand-typed text.
   ]),
-  (id: "filter-dialog", pl: ("PL-008",), num: 1, title: [No advanced filter dialog], body: [
-    Filtering tops out at text search plus status chips. Needs an additional button next to the
-    chip row that expands into a fuller filter dialog — likely multi-field, not just status.
-  ]),
 )
 
 // Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
