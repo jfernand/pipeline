@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.10",
+  revision: "1.11",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -81,6 +81,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     capitalizes payloads" on the Known Issues page. `MonoText` gained an `uppercase` opt-out for
     text whose casing is data, not a label; the event payload is the first (and only) caller to
     use it.],
+  [1.11], [2026-08-23], [The Dev Tools event log now pretty-prints each event's JSON payload for
+    display, instead of the compact single-line form it's stored and hashed as. Display-only —
+    the stored envelope payload is untouched, since it's part of the hash input that gives each
+    event its identity.],
 )
 
 #part(1, "Core Application",

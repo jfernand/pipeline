@@ -28,6 +28,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.time.Instant
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.cr.pipeline.data.DeviceIdentityStore
 import org.cr.pipeline.sync.chain.EventEnvelope
 import org.cr.pipeline.sync.event.EventLog
@@ -99,6 +101,14 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
     }
 }
 
+// Display-only. envelope.payload itself must stay exactly as EventEnvelopeCodec produced it —
+// it's part of the hash input that gives the event its identity, so re-encoding it (even just to
+// pretty-print) anywhere on the write path would change what the envelope hashes to.
+private val prettyPrintJson = Json { prettyPrint = true }
+
+private fun prettyPayload(payload: String): String =
+    runCatching { prettyPrintJson.encodeToString(Json.parseToJsonElement(payload)) }.getOrDefault(payload)
+
 @Composable
 private fun EventRow(envelope: EventEnvelope) {
     Column(Modifier.fillMaxWidth().drawBottomBorder(PlColors.borderSubtle).padding(horizontal = 16.dp, vertical = 12.dp)) {
@@ -120,11 +130,9 @@ private fun EventRow(envelope: EventEnvelope) {
             )
         }
         MonoText(
-            envelope.payload,
+            remember(envelope.payload) { prettyPayload(envelope.payload) },
             size = 9.5f.sp,
             color = PlColors.fgSecondary,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 6.dp),
             uppercase = false,
         )
