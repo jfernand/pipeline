@@ -55,6 +55,11 @@
     rows. Should collapse into one — with the port editable inline — and a port change should
     restart the running MCP server on the new port, not just relabel it.
   ]),
+  (id: "dev-log-order", pl: ("PL-012",), num: 2, title: [Dev log entries should be reverse order], body: [
+    The event log in Dev Tools (`DevToolsContent.kt`, `EventRow`) renders `chain` in append order —
+    oldest first, newest at the bottom. It should be reverse order, last on top, so the newest
+    entry is the one you see without scrolling.
+  ]),
 )
 
 // Every issue label lives in this one function so the Known Issues page and

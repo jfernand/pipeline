@@ -94,7 +94,10 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
                         .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
                         .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp)),
                 ) {
-                    chain.forEach { envelope -> EventRow(envelope) }
+                    // chain is append order (oldest first, by sequence) — that's what the hash
+                    // chain and diffChains rely on, so it's not something to reorder at the
+                    // source. Reversed for display only, so the newest entry reads at the top.
+                    chain.asReversed().forEach { envelope -> EventRow(envelope) }
                 }
             }
         }

@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.13",
+  revision: "1.14",
   date: "2026-08-23",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -95,6 +95,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     port too — previously `start()` no-oped whenever a server was already running, regardless of
     which port it was asked for, and the effect that calls it wasn't even keyed on the port to
     begin with.],
+  [1.14], [2026-08-23], [Fixed: the Dev Tools event log rendered oldest-first, newest entry at the
+    bottom — closes "Dev log entries should be reverse order" on the Known Issues page. Now
+    reversed for display; the underlying chain stays in append order, since that's what the hash
+    chain and sync's diffChains rely on.],
 )
 
 #part(1, "Core Application",
