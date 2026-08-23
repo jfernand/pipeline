@@ -25,10 +25,6 @@
     Filtering tops out at text search plus status chips. Needs an additional button next to the
     chip row that expands into a fuller filter dialog — likely multi-field, not just status.
   ]),
-  (id: "opening-animation", pl: ("PL-009",), num: 1, title: [Add animation], body: [
-    Screen transitions have no animation — opening an application (list → detail, including via
-    deep link) should use a shared-element/shared-outline transition instead of a hard cut.
-  ]),
   (id: "mcp-settings-row", pl: ("PL-013",), num: 1, title: [MCP toggle/address should merge], body: [
     The "MCP server" toggle and "Address" `SettingsRow`s (`SettingsScreen.kt`) are two separate
     rows. Should collapse into one — with the port editable inline — and a port change should
