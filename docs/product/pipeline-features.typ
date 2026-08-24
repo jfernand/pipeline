@@ -6,8 +6,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.19",
-  date: "2026-08-23",
+  revision: "1.20",
+  date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -115,6 +115,12 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     closes "Date applied has no picker" on the Known Issues page. Both now open a real
     `DatePickerDialog` via a new `DateField` component; converts through epoch days rather than
     local-timezone millis, avoiding the usual date-picker off-by-one.],
+  [1.20], [2026-08-24], [Fixed: the deep-link `<intent-filter>` (PL-009) had `android:autoVerify`
+    on a custom `pipeline://` scheme, which can't be verified — autoVerify requires http(s). Split
+    into two filters: the unverified custom scheme as before, plus a real Android App Link for
+    https://pipeline.casaroja.es with autoVerify. The in-app nav deep link now recognizes that URL
+    too, not just pipeline://app, so an App Link actually routes to the right screen instead of
+    just opening the app.],
 )
 
 #part(1, "Core Application",

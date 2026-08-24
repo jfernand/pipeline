@@ -64,7 +64,10 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 )
             }
             composable<DetailRoute>(
-                deepLinks = listOf(navDeepLink<DetailRoute>(basePath = "pipeline://app")),
+                deepLinks = listOf(
+                    navDeepLink<DetailRoute>(basePath = "pipeline://app"),
+                    navDeepLink<DetailRoute>(basePath = "https://pipeline.casaroja.es/app"),
+                ),
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<DetailRoute>()
                 DetailScreen(
