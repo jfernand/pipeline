@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.31",
+  revision: "1.32",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -168,6 +168,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     screen it opens on phone and on tablet, and its deep link if it has one. Hand-maintained, not
     derived from code the way the Feature Index is, so it can drift if a route changes without a
     matching edit here.],
+  [1.32], [2026-08-24], [Added an MCP Tool row to the Navigation Routes appendix. Only
+    `open_application` actually navigates anywhere — it pushes a deep link onto `DeepLinkBus`,
+    landing on `DetailRoute` the same way a real `pipeline://` link would; the other four tools
+    (`add_application`, `edit_application`, `list_applications`, `list_settings`) read or write
+    data through the repository directly and never touch a route.],
 )
 
 #part(1, "Core Application",
@@ -326,17 +331,18 @@ not the shipping/reading order the parts above use.
 #pagebreak(weak: true, to: "odd")
 #heading(level: 1, numbering: none)[Navigation Routes]
 
-Every destination `Routes.kt` declares — which screen it opens on phone and on tablet, and its
-deep link, if it has one. Hand-maintained, unlike the Feature Index: Typst reads Kotlin source no
-better than any other document does, so this table is only as current as the last edit that kept
-it in sync with `PipelinePhoneApp.kt` and `PipelineApp.kt`.
+Every destination `Routes.kt` declares — which screen it opens on phone and on tablet, its deep
+link if it has one, and the MCP tool that reaches it, if any. Hand-maintained, unlike the Feature
+Index: Typst reads Kotlin source no better than any other document does, so this table is only as
+current as the last edit that kept it in sync with `PipelinePhoneApp.kt`, `PipelineApp.kt`, and
+`McpApp.kt`.
 
 // A data-table with raw/code cells packed into narrow auto/1fr columns collided — Typst's table
 // auto-sizing doesn't account for code spans' wrapping the way it does plain text, so cells
 // overflowed and overlapped their neighbors instead of staying inside their column. This is the
 // same fixed-label-column grid isss-doc.typ's own sidenote/xref already use for prose-plus-tag
 // content, which doesn't hit that sizing problem.
-#let route-row(route, phone, tablet, deep-link: none) = block(
+#let route-row(route, phone, tablet, deep-link: none, mcp-tool: none) = block(
   below: 14pt,
   breakable: false,
   stroke: (bottom: rule-w + hairline),
@@ -351,15 +357,21 @@ it in sync with `PipelinePhoneApp.kt` and `PipelineApp.kt`.
     label("Phone", size: 7pt), phone,
     label("Tablet", size: 7pt), tablet,
     ..if deep-link != none { (label("Deep Link", size: 7pt), deep-link) } else { () },
+    ..if mcp-tool != none { (label("MCP Tool", size: 7pt), mcp-tool) } else { () },
   )
 ]
 
+// Only open_application (PL-017) actually navigates anywhere — add_application, edit_application,
+// list_applications and list_settings all read/write data through the repository directly and
+// never touch a route, so they're not listed on any row here.
 #route-row([ListRoute], [`ListScreen` — start destination], [`TabletListContent` — start destination])
 #route-row(
   [DetailRoute(id: Long)],
   [`DetailScreen`],
   [`TabletDetailScreen`],
   deep-link: [`pipeline://app/{id}`; `https://pipeline.casaroja.es/app/{id}`],
+  mcp-tool: [`open_application` — pushes `pipeline://app/{id}` onto `DeepLinkBus`, the same path a
+    real deep link takes],
 )
 #route-row([AddEditRoute(id: Long? = null)], [`AddEditScreen`], [`AddEditScreen`])
 #route-row([FollowUpsRoute], [Not registered — unreachable], [`PlaceholderPane("Follow-ups")`])
