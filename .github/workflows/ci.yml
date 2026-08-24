@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & test (Android, JVM, JS, WasmJS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # NOT the blanket `build` task: that also builds :shared's and :sync-core's own iOS
+      # target directly, which needs the Apple linker and fails outright on Linux. Building each
+      # consumer module instead (androidApp/desktopApp/webApp) only pulls in the shared/sync-core
+      # compilation for the target that consumer actually depends on — Gradle's variant-aware
+      # resolution means that's Android/JVM/JS/WasmJS here, never iOS.
+      - run: ./gradlew :androidApp:build :desktopApp:build :webApp:build :shared:jvmTest :sync-core:jvmTest
+
+  ios:
+    name: Build iOS app
+    runs-on: macos-latest
+    # macOS runner minutes cost ~10x Linux on a private repo's included-minutes pool, so this
+    # doesn't even run on a release tag automatically — only on an explicit manual dispatch.
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "21"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # iosApp.xcodeproj has a Run Script build phase that calls
+      # `./gradlew :shared:embedAndSignAppleFrameworkForXcode` itself (see
+      # iosApp/iosApp.xcodeproj/project.pbxproj) — the same thing Xcode does on a local build —
+      # so building the scheme is enough; no separate Gradle step to assemble the framework first.
+      - name: Build iosApp
+        run: |
+          xcodebuild \
+            -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'generic/platform=iOS Simulator' \
+            build
