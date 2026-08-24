@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.24",
+  revision: "1.25",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -139,6 +139,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     on the Known Issues page — now a `FlowRow`, matching tablet's `ListPane.kt`. And Settings'
     "About" row showed a hardcoded "Pipeline 1.4.0" — closes "About box shows a hardcoded
     version" — now reads the same `BuildInfo.GIT_DESCRIBE` the NavRail already does.],
+  [1.25], [2026-08-24], [Added PL-039, Platform App Icons, as a new planned feature: a real icon
+    for every platform, built from the same "PL" monogram NavRail already uses — Android currently
+    ships the stock Android Studio template icon, iOS's AppIcon.appiconset is the empty Xcode
+    default, and desktop/web have no icon configured at all.],
 )
 
 #part(1, "Core Application",
@@ -180,6 +184,7 @@ dialog for every field that might change.
 #include "features/PL-035-opening-animation.typ"
 #include "features/PL-036-advanced-filter-dialog.typ"
 #include "features/PL-037-artifact-version-from-build-info.typ"
+#include "features/PL-039-platform-app-icons.typ"
 
 #part(2, "Local Storage & \nData Portability",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
