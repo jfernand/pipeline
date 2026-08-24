@@ -75,7 +75,7 @@ fun StatusSheet(
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            MonoText("New status", size = 9.5f.sp, color = PlColors.fgMuted)
+            MonoText("New status", size = 9.5f.sp)
             StatusPickerFlowRow(selected = selectedStatus, onSelect = { selectedStatus = it })
         }
         Field(
@@ -91,8 +91,8 @@ fun StatusSheet(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Icon(Icons.Filled.CalendarToday, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp))
-            MonoText(todayFormatted(), size = 10.sp, color = PlColors.fgSecondary, modifier = Modifier.weight(1f))
-            MonoText("Dated today", size = 9.sp, color = PlColors.fgMuted)
+            MonoText(todayFormatted(), size = 10.sp, modifier = Modifier.weight(1f), color = PlColors.fgSecondary)
+            MonoText("Dated today", size = 9.sp)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             PlSecondaryButton("Cancel", onClick = onCancel, height = 46.dp, modifier = Modifier.weight(1f))

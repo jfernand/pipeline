@@ -59,10 +59,9 @@ fun ContactRow(contact: ContactInfo, modifier: Modifier = Modifier) {
             MonoText(
                 contact.role,
                 size = 9.sp,
-                color = PlColors.fgMuted,
+                modifier = Modifier.padding(top = 3.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 3.dp),
             )
             androidx.compose.material3.Text(
                 contact.email,

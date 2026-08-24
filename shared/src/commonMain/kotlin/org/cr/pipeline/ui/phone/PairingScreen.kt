@@ -64,18 +64,18 @@ fun PairingScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                MonoText("Scan this on your other device", size = 9.5f.sp, color = PlColors.fgMuted)
+                MonoText("Scan this on your other device", size = 9.5f.sp)
                 Column(Modifier.background(PlColors.paper, RoundedCornerShape(2.dp)).padding(12.dp)) {
                     QrCodePlaceholder()
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     MonoText("4K7P — 2QX9", size = 13.sp, color = PlColors.fgPrimary, letterSpacing = 0.2f.em)
-                    MonoText("Code expires in 4:52", size = 9.sp, color = PlColors.fgMuted)
+                    MonoText("Code expires in 4:52", size = 9.sp)
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f).height(1.dp).background(PlColors.borderDefault)) {}
-                MonoText("or", size = 9.sp, color = PlColors.fgMuted)
+                MonoText("or", size = 9.sp)
                 Column(Modifier.weight(1f).height(1.dp).background(PlColors.borderDefault)) {}
             }
             PlSecondaryButton(
@@ -100,7 +100,6 @@ fun PairingScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}) {
                         MonoText(
                             "Last synced 11 min ago · 14 records",
                             size = 9.sp,
-                            color = PlColors.fgMuted,
                             modifier = Modifier.padding(top = 3.dp),
                         )
                     }

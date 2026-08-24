@@ -167,6 +167,6 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
 @Composable
 private fun PlaceholderPane(label: String) {
     Box(Modifier.fillMaxSize().background(PlColors.bgBase), contentAlignment = Alignment.Center) {
-        MonoText("$label — coming soon", size = 11.sp, color = PlColors.fgMuted)
+        MonoText("$label — coming soon", size = 11.sp)
     }
 }

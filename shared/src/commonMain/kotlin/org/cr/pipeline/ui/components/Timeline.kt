@@ -52,7 +52,7 @@ fun Timeline(modifier: Modifier = Modifier, entries: List<TimelineEntry> = defau
                 Column(Modifier.padding(bottom = if (index == entries.lastIndex) 0.dp else 18.dp).widthIn(min = 0.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatusChip(entry.status, small = true)
-                        MonoText(entry.date, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        MonoText(entry.date, size = 9.5f.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         if (entry.current) {
                             MonoText(
                                 "· current",

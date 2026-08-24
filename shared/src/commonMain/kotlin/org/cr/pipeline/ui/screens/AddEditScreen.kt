@@ -115,7 +115,7 @@ fun AddEditScreen(
             Field("Company", value = company, placeholder = "Company name", onValueChange = { company = it })
             Field("Role", value = role, placeholder = "Job title", onValueChange = { role = it })
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                MonoText("Status", size = 9.5f.sp, color = PlColors.fgMuted)
+                MonoText("Status", size = 9.5f.sp)
                 StatusPickerFlowRow(selected = status, onSelect = { status = it })
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -140,7 +140,7 @@ fun AddEditScreen(
                 onValueChange = { postingUrl = it },
             )
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                MonoText("Source", size = 9.5f.sp, color = PlColors.fgMuted)
+                MonoText("Source", size = 9.5f.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     SOURCE_OPTIONS.forEach { option ->
                         PlFilterChip(option, active = source == option, onClick = { source = option })

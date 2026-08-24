@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -87,11 +86,10 @@ fun NavRail(
         DestinationIcon(NavDestination.SETTINGS, active == NavDestination.SETTINGS, onSelect)
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Dot(color = AppStatus.OFFER.color)
-            MonoText("Synced", size = 8.sp, color = PlColors.fgMuted)
+            MonoText("Synced", size = 8.sp)
             MonoText(
                 BuildInfo.GIT_DESCRIBE,
                 size = 6.5f.sp,
-                color = PlColors.fgMuted,
                 letterSpacing = 0f.em,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

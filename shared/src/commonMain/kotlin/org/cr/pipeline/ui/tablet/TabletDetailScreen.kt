@@ -43,7 +43,7 @@ fun TabletDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             PlIconButton(Icons.AutoMirrored.Filled.ArrowBack, onClick = onBack, size = 36.dp, iconSize = 18.dp)
-            MonoText("Applications", size = 10.sp, color = PlColors.fgMuted)
+            MonoText("Applications", size = 10.sp)
         }
         DetailPane(
             applicationId = applicationId,

@@ -53,7 +53,7 @@ fun SettingsRow(
         if (icon != null) Icon(icon, null, tint = PlColors.fgMuted, modifier = Modifier.size(18.dp))
         Column(Modifier.weight(1f)) {
             BodyText(label, size = 14.5f.sp, color = PlColors.fgPrimary)
-            if (value != null) MonoText(value, size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
+            if (value != null) MonoText(value, size = 9.sp, modifier = Modifier.padding(top = 3.dp))
         }
         if (trailingText != null) {
             MonoText(trailingText, size = 9.5f.sp, color = trailingColor)

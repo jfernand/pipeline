@@ -95,7 +95,7 @@ private fun DetailPaneContent(
     Column(modifier.fillMaxHeight().fillMaxWidth().background(PlColors.bgBase)) {
         if (detail == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                MonoText("Select an application", size = 11.sp, color = PlColors.fgMuted)
+                MonoText("Select an application", size = 11.sp)
             }
             return@Column
         }
@@ -153,7 +153,6 @@ private fun HeaderInfo(detail: ApplicationDetail) {
             MonoText(
                 "${detail.daysSinceActivity}d since activity",
                 size = 9.5f.sp,
-                color = PlColors.fgMuted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -199,10 +198,10 @@ private fun DetailSecondaryColumn(detail: ApplicationDetail, onSaveNotes: (Strin
                 if (detail.source != null || detail.dateApplied != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         detail.source?.let {
-                            MonoText("Source: $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            MonoText("Source: $it", size = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         detail.dateApplied?.let {
-                            MonoText("Added $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            MonoText("Added $it", size = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 }

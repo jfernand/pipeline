@@ -27,8 +27,13 @@ fun SectionLabel(
     accent: Boolean = false,
 ) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        MonoText(label, size = 10.sp, weight = FontWeight.SemiBold, color = if (accent) PlColors.brandPrimary else PlColors.fgMuted)
-        if (count != null) MonoText("· $count", size = 10.sp, color = PlColors.fgMuted)
+        MonoText(
+            label,
+            size = 10.sp,
+            weight = FontWeight.SemiBold,
+            color = if (accent) PlColors.brandPrimary else PlColors.fgMuted,
+        )
+        if (count != null) MonoText("· $count", size = 10.sp)
         Spacer(Modifier.weight(1f).height(1.dp).background(PlColors.borderDefault))
     }
 }

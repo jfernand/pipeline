@@ -124,8 +124,13 @@ fun SettingsScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Dot(color = AppStatus.OFFER.color)
-                    MonoText("Sync up to date", size = 9.5f.sp, color = PlColors.fgSecondary, modifier = Modifier.weight(1f))
-                    MonoText("11 min ago", size = 9.sp, color = PlColors.fgMuted)
+                    MonoText(
+                        "Sync up to date",
+                        size = 9.5f.sp,
+                        modifier = Modifier.weight(1f),
+                        color = PlColors.fgSecondary,
+                    )
+                    MonoText("11 min ago", size = 9.sp)
                 }
                 BodyText("Pixel Tablet · 14 records, 0 conflicts", size = 13.sp, color = PlColors.fgMuted)
                 PlSecondaryButton("Sync now", height = 42.dp, modifier = Modifier.fillMaxWidth())
@@ -194,8 +199,8 @@ fun SettingsScreen(
             )
         }
         Column(Modifier.padding(start = 16.dp, top = 18.dp, end = 16.dp, bottom = 32.dp)) {
-            MonoText("No account. No server. No telemetry.", size = 9.sp, color = PlColors.fgMuted)
-            MonoText("Your data stays on your devices.", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 4.dp))
+            MonoText("No account. No server. No telemetry.", size = 9.sp)
+            MonoText("Your data stays on your devices.", size = 9.sp, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }
@@ -257,7 +262,7 @@ private fun McpServerRow(
             // "127.0.0.1:" and "/mcp" around it are fixed, not something tapping edits.
             Row(Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (!editing && enabled && status is McpServerStatus.Running) {
-                    MonoText("${status.host}:", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                    MonoText("${status.host}:", size = 9.sp, uppercase = false)
                 }
                 EditableAffordanceBox(
                     editing = editing,
@@ -297,16 +302,16 @@ private fun McpServerRow(
                         )
                         LaunchedEffect(Unit) { focusRequester.requestFocus() }
                     } else {
-                        MonoText(port.toString(), size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                        MonoText(port.toString(), size = 9.sp, uppercase = false)
                     }
                 }
                 if (!editing) {
                     when {
                         enabled && status is McpServerStatus.Running ->
-                            MonoText("/mcp", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                            MonoText("/mcp", size = 9.sp, uppercase = false)
                         enabled && status is McpServerStatus.Error ->
-                            MonoText("  Error — ${status.message}", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
-                        enabled -> MonoText("  Starting…", size = 9.sp, color = PlColors.fgMuted, uppercase = false)
+                            MonoText("  Error — ${status.message}", size = 9.sp, uppercase = false)
+                        enabled -> MonoText("  Starting…", size = 9.sp, uppercase = false)
                     }
                 }
             }
@@ -314,8 +319,8 @@ private fun McpServerRow(
         MonoText(
             if (enabled) "ON" else "OFF",
             size = 9.5f.sp,
-            color = if (enabled) PlColors.brandPrimary else PlColors.fgMuted,
             modifier = Modifier.clickable(onClick = onToggle),
+            color = if (enabled) PlColors.brandPrimary else PlColors.fgMuted,
         )
     }
 }

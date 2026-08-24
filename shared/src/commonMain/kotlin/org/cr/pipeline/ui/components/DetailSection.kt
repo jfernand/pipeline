@@ -34,7 +34,7 @@ fun DetailSection(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                MonoText(label, size = 9.5f.sp, weight = FontWeight.SemiBold, color = PlColors.fgMuted, modifier = Modifier.weight(1f))
+                MonoText(label, size = 9.5f.sp, modifier = Modifier.weight(1f), weight = FontWeight.SemiBold)
                 right?.invoke()
             }
             content()

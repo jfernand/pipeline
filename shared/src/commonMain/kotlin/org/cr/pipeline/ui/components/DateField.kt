@@ -62,7 +62,7 @@ fun DateField(
     var showPicker by remember { mutableStateOf(false) }
 
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        MonoText(label, size = 9.5f.sp, color = PlColors.fgMuted)
+        MonoText(label, size = 9.5f.sp)
         Row(
             Modifier
                 .fillMaxWidth()

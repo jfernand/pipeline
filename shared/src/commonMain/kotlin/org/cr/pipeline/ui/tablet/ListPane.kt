@@ -72,7 +72,7 @@ fun ListPane(
             ) {
                 Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     DisplayText("Applications", size = 25.sp, letterSpacing = 0.02f.em)
-                    MonoText("${applications.size} open", size = 10.sp, color = PlColors.fgMuted)
+                    MonoText("${applications.size} open", size = 10.sp)
                 }
                 PlSearchField(query = filter.query, onQueryChange = filter.onQueryChange)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

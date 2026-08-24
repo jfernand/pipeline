@@ -97,14 +97,14 @@ fun TabletSyncContent(modifier: Modifier = Modifier) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    MonoText("Scan from your phone", size = 9.5f.sp, weight = FontWeight.SemiBold, color = PlColors.fgMuted)
+                    MonoText("Scan from your phone", size = 9.5f.sp, weight = FontWeight.SemiBold)
                     Column(
                         Modifier.background(PlColors.paper, RoundedCornerShape(2.dp)).padding(12.dp),
                     ) {
                         QrCodePlaceholder(qrSize = 200.dp)
                     }
                     MonoText("4K7P — 2QX9", size = 14.sp, color = PlColors.fgPrimary, letterSpacing = 0.2f.em)
-                    MonoText("Code expires in 4:52", size = 9.sp, color = PlColors.fgMuted)
+                    MonoText("Code expires in 4:52", size = 9.sp)
                 }
             }
             val details = @Composable {
@@ -126,7 +126,6 @@ fun TabletSyncContent(modifier: Modifier = Modifier) {
                                 MonoText(
                                     "Last synced 11 min ago · 14 records · 0 conflicts",
                                     size = 9.sp,
-                                    color = PlColors.fgMuted,
                                     modifier = Modifier.padding(top = 3.dp),
                                 )
                             }
@@ -147,7 +146,7 @@ fun TabletSyncContent(modifier: Modifier = Modifier) {
                                     .padding(vertical = 10.dp),
                                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                             ) {
-                                MonoText(time, size = 9.5f.sp, color = PlColors.fgMuted, modifier = Modifier.width(80.dp))
+                                MonoText(time, size = 9.5f.sp, modifier = Modifier.width(80.dp))
                                 BodyText(label, size = 13.5f.sp, color = PlColors.fgSecondary)
                             }
                         }

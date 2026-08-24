@@ -51,7 +51,7 @@ fun StatusHistorySection(statusHistory: List<StatusHistoryEntry>, modifier: Modi
     if (statusHistory.isEmpty()) return
     DetailSection(
         label = "Status history",
-        right = { MonoText(changesLabel(statusHistory.size), size = 9.sp, color = PlColors.fgMuted) },
+        right = { MonoText(changesLabel(statusHistory.size), size = 9.sp) },
         modifier = modifier,
     ) {
         Timeline(entries = statusHistory.map { TimelineEntry(it.status, it.date, it.note, it.current) })

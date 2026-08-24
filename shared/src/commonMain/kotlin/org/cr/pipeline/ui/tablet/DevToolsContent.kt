@@ -28,7 +28,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.time.Instant
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.cr.pipeline.data.DeviceIdentityStore
 import org.cr.pipeline.sync.chain.EventEnvelope
@@ -79,7 +78,7 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
                     .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp))
                     .padding(horizontal = 16.dp, vertical = 14.dp),
             ) {
-                MonoText("DEVICE ID", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.width(120.dp))
+                MonoText("DEVICE ID", size = 9.sp, modifier = Modifier.width(120.dp))
                 MonoText(deviceId ?: "…", size = 12.sp, color = PlColors.fgPrimary)
             }
         }
@@ -116,27 +115,25 @@ private fun prettyPayload(payload: String): String =
 private fun EventRow(envelope: EventEnvelope) {
     Column(Modifier.fillMaxWidth().drawBottomBorder(PlColors.borderSubtle).padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            MonoText("#${envelope.sequence}", size = 9.sp, color = PlColors.fgMuted, modifier = Modifier.width(36.dp))
+            MonoText("#${envelope.sequence}", size = 9.sp, modifier = Modifier.width(36.dp))
             MonoText("hash ${envelope.hash.value.take(8)}", size = 9.sp, color = PlColors.fgPrimary)
             MonoText(
                 if (envelope.parentHashes.isEmpty()) "genesis" else "parent ${envelope.parentHashes.joinToString(", ") { it.value.take(8) }}",
                 size = 9.sp,
-                color = PlColors.fgMuted,
             )
             MonoText(
                 Instant.fromEpochMilliseconds(envelope.timestampEpochMillis).toString(),
                 size = 9.sp,
-                color = PlColors.fgMuted,
+                modifier = Modifier.weight(1f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
             )
         }
         MonoText(
             remember(envelope.payload) { prettyPayload(envelope.payload) },
             size = 9.5f.sp,
-            color = PlColors.fgSecondary,
             modifier = Modifier.padding(top = 6.dp),
+            color = PlColors.fgSecondary,
             uppercase = false,
         )
     }

@@ -48,7 +48,7 @@ fun StatusChip(status: AppStatus, modifier: Modifier = Modifier, small: Boolean 
             )
             .padding(horizontal = paddingH, vertical = paddingV),
     ) {
-        MonoText(status.label, size = fontSize, weight = FontWeight.Medium, color = status.color)
+        MonoText(status.label, size = fontSize, color = status.color)
     }
 }
 
@@ -93,7 +93,11 @@ fun PlFilterChip(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         if (dotColor != null) Dot(color = dotColor, size = 6.dp)
-        MonoText(label, size = 10.sp, weight = FontWeight.Medium, color = if (active) PlColors.onBrand else PlColors.fgSecondary)
+        MonoText(
+            label,
+            size = 10.sp,
+            color = if (active) PlColors.onBrand else PlColors.fgSecondary,
+        )
     }
 }
 

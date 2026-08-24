@@ -72,7 +72,13 @@ fun AppCard(
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Column(Modifier.weight(1f)) {
-                BodyText(app.company, size = 16.5f.sp, weight = FontWeight.SemiBold, color = PlColors.fgPrimary, lineHeight = 20.sp)
+                BodyText(
+                    app.company,
+                    size = 16.5f.sp,
+                    weight = FontWeight.SemiBold,
+                    color = PlColors.fgPrimary,
+                    lineHeight = 20.sp
+                )
                 BodyText(
                     app.role,
                     size = 13.5f.sp,
@@ -81,23 +87,27 @@ fun AppCard(
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
-            MonoText("${app.daysAgo}d", size = 10.5f.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
+            MonoText("${app.daysAgo}d", size = 10.5f.sp, modifier = Modifier.padding(top = 3.dp))
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Box {
                 StatusChip(app.status)
                 // Tabs over the chip's top-right corner rather than sitting beside it as a
                 // second same-size badge — the offset is roughly half of OverdueBadge's own
                 // height so it visibly overlaps the top edge instead of just touching it.
                 app.overdueDays?.let {
-                    OverdueBadge(it, modifier = Modifier.align(Alignment.TopEnd).offset(x = (-6).dp, y = (-5).dp))
+                    OverdueBadge(
+                        it, modifier = Modifier.align(Alignment.TopEnd).offset(x = (-6).dp, y = (-5).dp)
+                    )
                 }
             }
             Spacer(Modifier.weight(1f))
             val (label, ago) = app.activity
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                MonoText(label, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                MonoText(ago, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                MonoText(label, size = 9.5f.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                MonoText(ago, size = 9.5f.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }

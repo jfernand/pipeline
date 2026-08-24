@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -139,7 +138,6 @@ private fun DetailHeader(detail: ApplicationDetail, onUpdate: () -> Unit) {
             MonoText(
                 "${detail.daysSinceActivity}d since activity",
                 size = 9.5f.sp,
-                color = PlColors.fgMuted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -159,10 +157,10 @@ private fun PostingSection(detail: ApplicationDetail, modifier: Modifier = Modif
         if (detail.source != null || detail.dateApplied != null) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 detail.source?.let {
-                    MonoText("Source: $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    MonoText("Source: $it", size = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 detail.dateApplied?.let {
-                    MonoText("Added $it", size = 9.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    MonoText("Added $it", size = 9.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }

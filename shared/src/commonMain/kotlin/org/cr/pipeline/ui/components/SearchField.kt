@@ -55,7 +55,7 @@ fun PlSearchField(
         if (onQueryChange != null) {
             Box(Modifier.weight(1f)) {
                 if (query.isEmpty()) {
-                    MonoText(placeholder, size = 10.5f.sp, color = PlColors.fgMuted)
+                    MonoText(placeholder, size = 10.5f.sp)
                 }
                 BasicTextField(
                     value = query,
@@ -72,7 +72,7 @@ fun PlSearchField(
                 )
             }
         } else {
-            MonoText(placeholder, size = 10.5f.sp, color = PlColors.fgMuted)
+            MonoText(placeholder, size = 10.5f.sp)
         }
     }
 }

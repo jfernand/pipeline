@@ -43,6 +43,6 @@ fun OverdueBanner(message: String, dueDate: String, modifier: Modifier = Modifie
             MonoText("Follow-up overdue", size = 9.5f.sp, color = PlColors.brandPrimary)
             BodyText(message, size = 13.sp, color = PlColors.fgSecondary, modifier = Modifier.padding(top = 3.dp))
         }
-        MonoText(dueDate, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        MonoText(dueDate, size = 9.5f.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
