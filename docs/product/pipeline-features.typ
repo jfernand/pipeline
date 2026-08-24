@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.25",
+  revision: "1.26",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -143,6 +143,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     for every platform, built from the same "PL" monogram NavRail already uses — Android currently
     ships the stock Android Studio template icon, iOS's AppIcon.appiconset is the empty Xcode
     default, and desktop/web have no icon configured at all.],
+  [1.26], [2026-08-24], [Added PL-040, QR Scanning (ML Kit), as a new planned feature: camera-based
+    scanning of PL-038's sync-key QR code, on-device via ML Kit — the read half of pairing to
+    PL-038's display half. No camera frames leave the device, consistent with pairing's existing
+    "no account, no server, nothing in between" promise.],
 )
 
 #part(1, "Core Application",
@@ -229,6 +233,7 @@ same "no server" stance the data itself is held to.
 #include "features/PL-003-device-pairing-sync-scaffold.typ"
 #include "features/PL-025-multi-device-sync-service.typ"
 #include "features/PL-038-sync-key-qr-generation.typ"
+#include "features/PL-040-qr-scanning-mlkit.typ"
 
 #part(4, "MCP Integration",
   blurb: [Same data, same actions, no separate API. An agent drives the pipeline the way a tap
