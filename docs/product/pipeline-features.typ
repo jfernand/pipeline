@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.35",
+  revision: "1.36",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -181,6 +181,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     PL-040.],
   [1.35], [2026-08-24], [`release` gets its second value: `"Backlog"`, tagged on PL-020, PL-024,
     PL-027, PL-036 — same badge as `"MVP"`, distinguished only by label text for now.],
+  [1.36], [2026-08-24], [`release` gets a third value: `"1.1"`, tagged on PL-022, PL-028, PL-030.
+    PL-029 tagged `"MVP"`; PL-035 tagged `"Backlog"`.],
 )
 
 #part(1, "Core Application",

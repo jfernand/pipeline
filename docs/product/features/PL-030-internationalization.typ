@@ -4,6 +4,7 @@
   designator: "PL-030",
   name: "Internationalization",
   status: "Planned",
+  release: "1.1",
   summary: [
     Every string in the app, in more than one language. Not just translation — date formats,
     pluralization, right-to-left layout where it applies.

@@ -4,6 +4,7 @@
   designator: "PL-022",
   name: "Backup Service",
   status: "Planned",
+  release: "1.1",
   summary: [
     A background service on desktop. Announces itself on the local network. Other devices back
     themselves up to it on their own schedule — daily by default. Scheduling gets a UI; discovery

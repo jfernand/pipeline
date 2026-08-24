@@ -4,6 +4,7 @@
   designator: "PL-029",
   name: "Interview Events & Notes",
   status: "Planned",
+  release: "MVP",
   summary: [
     A new event type on an application: an interview, at a time, with notes attached — distinct
     from a status change or a follow-up reminder. Integrates with PL-028's calendar sync.

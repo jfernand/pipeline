@@ -4,6 +4,7 @@
   designator: "PL-035",
   name: "Opening Animation",
   status: "Planned",
+  release: "Backlog",
   summary: [
     A shared-element/shared-outline transition for opening an application — list to detail —
     instead of a hard cut, whether the trigger is a tap in the list or a deep link (PL-009) landing

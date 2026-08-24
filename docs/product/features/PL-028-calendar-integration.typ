@@ -4,6 +4,7 @@
   designator: "PL-028",
   name: "Calendar Integration",
   status: "Planned",
+  release: "1.1",
   summary: [
     Reads and writes the platform calendar. An interview gets a reminder there, not just inside
     Pipeline.
