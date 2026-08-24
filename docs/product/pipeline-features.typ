@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.29",
+  revision: "1.30",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -160,6 +160,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.29], [2026-08-24], [Fixed: the Feature Index's Status column was plain text — "Shipped" and
     "Planned" read identically at a glance. Now reuses `status-stamp()`, the same outlined pill
     each feature's own page already renders, so Planned is visually distinct there too.],
+  [1.30], [2026-08-24], [Fixed: `feature()`'s `description` parameter defaulted to `[]` (empty
+    content), not `none` — `description != none` was always true, so every feature page rendered
+    an empty "Description" heading over nothing except the one entry (PL-031) that actually passed
+    one. Default is `none` now; the heading only appears when there's something under it.],
 )
 
 #part(1, "Core Application",

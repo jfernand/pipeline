@@ -26,7 +26,7 @@
   release: none, // e.g. "MVP" — which release this feature ships in, if assigned to one yet
   summary: [],
   purpose: [],
-  description: [],
+  description: none,
   implementation: (),
   related: (), // array of (designator, description-content) pairs
 ) = {
