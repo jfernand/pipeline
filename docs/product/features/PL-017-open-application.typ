@@ -4,6 +4,7 @@
   designator: "PL-017",
   name: "Open Application (MCP Deep-Link Navigation)",
   status: "Shipped",
+  release: "MVP",
   summary: [
     An action MCP tool. Pushes a `pipeline://app/{id}` deep link onto a shared `DeepLinkBus`. The
     running phone or tablet UI collects it and feeds it into

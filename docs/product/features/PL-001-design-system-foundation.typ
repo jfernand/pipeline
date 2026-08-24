@@ -4,6 +4,7 @@
   designator: "PL-001",
   name: "Design System Foundation",
   status: "Shipped",
+  release: "MVP",
   summary: [
     No stock Material widgets. Three vendored typefaces — Barlow Condensed, Space Grotesk, IBM
     Plex Mono — color, typography, and border tokens, and one shared library of primitives: chips,

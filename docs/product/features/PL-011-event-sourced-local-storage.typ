@@ -4,6 +4,7 @@
   designator: "PL-011",
   name: "Event-Sourced Local Storage",
   status: "Shipped",
+  release: "MVP",
   summary: [
     Every mutation — create, edit, status change — is a domain event. Events hash into an
     append-only chain (`EventEnvelope`, self-contained multiplatform SHA-256). A single

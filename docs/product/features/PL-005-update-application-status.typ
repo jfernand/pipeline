@@ -4,6 +4,7 @@
   designator: "PL-005",
   name: "Update Application Status",
   status: "Shipped",
+  release: "MVP",
   summary: [
     A bottom sheet on any application. Moves it to a new status — Applied, Phone Screen,
     Interviewing, Offer — with an optional note. No full edit form needed.

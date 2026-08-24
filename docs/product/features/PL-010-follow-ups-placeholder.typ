@@ -4,6 +4,7 @@
   designator: "PL-010",
   name: "Follow-ups",
   status: "Planned",
+  release: "MVP",
   summary: [
     A "Follow-ups" nav rail item exists on tablet. It routes to a screen. The screen says
     "Follow-ups — coming soon." Nothing behind it.

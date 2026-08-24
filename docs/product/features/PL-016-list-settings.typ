@@ -4,6 +4,7 @@
   designator: "PL-016",
   name: "List Settings (MCP)",
   status: "Shipped",
+  release: "MVP",
   summary: [
     A read-only MCP tool. Reports the device's current preferences — sync network mode, developer
     mode, and whether and where the MCP server itself is listening.

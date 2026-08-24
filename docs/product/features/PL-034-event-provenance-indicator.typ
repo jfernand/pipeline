@@ -4,6 +4,7 @@
   designator: "PL-034",
   name: "Event Provenance Indicator",
   status: "Planned",
+  release: "MVP",
   summary: [
     A small icon on each application card in the list — human (device) or AI (MCP client) —
     showing at a glance who or what made the application's most recent change, with the full

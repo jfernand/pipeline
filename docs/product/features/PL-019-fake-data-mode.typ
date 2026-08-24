@@ -4,6 +4,7 @@
   designator: "PL-019",
   name: "Fake Data Mode",
   status: "Planned",
+  release: "MVP",
   summary: [
     A Dev Tools switch that flips the app's repository and event log to in-memory
     implementations, seeded from the same `SeedData` used everywhere else. Flip it back, and the

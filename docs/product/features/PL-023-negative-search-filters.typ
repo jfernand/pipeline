@@ -4,6 +4,7 @@
   designator: "PL-023",
   name: "Negative Search Filters",
   status: "Planned",
+  release: "MVP",
   summary: [
     A third state on every status filter chip: not set, set, set in the negative — each with its
     own look. Tapping cycles not-set → set → negative → not-set. "Negative" on Rejected reads as

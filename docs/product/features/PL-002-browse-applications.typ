@@ -4,6 +4,7 @@
   designator: "PL-002",
   name: "Browse Applications (List & Detail)",
   status: "Shipped",
+  release: "MVP",
   summary: [
     The list of tracked applications, and a detail view per application. One navigation graph, two
     layouts: phone gets a single pane, list to detail; tablet gets a persistent nav rail. Window

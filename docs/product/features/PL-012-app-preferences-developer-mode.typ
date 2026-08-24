@@ -4,6 +4,7 @@
   designator: "PL-012",
   name: "App Preferences & Developer Mode",
   status: "Shipped",
+  release: "MVP",
   summary: [
     A Settings screen, backed by a per-device `PreferencesStore` — sync network mode, developer
     mode. Developer mode reveals a Dev Tools nav rail item on tablet. Hidden by default.

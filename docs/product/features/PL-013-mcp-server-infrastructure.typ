@@ -4,6 +4,7 @@
   designator: "PL-013",
   name: "MCP Server Infrastructure",
   status: "Shipped",
+  release: "MVP",
   summary: [
     An in-process MCP server: http4k-ai-mcp-sdk, Netty engine, JVM desktop only. Bound to loopback
     (`127.0.0.1`), started and stopped with the app via a Settings toggle — address and port

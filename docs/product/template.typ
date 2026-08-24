@@ -14,10 +14,16 @@
   box(stroke: rule-w + accent, inset: (x: 6pt, y: 3pt), label(status, color: text-color))
 }
 
+// A small filled badge — distinct from status-stamp's outlined pill — for which release a
+// feature belongs to. Filled rather than outlined specifically so it doesn't get mistaken for
+// another status pill next to status-stamp.
+#let release-badge(release) = box(fill: amber, inset: (x: 6pt, y: 3pt), label(release, color: ink))
+
 #let feature(
   designator: "",
   name: "",
   status: "Shipped",
+  release: none, // e.g. "MVP" — which release this feature ships in, if assigned to one yet
   summary: [],
   purpose: [],
   description: [],
@@ -45,9 +51,12 @@
     // somewhere, so the index can't drift out of sync with the entry
     // itself. Page number comes from this element's own location once the
     // appendix queries for it.
-    #metadata((designator: designator, name: name, status: status)) <feature-meta>
+    #metadata((designator: designator, name: name, status: status, release: release)) <feature-meta>
   ]
-  block(below: 12pt, status-stamp(status))
+  block(below: 12pt, {
+    status-stamp(status)
+    if release != none { h(6pt); release-badge(release) }
+  })
 
   summary
   v(4pt)

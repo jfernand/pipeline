@@ -4,6 +4,7 @@
   designator: "PL-018",
   name: "Document Attachments (Resume & Cover Letter)",
   status: "Planned",
+  release: "MVP",
   summary: [
     A resume and a cover letter, attached per application. Uploaded from disk, or picked through
     the file picker. An MCP route offers an agent the same capability — not a raw file upload, but

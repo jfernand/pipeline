@@ -4,6 +4,7 @@
   designator: "PL-015",
   name: "List Applications (MCP)",
   status: "Shipped",
+  release: "MVP",
   summary: [
     A read-only MCP tool. Every tracked application, as plain text: id, company, role, status, a
     short "Applied \<date\>" line. Same `observeApplications()` flow the UI's own list screens

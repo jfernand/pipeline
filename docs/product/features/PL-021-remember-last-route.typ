@@ -4,6 +4,7 @@
   designator: "PL-021",
   name: "Remember Last Route",
   status: "Planned",
+  release: "MVP",
   summary: [
     On launch, the app returns to whatever screen it was on when it closed — not always the list.
     Stored in preferences, restored before the first frame the user sees.

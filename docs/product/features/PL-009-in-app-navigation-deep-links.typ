@@ -4,6 +4,7 @@
   designator: "PL-009",
   name: "In-App Navigation & Deep Links",
   status: "Shipped",
+  release: "MVP",
   summary: [
     One type-safe `androidx.navigation` graph, shared by phone and tablet: List, Detail, Add/Edit,
     Settings, Pair. One deep-link scheme, `pipeline://app/{id}` — Android intent filters, desktop

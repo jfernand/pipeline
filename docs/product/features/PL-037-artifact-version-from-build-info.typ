@@ -4,6 +4,7 @@
   designator: "PL-037",
   name: "Artifact Version from Build Info",
   status: "Planned",
+  release: "MVP",
   summary: [
     The version baked into each shipped artifact — Android's `versionName`/`versionCode`, the
     desktop package's `packageVersion` — set from the same `git describe` output the NavRail

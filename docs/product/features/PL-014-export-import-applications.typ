@@ -4,6 +4,7 @@
   designator: "PL-014",
   name: "Export / Import Applications",
   status: "Shipped",
+  release: "MVP",
   summary: [
     Export writes every application to a JSON file — versioned `ExportedApplications`. Import reads
     one back and adds each entry as new: additive, never overwrites. JVM has the real

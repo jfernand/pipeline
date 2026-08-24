@@ -4,6 +4,7 @@
   designator: "PL-031",
   name: "File Management Service",
   status: "Planned",
+  release: "MVP",
   summary: [
     Owns the on-disk life of every file PL-018 attaches to an application: where it's stored,
     how it's named, and what happens to it when the application — or just the attachment — is

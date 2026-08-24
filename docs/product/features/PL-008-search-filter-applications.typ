@@ -4,6 +4,7 @@
   designator: "PL-008",
   name: "Search & Filter Applications",
   status: "Shipped",
+  release: "MVP",
   summary: [
     Live text search over company and role. Status filter chips — Wishlist, Applied, Screen, and
     the rest. Same list narrows on both phone and tablet as you type or tap a chip.

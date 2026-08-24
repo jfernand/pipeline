@@ -4,6 +4,7 @@
   designator: "PL-033",
   name: "Event Provenance",
   status: "Planned",
+  release: "MVP",
   summary: [
     Every event in the event log should record where it came from — the device id of the app
     instance that made the change, or an identifying token for the AI/client that made it through

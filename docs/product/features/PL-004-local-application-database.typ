@@ -4,6 +4,7 @@
   designator: "PL-004",
   name: "Local Application Database",
   status: "Shipped",
+  release: "MVP",
   summary: [
     `JobApplicationRepository`, Koin-injected, backed by Room on Android/JVM/iOS and an in-memory
     store on js/wasmJs (Room has no target there). Seeded with QA data on first run — the app is

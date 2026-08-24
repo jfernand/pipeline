@@ -4,6 +4,7 @@
   designator: "PL-007",
   name: "Edit Application",
   status: "Shipped",
+  release: "MVP",
   summary: [
     Updates an application in place, by id. Same fields as PL-006, plus the id. Two entry points —
     the Add/Edit screen, opened from an existing application, and the `edit_application` MCP tool.

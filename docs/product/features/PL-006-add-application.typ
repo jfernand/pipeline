@@ -4,6 +4,7 @@
   designator: "PL-006",
   name: "Add Application",
   status: "Shipped",
+  release: "MVP",
   summary: [
     Creates a job application: company, role, status, and optionally applied/next-action dates,
     posting URL, source, notes. Persisted through the event-sourced repository. Two entry points —

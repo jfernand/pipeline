@@ -1,12 +1,12 @@
 #import "isss-doc.typ": *
-#import "template.typ": feature
+#import "template.typ": feature, release-badge
 
 #show: isss-doc.with(
   title: "Pipeline",
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.26",
+  revision: "1.27",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -147,6 +147,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     scanning of PL-038's sync-key QR code, on-device via ML Kit — the read half of pairing to
     PL-038's display half. No camera frames leave the device, consistent with pairing's existing
     "no account, no server, nothing in between" promise.],
+  [1.27], [2026-08-24], [Added a `release` field to `feature()` — a small filled badge next to
+    the status stamp, and a new Release column in the Feature Index, driven off the same
+    source-of-truth metadata as everything else there. Every Shipped feature (PL-001–002,
+    004–009, 011–017) is tagged `"MVP"`; so are eleven Planned ones targeted for that same
+    release: PL-010, 018, 019, 021, 023, 026, 031, 033, 034, 037, 039.],
 )
 
 #part(1, "Core Application",
@@ -283,17 +288,19 @@ not the shipping/reading order the parts above use.
     designator: e.value.designator,
     name: e.value.name,
     status: e.value.status,
+    release: e.value.at("release", default: none),
     loc: e.location(),
   ))
   let sorted = entries.sorted(key: e => int(e.designator.split("-").at(1)))
   data-table(
-    columns: (auto, 1fr, auto, auto),
-    header: ("PL", "Name", "Status", "Page"),
+    columns: (auto, 1fr, auto, auto, auto),
+    header: ("PL", "Name", "Status", "Release", "Page"),
     ..sorted
       .map(e => (
         link(e.loc)[#e.designator],
         e.name,
         e.status,
+        if e.release != none { release-badge(e.release) } else { [] },
         link(e.loc)[#counter(page).at(e.loc).first()],
       ))
       .flatten(),

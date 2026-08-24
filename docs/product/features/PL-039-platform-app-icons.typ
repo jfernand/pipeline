@@ -4,6 +4,7 @@
   designator: "PL-039",
   name: "Platform App Icons",
   status: "Planned",
+  release: "MVP",
   summary: [
     A real app icon for every platform — Android launcher, iOS `AppIcon`, desktop window/dock
     icon, web favicon — built from the same "PL" monogram (Barlow Condensed, brand amber on the
