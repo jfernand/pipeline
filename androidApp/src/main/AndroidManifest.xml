@@ -17,13 +17,27 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <intent-filter android:autoVerify="true">
+            <!-- Custom scheme: no verification possible (or needed) for a non-http(s) scheme,
+                 so this stays unverified — see the App Link filter below for the real thing. -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data android:scheme="pipeline" android:host="app"/>
+            </intent-filter>
+            <!-- Real Android App Link: autoVerify here actually does something, since Android can
+                 fetch https://pipeline.casaroja.es/.well-known/assetlinks.json to confirm we own
+                 the domain. That file has to exist and be correct there for verification to pass
+                 at install time — nothing in this repo hosts it. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="https" android:host="pipeline.casaroja.es"/>
             </intent-filter>
         </activity>
     </application>
