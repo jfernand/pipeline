@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.20",
+  revision: "1.21",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -121,6 +121,12 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     https://pipeline.casaroja.es with autoVerify. The in-app nav deep link now recognizes that URL
     too, not just pipeline://app, so an App Link actually routes to the right screen instead of
     just opening the app.],
+  [1.21], [2026-08-24], [Fixed: Sync and Dev Tools were unreachable on phone-width screens —
+    closes "Sync and Dev Tools unreachable on phone" on the Known Issues page. `PipelinePhoneApp`
+    now wires `SyncRoute`/`DevToolsRoute` too, reached from Settings (the sync status card; a
+    newly-navigable "Event log" row). `TabletSyncContent` — now shared by both, despite the name —
+    stacks vertically below 640dp instead of a fixed-width side-by-side `Row` that would've
+    overflowed a phone screen.],
 )
 
 #part(1, "Core Application",

@@ -83,7 +83,13 @@ import org.cr.pipeline.ui.theme.drawBottomBorder
 import org.koin.compose.koinInject
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPair: () -> Unit = {}) {
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {},
+    onPair: () -> Unit = {},
+    onSync: () -> Unit = {},
+    onDevTools: () -> Unit = {},
+) {
     val scope = rememberCoroutineScope()
     val preferencesStore = koinInject<PreferencesStore>()
     val deviceIdentityStore = koinInject<DeviceIdentityStore>()
@@ -111,6 +117,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
                     .fillMaxWidth()
                     .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
                     .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp))
+                    .clickable(onClick = onSync)
                     .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -172,7 +179,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, onBack: () -> Unit = {}, onPai
                 value = "${chain.size} event${if (chain.size == 1) "" else "s"}" +
                     (chain.lastOrNull()?.let { " · latest ${it.hash.value.take(8)}" } ?: ""),
                 icon = Icons.Filled.Storage,
-                chevron = false,
+                onClick = onDevTools,
             )
         }
         if (mcpServerController.isSupported) {

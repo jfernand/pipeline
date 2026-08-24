@@ -56,6 +56,12 @@
     Date applied (`AddEditScreen.kt`, `Field("Date applied", ...)`) is a plain ISO-8601 text field —
     no calendar picker. Make it properly editable from the front end instead of freehand-typed text.
   ]),
+  (id: "phone-sync-devtools-nav", pl: ("PL-009", "PL-003", "PL-012"), num: 1, title: [Sync and Dev Tools unreachable on phone], body: [
+    `NavRail` (tablet-only) is the only way to reach the Sync tab (`TabletSyncContent`) and Dev
+    Tools (`DevToolsContent`) — `PipelinePhoneApp`'s `NavHost` never wired `SyncRoute` or
+    `DevToolsRoute` at all, so on phone-width screens (portrait, or landscape narrower than the
+    600dp tablet-layout breakpoint) there's no way to reach either, even with developer mode on.
+  ]),
 )
 
 // Every issue label lives in this one function so the Known Issues page and

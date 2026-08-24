@@ -34,9 +34,11 @@ import org.cr.pipeline.nav.DeepLinkBus
 import org.cr.pipeline.ui.components.PlFab
 import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
+import org.cr.pipeline.ui.nav.DevToolsRoute
 import org.cr.pipeline.ui.nav.ListRoute
 import org.cr.pipeline.ui.nav.PairRoute
 import org.cr.pipeline.ui.nav.SettingsRoute
+import org.cr.pipeline.ui.nav.SyncRoute
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.koin.compose.koinInject
@@ -83,10 +85,21 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
             }
             composable<SettingsRoute> {
-                SettingsScreen(onBack = { navController.popBackStack() }, onPair = { navController.navigate(PairRoute) })
+                SettingsScreen(
+                    onBack = { navController.popBackStack() },
+                    onPair = { navController.navigate(PairRoute) },
+                    onSync = { navController.navigate(SyncRoute) },
+                    onDevTools = { navController.navigate(DevToolsRoute) },
+                )
             }
             composable<PairRoute> {
                 PairingScreen(onBack = { navController.popBackStack() })
+            }
+            composable<SyncRoute> {
+                SyncScreen(onBack = { navController.popBackStack() })
+            }
+            composable<DevToolsRoute> {
+                DevToolsScreen(onBack = { navController.popBackStack() })
             }
         }
         // See the matching comment in PipelineTabletApp: this must run in the same composition
