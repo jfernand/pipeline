@@ -4,6 +4,7 @@
   designator: "PL-020",
   name: "File Picker Module",
   status: "Planned",
+  release: "Backlog",
   summary: [
     `DataPortController.jvm.kt`'s private `showFileDialog` — a thin wrapper over
     `java.awt.FileDialog` — pulled out into its own module. One file picker, reused by

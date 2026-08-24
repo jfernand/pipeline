@@ -4,6 +4,7 @@
   designator: "PL-027",
   name: "App Password (Biometric Lock)",
   status: "Planned",
+  release: "Backlog",
   summary: [
     Locks the app behind the platform's own credential store — Face ID, fingerprint, whatever
     Android or iOS already trusts. Pipeline never sees or stores the credential itself.

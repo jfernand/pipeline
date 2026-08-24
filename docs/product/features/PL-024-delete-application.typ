@@ -4,6 +4,7 @@
   designator: "PL-024",
   name: "Delete Application",
   status: "Planned",
+  release: "Backlog",
   summary: [
     Removes an application outright. Slide to reveal a trash can on phone, a context menu where
     the platform supports one, the Delete key on desktop.

@@ -4,6 +4,7 @@
   designator: "PL-036",
   name: "Advanced Filter Dialog",
   status: "Planned",
+  release: "Backlog",
   summary: [
     A button next to the status chip row that opens a fuller filter dialog — multiple fields at
     once, not just the single status chip PL-008 offers today.

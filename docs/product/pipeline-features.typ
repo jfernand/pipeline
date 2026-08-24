@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.34",
+  revision: "1.35",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -179,6 +179,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     every route an MCP tool, not just `DetailRoute`'s `open_application`.],
   [1.34], [2026-08-24], [Tagged every feature in Part 3, Sync, `"MVP"`: PL-003, PL-025, PL-038,
     PL-040.],
+  [1.35], [2026-08-24], [`release` gets its second value: `"Backlog"`, tagged on PL-020, PL-024,
+    PL-027, PL-036 — same badge as `"MVP"`, distinguished only by label text for now.],
 )
 
 #part(1, "Core Application",
