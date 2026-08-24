@@ -4,6 +4,7 @@
   designator: "PL-038",
   name: "Sync Key QR Generation",
   status: "Planned",
+  release: "MVP",
   summary: [
     A real, scannable QR code encoding the iroh ticket PL-025's sync system generates — replacing
     `QrCodePlaceholder`'s deterministic pseudo-QR pattern, which looks like a code but decodes to

@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.33",
+  revision: "1.34",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -177,6 +177,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     flesh out the routing/deep-link schema to carry state beyond "which screen, which
     application" — the list screen's active status filter and search text, notably — and give
     every route an MCP tool, not just `DetailRoute`'s `open_application`.],
+  [1.34], [2026-08-24], [Tagged every feature in Part 3, Sync, `"MVP"`: PL-003, PL-025, PL-038,
+    PL-040.],
 )
 
 #part(1, "Core Application",

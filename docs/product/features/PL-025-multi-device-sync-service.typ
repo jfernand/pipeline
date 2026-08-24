@@ -4,6 +4,7 @@
   designator: "PL-025",
   name: "Multi-Device Sync Service",
   status: "Planned",
+  release: "MVP",
   summary: [
     The transport PL-003's pairing screen has been waiting on. An unsynced app can turn sync on,
     which presents a QR code carrying an iroh ticket — the sync key. A second device scans it, and

@@ -4,6 +4,7 @@
   designator: "PL-040",
   name: "QR Scanning (ML Kit)",
   status: "Planned",
+  release: "MVP",
   summary: [
     Camera-based scanning of the sync-key QR code PL-038 generates, using ML Kit's barcode
     scanning — the other half of pairing: PL-038 makes the code real to display, this makes it

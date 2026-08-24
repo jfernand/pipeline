@@ -4,6 +4,7 @@
   designator: "PL-003",
   name: "Device Pairing & Multi-Device Sync (UI Scaffold)",
   status: "Planned",
+  release: "MVP",
   summary: [
     A pairing screen — QR-code placeholder, "scan to pair a tablet" — and a Sync destination on
     tablet. Neither does anything. No QR generation, no scanning, no event ever crosses a network.
