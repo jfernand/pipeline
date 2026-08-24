@@ -3,7 +3,8 @@
 #feature(
   designator: "PL-032",
   name: "Editability Affordance Language",
-  status: "Planned",
+  status: "Shipped",
+  release: "MVP",
   summary: [
     A distinct visual language for signaling that a small item — a note, a date, a field on the
     detail screen — can be edited in place. Not a pencil icon on everything; something that reads

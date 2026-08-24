@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.27",
+  revision: "1.28",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -152,6 +152,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     source-of-truth metadata as everything else there. Every Shipped feature (PL-001–002,
     004–009, 011–017) is tagged `"MVP"`; so are eleven Planned ones targeted for that same
     release: PL-010, 018, 019, 021, 023, 026, 031, 033, 034, 037, 039.],
+  [1.28], [2026-08-24], [PL-032, Editability Affordance Language, marked Shipped — its
+    `EditableAffordanceBox` is already live in two real call sites (`NotesSection`, the MCP port
+    field in `SettingsScreen.kt`), not just the design exploration. Tagged `"MVP"` too, following
+    from rev 1.27's "every Shipped feature belongs to the MVP release" rule applied to a feature
+    that became Shipped after that rule was set.],
 )
 
 #part(1, "Core Application",
