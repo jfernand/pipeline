@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.21",
+  revision: "1.22",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -127,6 +127,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     newly-navigable "Event log" row). `TabletSyncContent` — now shared by both, despite the name —
     stacks vertically below 640dp instead of a fixed-width side-by-side `Row` that would've
     overflowed a phone screen.],
+  [1.22], [2026-08-24], [Added PL-037, Artifact Version from Build Info, as a new planned feature:
+    the version stamped on each shipped artifact (Android's versionName/versionCode, the desktop
+    package's packageVersion) should come from the same git describe output the NavRail already
+    shows, instead of hand-maintained numbers that have drifted from it since 1.0.],
 )
 
 #part(1, "Core Application",
@@ -167,6 +171,7 @@ dialog for every field that might change.
 #include "features/PL-034-event-provenance-indicator.typ"
 #include "features/PL-035-opening-animation.typ"
 #include "features/PL-036-advanced-filter-dialog.typ"
+#include "features/PL-037-artifact-version-from-build-info.typ"
 
 #part(2, "Local Storage & \nData Portability",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
