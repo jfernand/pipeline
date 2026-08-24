@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.22",
+  revision: "1.23",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -131,6 +131,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     the version stamped on each shipped artifact (Android's versionName/versionCode, the desktop
     package's packageVersion) should come from the same git describe output the NavRail already
     shows, instead of hand-maintained numbers that have drifted from it since 1.0.],
+  [1.23], [2026-08-24], [Added PL-038, Sync Key QR Generation, as a new planned feature: a real,
+    scannable QR code encoding the iroh ticket PL-025 generates, replacing QrCodePlaceholder's
+    deterministic pseudo-QR pattern, which looks like a code but decodes to nothing.],
 )
 
 #part(1, "Core Application",
@@ -215,6 +218,7 @@ same "no server" stance the data itself is held to.
 
 #include "features/PL-003-device-pairing-sync-scaffold.typ"
 #include "features/PL-025-multi-device-sync-service.typ"
+#include "features/PL-038-sync-key-qr-generation.typ"
 
 #part(4, "MCP Integration",
   blurb: [Same data, same actions, no separate API. An agent drives the pipeline the way a tap
