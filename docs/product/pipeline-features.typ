@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.32",
+  revision: "1.33",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -173,6 +173,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     landing on `DetailRoute` the same way a real `pipeline://` link would; the other four tools
     (`add_application`, `edit_application`, `list_applications`, `list_settings`) read or write
     data through the repository directly and never touch a route.],
+  [1.33], [2026-08-24], [Added PL-041, Routes and Deep Links, as a new planned feature (MVP):
+    flesh out the routing/deep-link schema to carry state beyond "which screen, which
+    application" — the list screen's active status filter and search text, notably — and give
+    every route an MCP tool, not just `DetailRoute`'s `open_application`.],
 )
 
 #part(1, "Core Application",
@@ -215,6 +219,7 @@ dialog for every field that might change.
 #include "features/PL-036-advanced-filter-dialog.typ"
 #include "features/PL-037-artifact-version-from-build-info.typ"
 #include "features/PL-039-platform-app-icons.typ"
+#include "features/PL-041-routes-and-deep-links.typ"
 
 #part(2, "Local Storage & \nData Portability",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
