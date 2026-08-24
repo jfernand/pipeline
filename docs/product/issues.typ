@@ -62,6 +62,17 @@
     `DevToolsRoute` at all, so on phone-width screens (portrait, or landscape narrower than the
     600dp tablet-layout breakpoint) there's no way to reach either, even with developer mode on.
   ]),
+  (id: "filter-chips-overflow", pl: ("PL-008",), num: 1, title: [Filter chips run off screen on portrait phone], body: [
+    `StatusFilterChips` (`ListScreen.kt`) sits in a `Row(Modifier.horizontalScroll(...))` on
+    phone — with 8 chips (All + one per `AppStatus`), that runs off the edge of a portrait phone
+    screen instead of wrapping. Tablet's `ListPane.kt` already wraps the same chips in a
+    `FlowRow`; phone should too.
+  ]),
+  (id: "about-version-hardcoded", pl: ("PL-012",), num: 3, title: [About box shows a hardcoded version], body: [
+    Settings' "About" row (`SettingsScreen.kt`) reads `"Pipeline 1.4.0"` / `"Build 2026.06.24"` —
+    fixed strings that never move, unlike `NavRail`'s footer, which already reads the real
+    `BuildInfo.GIT_DESCRIBE`. The two should agree.
+  ]),
 )
 
 // Every issue label lives in this one function so the Known Issues page and

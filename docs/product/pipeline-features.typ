@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.23",
+  revision: "1.24",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -134,6 +134,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.23], [2026-08-24], [Added PL-038, Sync Key QR Generation, as a new planned feature: a real,
     scannable QR code encoding the iroh ticket PL-025 generates, replacing QrCodePlaceholder's
     deterministic pseudo-QR pattern, which looks like a code but decodes to nothing.],
+  [1.24], [2026-08-24], [Fixed two: filter chips on the phone list screen ran off the edge of a
+    portrait screen instead of wrapping — closes "Filter chips run off screen on portrait phone"
+    on the Known Issues page — now a `FlowRow`, matching tablet's `ListPane.kt`. And Settings'
+    "About" row showed a hardcoded "Pipeline 1.4.0" — closes "About box shows a hardcoded
+    version" — now reads the same `BuildInfo.GIT_DESCRIBE` the NavRail already does.],
 )
 
 #part(1, "Core Application",

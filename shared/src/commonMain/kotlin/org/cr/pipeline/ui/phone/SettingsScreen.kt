@@ -59,6 +59,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import org.cr.pipeline.BuildInfo
 import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.DeviceIdentityStore
 import org.cr.pipeline.data.PreferencesStore
@@ -162,7 +163,7 @@ fun SettingsScreen(
         )
         SettingsRow("Follow-up reminders", value = "9:00, weekdays", icon = Icons.Filled.NotificationsActive)
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("About") }
-        SettingsRow("Pipeline 1.4.0", value = "Build 2026.06.24", icon = Icons.Filled.Info, chevron = false)
+        SettingsRow("Pipeline", value = BuildInfo.GIT_DESCRIBE, icon = Icons.Filled.Info, chevron = false)
         Column(Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)) { SectionLabel("Developer") }
         SettingsRow(
             "Developer mode",
