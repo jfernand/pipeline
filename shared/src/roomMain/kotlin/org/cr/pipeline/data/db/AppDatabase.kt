@@ -50,7 +50,12 @@ expect fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase>
 
 fun buildDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase = builder
     .setDriver(BundledSQLiteDriver())
-    .setQueryCoroutineContext(Dispatchers.IO)
+    // Dispatchers.IO isn't part of kotlinx-coroutines-core's common API — it's a JVM actual, and
+    // restricted on Native — so it doesn't resolve here in roomMain's own common-metadata compile
+    // (shared by Android/JVM/iOS). Default works everywhere this source set does; the bundled
+    // SQLite driver isn't doing classic blocking file I/O the way a JDBC driver would, so there's
+    // no real IO-vs-CPU distinction being lost by not having a dedicated IO pool here.
+    .setQueryCoroutineContext(Dispatchers.Default)
     // No migration story yet (pre-release, exportSchema = false) — a schema bump just recreates
     // the local DB. Seed data repopulates automatically; nothing durable is lost that a future
     // synced install couldn't recover.
