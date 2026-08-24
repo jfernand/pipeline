@@ -347,10 +347,7 @@ not the shipping/reading order the parts above use.
 #heading(level: 1, numbering: none)[Navigation Routes]
 
 Every destination `Routes.kt` declares — which screen it opens on phone and on tablet, its deep
-link if it has one, and the MCP tool that reaches it, if any. Hand-maintained, unlike the Feature
-Index: Typst reads Kotlin source no better than any other document does, so this table is only as
-current as the last edit that kept it in sync with `PipelinePhoneApp.kt`, `PipelineApp.kt`, and
-`McpApp.kt`.
+link if it has one, and the MCP tool that reaches it, if any.
 
 // A data-table with raw/code cells packed into narrow auto/1fr columns collided — Typst's table
 // auto-sizing doesn't account for code spans' wrapping the way it does plain text, so cells
