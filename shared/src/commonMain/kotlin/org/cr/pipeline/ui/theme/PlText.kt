@@ -63,6 +63,7 @@ fun MonoText(
     weight: FontWeight = FontWeight.Medium,
     color: Color = PlColors.fgMuted,
     letterSpacing: TextUnit = 0.14f.em,
+    lineHeight: TextUnit = TextUnit.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
     uppercase: Boolean = true,
@@ -75,6 +76,7 @@ fun MonoText(
         fontFamily = PlType.mono(),
         fontWeight = weight,
         letterSpacing = letterSpacing,
+        lineHeight = lineHeight,
         maxLines = maxLines,
         overflow = overflow,
     )
