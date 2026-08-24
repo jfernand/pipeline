@@ -1,12 +1,12 @@
 #import "isss-doc.typ": *
-#import "template.typ": feature, release-badge
+#import "template.typ": feature, release-badge, status-stamp
 
 #show: isss-doc.with(
   title: "Pipeline",
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.28",
+  revision: "1.29",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -157,6 +157,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     field in `SettingsScreen.kt`), not just the design exploration. Tagged `"MVP"` too, following
     from rev 1.27's "every Shipped feature belongs to the MVP release" rule applied to a feature
     that became Shipped after that rule was set.],
+  [1.29], [2026-08-24], [Fixed: the Feature Index's Status column was plain text — "Shipped" and
+    "Planned" read identically at a glance. Now reuses `status-stamp()`, the same outlined pill
+    each feature's own page already renders, so Planned is visually distinct there too.],
 )
 
 #part(1, "Core Application",
@@ -304,7 +307,7 @@ not the shipping/reading order the parts above use.
       .map(e => (
         link(e.loc)[#e.designator],
         e.name,
-        e.status,
+        status-stamp(e.status),
         if e.release != none { release-badge(e.release) } else { [] },
         link(e.loc)[#counter(page).at(e.loc).first()],
       ))
