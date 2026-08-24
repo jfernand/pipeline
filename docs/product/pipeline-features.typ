@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.30",
+  revision: "1.31",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -164,6 +164,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     content), not `none` — `description != none` was always true, so every feature page rendered
     an empty "Description" heading over nothing except the one entry (PL-031) that actually passed
     one. Default is `none` now; the heading only appears when there's something under it.],
+  [1.31], [2026-08-24], [Added a Navigation Routes appendix — every route in `Routes.kt`, which
+    screen it opens on phone and on tablet, and its deep link if it has one. Hand-maintained, not
+    derived from code the way the Feature Index is, so it can drift if a route changes without a
+    matching edit here.],
 )
 
 #part(1, "Core Application",
@@ -318,3 +322,52 @@ not the shipping/reading order the parts above use.
       .flatten(),
   )
 }
+
+#pagebreak(weak: true, to: "odd")
+#heading(level: 1, numbering: none)[Navigation Routes]
+
+Every destination `Routes.kt` declares — which screen it opens on phone and on tablet, and its
+deep link, if it has one. Hand-maintained, unlike the Feature Index: Typst reads Kotlin source no
+better than any other document does, so this table is only as current as the last edit that kept
+it in sync with `PipelinePhoneApp.kt` and `PipelineApp.kt`.
+
+// A data-table with raw/code cells packed into narrow auto/1fr columns collided — Typst's table
+// auto-sizing doesn't account for code spans' wrapping the way it does plain text, so cells
+// overflowed and overlapped their neighbors instead of staying inside their column. This is the
+// same fixed-label-column grid isss-doc.typ's own sidenote/xref already use for prose-plus-tag
+// content, which doesn't hit that sizing problem.
+#let route-row(route, phone, tablet, deep-link: none) = block(
+  below: 14pt,
+  breakable: false,
+  stroke: (bottom: rule-w + hairline),
+  inset: (bottom: 10pt),
+)[
+  #text(font: mono-font, size: 10pt, weight: 600, fill: ink)[#route]
+  #v(4pt)
+  #grid(
+    columns: (60pt, 1fr),
+    column-gutter: 10pt,
+    row-gutter: 4pt,
+    label("Phone", size: 7pt), phone,
+    label("Tablet", size: 7pt), tablet,
+    ..if deep-link != none { (label("Deep Link", size: 7pt), deep-link) } else { () },
+  )
+]
+
+#route-row([ListRoute], [`ListScreen` — start destination], [`TabletListContent` — start destination])
+#route-row(
+  [DetailRoute(id: Long)],
+  [`DetailScreen`],
+  [`TabletDetailScreen`],
+  deep-link: [`pipeline://app/{id}`; `https://pipeline.casaroja.es/app/{id}`],
+)
+#route-row([AddEditRoute(id: Long? = null)], [`AddEditScreen`], [`AddEditScreen`])
+#route-row([FollowUpsRoute], [Not registered — unreachable], [`PlaceholderPane("Follow-ups")`])
+#route-row([SyncRoute], [`SyncScreen`], [`TabletSyncContent`])
+#route-row([SettingsRoute], [`SettingsScreen`], [`SettingsScreen`])
+#route-row([PairRoute], [`PairingScreen`], [`PairingScreen`])
+#route-row([DevToolsRoute], [`DevToolsScreen`], [`DevToolsContent`])
+
+`FollowUpsRoute` is the one route on this table with no phone entry point at all —
+`PipelinePhoneApp`'s `NavHost` never registers it, unlike every other route here. Reachable on
+tablet only, via `NavRail`'s "Follow-ups" tab.
