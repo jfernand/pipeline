@@ -8,12 +8,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Business
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Public
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,13 +83,17 @@ fun AppCard(
             }
             MonoText("${app.daysAgo}d", size = 10.5f.sp, color = PlColors.fgMuted, modifier = Modifier.padding(top = 3.dp))
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            StatusChip(app.status)
-            app.overdueDays?.let { OverdueBadge(it) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box {
+                StatusChip(app.status)
+                // Tabs over the chip's top-right corner rather than sitting beside it as a
+                // second same-size badge — the offset is roughly half of OverdueBadge's own
+                // height so it visibly overlaps the top edge instead of just touching it.
+                app.overdueDays?.let {
+                    OverdueBadge(it, modifier = Modifier.align(Alignment.TopEnd).offset(x = (-6).dp, y = (-5).dp))
+                }
+            }
             Spacer(Modifier.weight(1f))
-//            app.source?.let {
-//                Icon(sourceIcon(it), contentDescription = it, tint = PlColors.fgMuted, modifier = Modifier.size(12.dp))
-//            }
             val (label, ago) = app.activity
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(0.dp)) {
                 MonoText(label, size = 9.5f.sp, color = PlColors.fgMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)

@@ -52,15 +52,25 @@ fun StatusChip(status: AppStatus, modifier: Modifier = Modifier, small: Boolean 
     }
 }
 
+/** Meant to sit as a small tab over the top edge of the [StatusChip] it's paired with — see
+ *  [AppCard], its only caller — not as a same-size badge occupying its own space in the row. */
 @Composable
 fun OverdueBadge(days: Int, modifier: Modifier = Modifier) {
     Box(
-        modifier
+        contentAlignment = Alignment.Center,
+        modifier = modifier
             .clip(chipShape)
             .background(PlColors.brandPrimary)
-            .padding(horizontal = 6.dp, vertical = 4.dp),
+            .padding(horizontal = 1.dp, vertical = 0.dp),
     ) {
-        MonoText("${days}d overdue", size = 9.5f.sp, weight = FontWeight.SemiBold, color = PlColors.onBrand)
+        MonoText(
+            "${days}d",
+            size = 8.sp,
+            weight = FontWeight.SemiBold,
+            color = PlColors.onBrand,
+            letterSpacing = 0.sp,
+            lineHeight = 8.sp,
+        )
     }
 }
 

@@ -12,12 +12,7 @@
 // picks the next number after the highest already used for that issue's
 // `pl.at(0)`; moving an entry from `issues` to `fixed-issues` never changes
 // its number.
-#let issues = (
-  (id: "overdue-badge-align", pl: ("PL-002",), num: 1, title: [Overdue badge alignment], body: [
-    `OverdueBadge` (`StatusChip.kt`), as rendered next to the status chip on `AppCard`, should be
-    smaller, and just tab over the top edge of the status chip it sits beside.
-  ]),
-)
+#let issues = ()
 
 // Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
 // the record of what the issue actually said, not a changelog blurb about it. `known-issues.typ`
@@ -72,6 +67,10 @@
     Settings' "About" row (`SettingsScreen.kt`) reads `"Pipeline 1.4.0"` / `"Build 2026.06.24"` —
     fixed strings that never move, unlike `NavRail`'s footer, which already reads the real
     `BuildInfo.GIT_DESCRIBE`. The two should agree.
+  ]),
+  (id: "overdue-badge-align", pl: ("PL-002",), num: 1, title: [Overdue badge alignment], body: [
+    `OverdueBadge` (`StatusChip.kt`), as rendered next to the status chip on `AppCard`, should be
+    smaller, and just tab over the top edge of the status chip it sits beside.
   ]),
 )
 

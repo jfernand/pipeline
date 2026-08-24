@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.36",
+  revision: "1.37",
   date: "2026-08-24",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -183,6 +183,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     PL-027, PL-036 — same badge as `"MVP"`, distinguished only by label text for now.],
   [1.36], [2026-08-24], [`release` gets a third value: `"1.1"`, tagged on PL-022, PL-028, PL-030.
     PL-029 tagged `"MVP"`; PL-035 tagged `"Backlog"`.],
+  [1.37], [2026-08-24], [Fixed: `OverdueBadge` sat as a same-size badge beside `StatusChip` in
+    `AppCard` — closes "Overdue badge alignment" on the Known Issues page. Smaller now, and
+    positioned as a tab overlapping the chip's top-right corner instead of a row sibling occupying
+    its own space.],
 )
 
 #part(1, "Core Application",
