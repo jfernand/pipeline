@@ -13,6 +13,7 @@ import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.nav.DeepLinkBus
+import org.cr.pipeline.sync.event.EventProvenance
 import org.http4k.ai.mcp.ToolRequest
 import org.http4k.ai.mcp.ToolResponse
 import org.http4k.ai.mcp.model.Tool
@@ -50,6 +51,12 @@ fun buildMcpApp(
     val listSettings = Tool("list_settings", "List Pipeline's current app-level settings for this device.")
     val openApplication = Tool("open_application", "Open a job application's detail screen in the running Pipeline app.", idArg)
 
+    // The MCP transport (NoMcpSecurity, no session layer) doesn't hand this app a per-client or
+    // per-session identifier to attribute a call to — "mcp" is the most specific token available
+    // until that exists, but it's still enough to tell an AI-made change apart from one made
+    // through the app itself.
+    val mcpProvenance = EventProvenance.McpClient("mcp")
+
     val serverHandler = mcpHttpNonStreaming(
         ServerMetaData("pipeline", "1.0.0"),
         NoMcpSecurity,
@@ -81,7 +88,7 @@ fun buildMcpApp(
         addApplication bind { request: ToolRequest ->
             logger.d { "MCP tool call: add_application with args ${request.args}" }
             val input = request.toApplicationInput()
-            val id = runBlocking { repository.saveApplication(null, input) }
+            val id = runBlocking { repository.saveApplication(null, input, mcpProvenance) }
             val message = "Added application #$id: ${input.company} — ${input.role} (${input.status})."
             logger.d { "MCP tool response: add_application -> #$id" }
             ToolResponse.Ok(message)
@@ -90,7 +97,7 @@ fun buildMcpApp(
             val id = idArg(request)
             logger.d { "MCP tool call: edit_application with id=$id, args ${request.args}" }
             val input = request.toApplicationInput()
-            runBlocking { repository.saveApplication(id, input) }
+            runBlocking { repository.saveApplication(id, input, mcpProvenance) }
             val message = "Updated application #$id: ${input.company} — ${input.role} (${input.status})."
             logger.d { "MCP tool response: edit_application -> #$id" }
             ToolResponse.Ok(message)

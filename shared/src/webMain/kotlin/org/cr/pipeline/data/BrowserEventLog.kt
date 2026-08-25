@@ -25,7 +25,7 @@ internal class BrowserEventLog(private val identityStore: DeviceIdentityStore) :
     private val chain = MutableStateFlow(readChain())
 
     override suspend fun deviceId(): DeviceId =
-        cachedDeviceId ?: identityStore.getOrCreateDeviceId().also { cachedDeviceId = it }
+        cachedDeviceId ?: identityStore.getDeviceId().also { cachedDeviceId = it }
 
     override fun observeChain(): Flow<List<EventEnvelope>> = chain
 

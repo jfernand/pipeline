@@ -16,12 +16,17 @@ import org.cr.pipeline.model.AppStatus
 @Serializable
 sealed interface ApplicationEvent {
     val applicationId: ApplicationId
+
+    /** Defaults to [EventProvenance.Unknown] so a payload written before this field existed —
+     *  which has no "provenance" key at all — still decodes, rather than failing to load. */
+    val provenance: EventProvenance
 }
 
 @Serializable
 data class ApplicationCreated(
     override val applicationId: ApplicationId,
     val input: ApplicationInput,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent
 
 /** A full save from the edit form — always the complete field set, not a diff, so it can be
@@ -30,6 +35,7 @@ data class ApplicationCreated(
 data class ApplicationEdited(
     override val applicationId: ApplicationId,
     val input: ApplicationInput,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent
 
 /** The dedicated "Update status" sheet, distinct from [ApplicationEdited] because it always
@@ -40,4 +46,5 @@ data class StatusChanged(
     override val applicationId: ApplicationId,
     val status: AppStatus,
     val note: String,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent

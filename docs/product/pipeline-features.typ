@@ -6,8 +6,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.37",
-  date: "2026-08-24",
+  revision: "1.39",
+  date: "2026-08-25",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -187,6 +187,15 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     `AppCard` — closes "Overdue badge alignment" on the Known Issues page. Smaller now, and
     positioned as a tab overlapping the chip's top-right corner instead of a row sibling occupying
     its own space.],
+  [1.38], [2026-08-25], [Shipped PL-033, Event Provenance: every `ApplicationEvent` now carries an
+    `EventProvenance` — `Device` for an ordinary in-app edit, `McpClient` for one made through the
+    MCP server, or `Unknown`, the default for event payloads written before this field existed, so
+    old event logs keep reading correctly.],
+  [1.39], [2026-08-25], [`EventProvenance.Device` now carries the device's actual `DeviceId`,
+    instead of leaving it implicit. That id is standardized across every platform: `DeviceIdentityStore`
+    moved off a Room table only Android/JVM/iOS had, onto an `expect fun createDeviceIdentityStore()`
+    backed by that platform's `Settings` — android, ios, jvm, js, and wasmJs each get an actual, so
+    every target generates and persists the id the same way.],
 )
 
 #part(1, "Core Application",

@@ -50,7 +50,7 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
     var deviceId by remember { mutableStateOf<String?>(null) }
     val chain by eventLog.observeChain().collectAsState(initial = emptyList())
 
-    LaunchedEffect(Unit) { deviceId = deviceIdentityStore.getOrCreateDeviceId().value }
+    LaunchedEffect(Unit) { deviceId = deviceIdentityStore.getDeviceId().value }
 
     Column(
         modifier

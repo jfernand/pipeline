@@ -18,10 +18,12 @@ import kotlinx.coroutines.Dispatchers
         StatusEvent::class,
         Contact::class,
         Reminder::class,
-        DeviceIdentity::class,
         EventEnvelopeEntity::class,
     ],
-    version = 2,
+    // 3: device_identity dropped — the device id lives in platform Settings now
+    // (DeviceIdentityStore.kt), standardized the same way across every target instead of only
+    // the Room-backed ones.
+    version = 3,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -31,7 +33,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun statusEventDao(): StatusEventDao
     abstract fun contactDao(): ContactDao
     abstract fun reminderDao(): ReminderDao
-    abstract fun deviceIdentityDao(): DeviceIdentityDao
     abstract fun eventEnvelopeDao(): EventEnvelopeDao
 }
 

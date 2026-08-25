@@ -106,7 +106,7 @@ fun SettingsScreen(
 
     LaunchedEffect(preferences.developerMode) {
         if (preferences.developerMode && deviceId == null) {
-            deviceId = deviceIdentityStore.getOrCreateDeviceId().value
+            deviceId = deviceIdentityStore.getDeviceId().value
         }
     }
 

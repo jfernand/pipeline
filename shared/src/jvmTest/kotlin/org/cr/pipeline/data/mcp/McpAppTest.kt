@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.EventSourcedJobApplicationRepository
 import org.cr.pipeline.data.FakeApplicationStateStore
@@ -22,6 +26,8 @@ import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.SyncNetworkMode
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.nav.DeepLinkBus
+import org.cr.pipeline.sync.event.ApplicationEvent
+import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import org.http4k.ai.mcp.McpError
 import org.http4k.ai.mcp.ToolRequest
@@ -222,6 +228,32 @@ class McpAppTest {
         assertIs<Content.Text>(message)
         assertTrue(message.text.contains("Acme Rockets"))
         assertTrue(message.text.contains("#$id"))
+    }
+
+    @Test
+    fun `add_application and edit_application tag their events with MCP provenance, not Device`() {
+        val store = FakeApplicationStateStore()
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(store, eventLog)
+        val client = HttpNonStreamingMcpClient(
+            Uri.of("http://in-memory/mcp"),
+            http = buildMcpApp(repository, FakePreferencesStore(), FakeDeepLinkBus()),
+        ).also { it.start().orFail() }
+
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+        client.tools().call(
+            ToolName.of("edit_application"),
+            ToolRequest(mapOf("id" to id, "company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "INTERVIEW")),
+        ).orFail()
+
+        val chain = runBlocking { eventLog.observeChain().first() }
+        val provenances = chain.map { Json.decodeFromString<ApplicationEvent>(it.payload).provenance }
+        assertEquals(2, provenances.size)
+        provenances.forEach { assertIs<EventProvenance.McpClient>(it) }
     }
 
     @Test

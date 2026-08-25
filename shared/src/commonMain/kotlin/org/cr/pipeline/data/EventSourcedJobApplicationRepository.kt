@@ -18,6 +18,7 @@ import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.ApplicationState
 import org.cr.pipeline.sync.event.EventLog
+import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.sync.event.StatusChanged
 import org.cr.pipeline.sync.event.applyEvent
 import org.cr.pipeline.sync.event.toApplicationDetail
@@ -43,22 +44,29 @@ class EventSourcedJobApplicationRepository(
     override suspend fun getApplicationInput(id: Long): ApplicationInput? =
         store.getState(id)?.toApplicationInput()
 
-    override suspend fun saveApplication(id: Long?, input: ApplicationInput): Long {
+    override suspend fun saveApplication(id: Long?, input: ApplicationInput, provenance: EventProvenance?): Long {
         val current = id?.let { store.getState(it) }
+        val resolvedProvenance = resolveProvenance(provenance)
         // Row ids aren't stable across devices; for a create, there isn't one yet to key off of
         // anyway, so this is a random placeholder either way until real ids are wired up.
         val event = if (id == null) {
-            ApplicationCreated(ApplicationId.random(), input)
+            ApplicationCreated(ApplicationId.random(), input, resolvedProvenance)
         } else {
-            ApplicationEdited(ApplicationId(id.toString()), input)
+            ApplicationEdited(ApplicationId(id.toString()), input, resolvedProvenance)
         }
         return persist(id, current, event)
     }
 
-    override suspend fun updateStatus(id: Long, status: AppStatus, note: String) {
+    override suspend fun updateStatus(id: Long, status: AppStatus, note: String, provenance: EventProvenance?) {
         val current = store.getState(id) ?: return
-        persist(id, current, StatusChanged(ApplicationId(id.toString()), status, note))
+        persist(id, current, StatusChanged(ApplicationId(id.toString()), status, note, resolveProvenance(provenance)))
     }
+
+    // deviceId() is a storage round trip on first call (then cached by eventLog itself), so this
+    // only pays that cost for the calls that actually end up needing it — an explicit provenance
+    // (e.g. the MCP server's) skips it entirely.
+    private suspend fun resolveProvenance(explicit: EventProvenance?): EventProvenance =
+        explicit ?: EventProvenance.Device(eventLog.deviceId())
 
     private suspend fun persist(id: Long?, current: ApplicationState?, event: ApplicationEvent): Long {
         eventLog.append(event, Clock.System.now().toEpochMilliseconds())

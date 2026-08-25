@@ -13,6 +13,7 @@ import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEvent
+import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import org.cr.pipeline.sync.event.StatusChanged
 import kotlin.test.Test
@@ -107,5 +108,33 @@ class EventSourcedJobApplicationRepositoryTest {
         assertEquals(listOf(chain[0].hash), chain[1].parentHashes)
         assertIs<ApplicationCreated>(Json.decodeFromString<ApplicationEvent>(chain[0].payload))
         assertIs<StatusChanged>(Json.decodeFromString<ApplicationEvent>(chain[1].payload))
+    }
+
+    @Test
+    fun `saveApplication and updateStatus default to this device's own Device provenance`() = runTest {
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(FakeApplicationStateStore(), eventLog)
+        val expected = EventProvenance.Device(eventLog.deviceId())
+
+        val id = repository.saveApplication(null, input)
+        repository.updateStatus(id, AppStatus.OFFER, "Verbal offer")
+
+        val chain = eventLog.observeChain().first()
+        assertEquals(expected, Json.decodeFromString<ApplicationEvent>(chain[0].payload).provenance)
+        assertEquals(expected, Json.decodeFromString<ApplicationEvent>(chain[1].payload).provenance)
+    }
+
+    @Test
+    fun `saveApplication and updateStatus record an explicit provenance`() = runTest {
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(FakeApplicationStateStore(), eventLog)
+        val mcp = EventProvenance.McpClient("mcp")
+
+        val id = repository.saveApplication(null, input, mcp)
+        repository.updateStatus(id, AppStatus.OFFER, "Verbal offer", mcp)
+
+        val chain = eventLog.observeChain().first()
+        assertEquals(mcp, Json.decodeFromString<ApplicationEvent>(chain[0].payload).provenance)
+        assertEquals(mcp, Json.decodeFromString<ApplicationEvent>(chain[1].payload).provenance)
     }
 }

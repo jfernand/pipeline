@@ -19,12 +19,12 @@ internal class RoomEventLog(
     private val identityStore: DeviceIdentityStore,
     private val dao: EventEnvelopeDao,
 ) : EventLog {
-    // Resolved once and cached: identityStore.getOrCreateDeviceId() is a DB round trip, and the
+    // Resolved once and cached: identityStore.getDeviceId() is a storage round trip, and the
     // device id can't change mid-process.
     private var cachedDeviceId: DeviceId? = null
 
     override suspend fun deviceId(): DeviceId =
-        cachedDeviceId ?: identityStore.getOrCreateDeviceId().also { cachedDeviceId = it }
+        cachedDeviceId ?: identityStore.getDeviceId().also { cachedDeviceId = it }
 
     override fun observeChain(): Flow<List<EventEnvelope>> =
         dao.observeAll().map { list -> list.map { it.toEventEnvelope() } }
