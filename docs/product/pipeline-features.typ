@@ -6,8 +6,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.44",
-  date: "2026-08-25",
+  revision: "1.45",
+  date: "2026-08-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -217,6 +217,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     `StatusFilterChips`' state is a `Map<AppStatus, StatusFilterMode>` now, not a single
     `AppStatus?`. `PlFilterChip` gained a `negative` variant (`PlColors.danger`, distinct from
     `active`'s brand amber) to render it.],
+  [1.45], [2026-08-26], [Shipped PL-010, Follow-ups: the tablet nav tab behind
+    `PlaceholderPane("Follow-ups")` now lists every overdue next-action date and overdue reminder
+    across the whole pipeline, sorted by due date — `JobApplicationRepository.observeFollowUps`,
+    backed by a new `toFollowUpItems` mapping over every application's live state.],
 )
 
 #part(1, "Core Application",
@@ -244,7 +248,7 @@ dialog for every field that might change.
 #include "features/PL-007-edit-application.typ"
 #include "features/PL-008-search-filter-applications.typ"
 #include "features/PL-009-in-app-navigation-deep-links.typ"
-#include "features/PL-010-follow-ups-placeholder.typ"
+#include "features/PL-010-follow-ups.typ"
 #include "features/PL-021-remember-last-route.typ"
 #include "features/PL-023-negative-search-filters.typ"
 #include "features/PL-024-delete-application.typ"
@@ -417,7 +421,7 @@ link if it has one, and the MCP tool that reaches it, if any.
     real deep link takes],
 )
 #route-row([AddEditRoute(id: Long? = null)], [`AddEditScreen`], [`AddEditScreen`])
-#route-row([FollowUpsRoute], [Not registered — unreachable], [`PlaceholderPane("Follow-ups")`])
+#route-row([FollowUpsRoute], [Not registered — unreachable], [`FollowUpsContent`])
 #route-row([SyncRoute], [`SyncScreen`], [`TabletSyncContent`])
 #route-row([SettingsRoute], [`SettingsScreen`], [`SettingsScreen`])
 #route-row([PairRoute], [`PairingScreen`], [`PairingScreen`])
