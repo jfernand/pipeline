@@ -74,19 +74,24 @@ fun OverdueBadge(days: Int, modifier: Modifier = Modifier) {
     }
 }
 
+/** [negative] is a third, independent look on top of [active] — e.g. PL-023's status filter
+ *  chips, where a status can be excluded ("negative") rather than just selected. Takes precedence
+ *  over [active] when both are somehow true, but callers are expected to only ever set one. */
 @Composable
 fun PlFilterChip(
     label: String,
     modifier: Modifier = Modifier,
     active: Boolean = false,
+    negative: Boolean = false,
     dotColor: Color? = null,
     onClick: (() -> Unit)? = null,
 ) {
+    val accent = if (negative) PlColors.danger else PlColors.brandPrimary
     Row(
         modifier
             .clip(chipShape)
-            .background(if (active) PlColors.brandPrimary else Color.Transparent)
-            .border(1.dp, if (active) PlColors.brandPrimary else PlColors.borderDefault, chipShape)
+            .background(if (active || negative) accent else Color.Transparent)
+            .border(1.dp, if (active || negative) accent else PlColors.borderDefault, chipShape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 11.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -96,7 +101,13 @@ fun PlFilterChip(
         MonoText(
             label,
             size = 10.sp,
-            color = if (active) PlColors.onBrand else PlColors.fgSecondary,
+            // fgPrimary rather than onBrand for the negative case — danger's dark, saturated red
+            // needs a light foreground for contrast, the opposite of brandPrimary's light amber.
+            color = when {
+                negative -> PlColors.fgPrimary
+                active -> PlColors.onBrand
+                else -> PlColors.fgSecondary
+            },
         )
     }
 }
