@@ -10,6 +10,25 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+// Same source BuildInfo.GIT_DESCRIBE (shared/build.gradle.kts) is generated from — providers.exec
+// rather than a raw process call so this stays configuration-cache-safe. Never fails the build if
+// git is unavailable, matching GenerateGitInfoTask's own fallback there.
+fun gitOutput(vararg args: String): String? {
+    val execOutput = providers.exec {
+        commandLine("git", *args)
+        isIgnoreExitValue = true
+    }
+    return runCatching { execOutput.standardOutput.asText.get().trim() }.getOrNull()?.takeIf { it.isNotBlank() }
+}
+
+// packageVersion has to be a strict major.minor.patch — unlike Android's free-form versionName,
+// there's no format here to just drop the raw git describe string (with its commit hash suffix)
+// into. No release tags exist yet to derive a real major.minor from, so 1.0 stays fixed by hand
+// and only the patch digit moves, driven by commit count — a real, monotonically-increasing
+// number instead of "1.0.0" frozen forever.
+val gitPatchVersion = gitOutput("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0
+val gitPackageVersion = "1.0.$gitPatchVersion"
+
 dependencies {
     implementation(project(":shared"))
 
@@ -27,7 +46,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.cr.pipeline"
-            packageVersion = "1.0.0"
+            packageVersion = gitPackageVersion
         }
     }
 }
