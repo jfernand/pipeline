@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.43",
+  revision: "1.44",
   date: "2026-08-25",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -212,6 +212,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.43], [2026-08-25], [Shipped PL-039, Platform App Icons: Android, iOS, desktop, and web all
     now show the "PL" monogram instead of template defaults — the stock Android Studio robot, the
     Kotlin Multiplatform wizard's hexagon, and no icon at all on desktop and web.],
+  [1.44], [2026-08-25], [Shipped PL-023, Negative Search Filters: every status filter chip now
+    cycles not-set → required → excluded independently, replacing the old single-select filter —
+    `StatusFilterChips`' state is a `Map<AppStatus, StatusFilterMode>` now, not a single
+    `AppStatus?`. `PlFilterChip` gained a `negative` variant (`PlColors.danger`, distinct from
+    `active`'s brand amber) to render it.],
 )
 
 #part(1, "Core Application",
