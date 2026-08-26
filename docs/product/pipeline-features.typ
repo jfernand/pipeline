@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.39",
+  revision: "1.41",
   date: "2026-08-25",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -196,6 +196,16 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     moved off a Room table only Android/JVM/iOS had, onto an `expect fun createDeviceIdentityStore()`
     backed by that platform's `Settings` — android, ios, jvm, js, and wasmJs each get an actual, so
     every target generates and persists the id the same way.],
+  [1.40], [2026-08-25], [The event log (PL-011) is now the sole source of truth: the Room cache
+    tables (`applications`, `status_events`, `contacts`, `reminders`) are gone, replaced by
+    `InMemoryApplicationStateStore` on every platform, materialized by replaying `event_envelopes`
+    through a new `replayApplicationState` on first access. A schema change to how state is shaped
+    no longer needs a database migration — only the event types staying additive does, the same
+    discipline PL-033 already established. Fixes real data loss on js/wasmJs (previously reset on
+    every reload) and a latent bug where an edit's `applicationId` didn't match its application's
+    original create event, which would have silently broken replay grouping.],
+  [1.41], [2026-08-25], [Added and shipped PL-042, Event Log as Source of Truth, formalizing 1.40's
+    change in the catalog.],
 )
 
 #part(1, "Core Application",
@@ -263,6 +273,7 @@ one worth trusting with a job search.
 #include "features/PL-019-fake-data-mode.typ"
 #include "features/PL-020-file-picker-module.typ"
 #include "features/PL-033-event-provenance.typ"
+#include "features/PL-042-event-log-as-source-of-truth.typ"
 
 #part(3, "Sync",
   blurb: [One pipeline, not a copy per device left to drift. Peer-to-peer, no server in the

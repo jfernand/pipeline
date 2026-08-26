@@ -61,6 +61,20 @@ class EventSourcedJobApplicationRepositoryTest {
     }
 
     @Test
+    fun `every event appended for one application carries the same applicationId as its create`() = runTest {
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(FakeApplicationStateStore(), eventLog)
+        val id = repository.saveApplication(null, input)
+
+        repository.saveApplication(id, input.copy(company = "Northwind Labs"))
+        repository.updateStatus(id, AppStatus.OFFER, "Verbal offer")
+
+        val applicationIds = eventLog.observeChain().first()
+            .map { Json.decodeFromString<ApplicationEvent>(it.payload).applicationId }
+        assertEquals(1, applicationIds.toSet().size, "create, edit, and status-change should all reference the same applicationId")
+    }
+
+    @Test
     fun `updateStatus appends a history entry with its note`() = runTest {
         val store = FakeApplicationStateStore()
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())

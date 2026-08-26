@@ -9,30 +9,26 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.sqlite.execSQL
 import kotlinx.coroutines.Dispatchers
 
 @Database(
     entities = [
-        Application::class,
-        StatusEvent::class,
-        Contact::class,
-        Reminder::class,
         EventEnvelopeEntity::class,
     ],
-    // 3: device_identity dropped — the device id lives in platform Settings now
-    // (DeviceIdentityStore.kt), standardized the same way across every target instead of only
-    // the Room-backed ones.
-    version = 3,
+    // 4: applications/status_events/contacts/reminders dropped — that read-side cache is
+    // in-memory only now, materialized by replaying event_envelopes at startup
+    // (InMemoryApplicationStateStore.kt) instead of being persisted and migrated in place. The
+    // event log is the only thing this database still needs to keep.
+    version = 4,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun applicationDao(): ApplicationDao
-    abstract fun statusEventDao(): StatusEventDao
-    abstract fun contactDao(): ContactDao
-    abstract fun reminderDao(): ReminderDao
     abstract fun eventEnvelopeDao(): EventEnvelopeDao
 }
 
@@ -49,6 +45,19 @@ const val DATABASE_NAME = "pipeline.db"
 
 expect fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase>
 
+// event_envelopes must survive this bump — it's the durable source of truth applications get
+// rebuilt from, so wiping it here would be exactly the bug this cache-removal is fixing, on the
+// release meant to fix it. Real migration, not fallbackToDestructiveMigration, specifically so
+// event_envelopes is left untouched; only the now-unused cache tables get dropped.
+private val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("DROP TABLE IF EXISTS applications")
+        connection.execSQL("DROP TABLE IF EXISTS status_events")
+        connection.execSQL("DROP TABLE IF EXISTS contacts")
+        connection.execSQL("DROP TABLE IF EXISTS reminders")
+    }
+}
+
 fun buildDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase = builder
     .setDriver(BundledSQLiteDriver())
     // Dispatchers.IO isn't part of kotlinx-coroutines-core's common API — it's a JVM actual, and
@@ -57,8 +66,9 @@ fun buildDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase = bui
     // SQLite driver isn't doing classic blocking file I/O the way a JDBC driver would, so there's
     // no real IO-vs-CPU distinction being lost by not having a dedicated IO pool here.
     .setQueryCoroutineContext(Dispatchers.Default)
-    // No migration story yet (pre-release, exportSchema = false) — a schema bump just recreates
-    // the local DB. Seed data repopulates automatically; nothing durable is lost that a future
-    // synced install couldn't recover.
+    .addMigrations(MIGRATION_3_4)
+    // Still no migration story beyond 3->4 (pre-release, exportSchema = false) — a future bump
+    // recreates the local DB, including event_envelopes, unless it also gets a real migration
+    // the way 3->4 did above.
     .fallbackToDestructiveMigration(dropAllTables = true)
     .build()

@@ -24,6 +24,7 @@ import kotlinx.datetime.LocalDate
  */
 fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDate): ApplicationState = when (event) {
     is ApplicationCreated -> ApplicationState(
+        applicationId = event.applicationId,
         company = event.input.company,
         role = event.input.role,
         status = event.input.status,

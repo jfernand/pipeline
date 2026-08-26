@@ -30,10 +30,9 @@ data class SeedApplication(
 )
 
 /**
- * The one source of test/QA data for the app: [org.cr.pipeline.data.RoomJobApplicationRepository]
- * seeds the database from this on first run, and [org.cr.pipeline.data.InMemoryJobApplicationRepository]
- * (js/wasmJs, no Room) reads it directly. Dates are relative offsets from "today" so the app always
- * looks current whenever it's actually run.
+ * The one source of test/QA data for the app: [org.cr.pipeline.data.InMemoryApplicationStateStore]
+ * shows this whenever the event log is empty (a fresh install). Dates are relative offsets from
+ * "today" so the app always looks current whenever it's actually run.
  */
 val seedApplications: List<SeedApplication> = listOf(
     SeedApplication(

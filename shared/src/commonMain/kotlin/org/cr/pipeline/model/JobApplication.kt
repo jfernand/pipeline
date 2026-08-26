@@ -6,6 +6,11 @@ package org.cr.pipeline.model
 
 import androidx.compose.ui.graphics.Color
 
+/** Serialized by name into the event log (`ApplicationInput.status`/`StatusChanged.status` inside
+ *  `ApplicationEvent`), which is permanent — append-only, never remove or rename an entry. There's
+ *  deliberately no runtime fallback for an unrecognized name the way `EventProvenance.Unknown`
+ *  exists for provenance: an old build reading a status name it doesn't know fails to decode that
+ *  one event (see `replayApplicationState`), it doesn't degrade to some placeholder value. */
 enum class AppStatus(val label: String, val color: Color) {
     WISHLIST("Wishlist", Color(0xFF9C9C9C)),
     APPLIED("Applied", Color(0xFF7FA9CC)),

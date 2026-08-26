@@ -15,6 +15,7 @@ import org.cr.pipeline.model.AppStatus
  * format (Room tables, an in-memory map, ...).
  */
 data class ApplicationState(
+    val applicationId: ApplicationId,
     val company: String,
     val role: String,
     val status: AppStatus,

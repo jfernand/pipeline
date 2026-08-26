@@ -5,23 +5,10 @@
 package org.cr.pipeline.data.db
 
 import androidx.room.TypeConverter
-import kotlin.time.Instant
-import kotlinx.datetime.LocalDate
 
-/** Room has no built-in support for kotlinx.datetime types, so both are stored as Long. */
+/** Only [EventEnvelopeEntity] is left with a column needing a converter, now that the cache
+ *  tables (which needed [kotlinx.datetime.LocalDate]/[kotlin.time.Instant] converters) are gone. */
 class Converters {
-    @TypeConverter
-    fun epochDaysToLocalDate(value: Long?): LocalDate? = value?.let { LocalDate.fromEpochDays(it) }
-
-    @TypeConverter
-    fun localDateToEpochDays(date: LocalDate?): Long? = date?.toEpochDays()
-
-    @TypeConverter
-    fun epochMillisToInstant(value: Long?): Instant? = value?.let { Instant.fromEpochMilliseconds(it) }
-
-    @TypeConverter
-    fun instantToEpochMillis(instant: Instant?): Long? = instant?.toEpochMilliseconds()
-
     /** Hash values are hex digests, so a bare comma-join is an unambiguous, dependency-free
      *  encoding — no need for JSON here. */
     @TypeConverter

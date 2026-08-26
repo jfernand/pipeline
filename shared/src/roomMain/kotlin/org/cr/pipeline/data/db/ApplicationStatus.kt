@@ -1,9 +1,0 @@
-/*
- * Copyright (c) 2026 Javier Fernández. All rights reserved.
- */
-
-package org.cr.pipeline.data.db
-
-enum class ApplicationStatus {
-    WISHLIST, APPLIED, PHONE_SCREEN, INTERVIEWING, OFFER, REJECTED, WITHDRAWN
-}

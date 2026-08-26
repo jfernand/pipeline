@@ -6,6 +6,7 @@ package org.cr.pipeline.data
 
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
@@ -45,21 +46,21 @@ class EventSourcedJobApplicationRepository(
         store.getState(id)?.toApplicationInput()
 
     override suspend fun saveApplication(id: Long?, input: ApplicationInput, provenance: EventProvenance?): Long {
-        val current = id?.let { store.getState(it) }
-        val resolvedProvenance = resolveProvenance(provenance)
-        // Row ids aren't stable across devices; for a create, there isn't one yet to key off of
-        // anyway, so this is a random placeholder either way until real ids are wired up.
-        val event = if (id == null) {
-            ApplicationCreated(ApplicationId.random(), input, resolvedProvenance)
-        } else {
-            ApplicationEdited(ApplicationId(id.toString()), input, resolvedProvenance)
+        if (id == null) {
+            val event = ApplicationCreated(ApplicationId.random(), input, resolveProvenance(provenance))
+            return persist(null, null, event)
         }
+        val current = store.getState(id) ?: return id
+        // Reuses the applicationId the original ApplicationCreated event carries, read off the
+        // current state, rather than synthesizing one from id — every event for one application
+        // has to share the same applicationId for replay to be able to group them back together.
+        val event = ApplicationEdited(current.applicationId, input, resolveProvenance(provenance))
         return persist(id, current, event)
     }
 
     override suspend fun updateStatus(id: Long, status: AppStatus, note: String, provenance: EventProvenance?) {
         val current = store.getState(id) ?: return
-        persist(id, current, StatusChanged(ApplicationId(id.toString()), status, note, resolveProvenance(provenance)))
+        persist(id, current, StatusChanged(current.applicationId, status, note, resolveProvenance(provenance)))
     }
 
     // deviceId() is a storage round trip on first call (then cached by eventLog itself), so this
@@ -69,6 +70,11 @@ class EventSourcedJobApplicationRepository(
         explicit ?: EventProvenance.Device(eventLog.deviceId())
 
     private suspend fun persist(id: Long?, current: ApplicationState?, event: ApplicationEvent): Long {
+        // Touches store first: if this is the store's very first access, that's what triggers its
+        // (one-time) materialization from the event log — it needs to see the log as it stood
+        // *before* this event, or its own materialization would replay this event too, on top of
+        // the write() call below that's about to record it a second time.
+        store.observeAll().first()
         eventLog.append(event, Clock.System.now().toEpochMilliseconds())
         return store.write(id, applyEvent(current, event, todayDate()))
     }

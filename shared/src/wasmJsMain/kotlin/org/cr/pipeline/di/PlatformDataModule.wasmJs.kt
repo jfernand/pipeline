@@ -20,11 +20,13 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual val platformDataModule: Module = module {
-    // Applications themselves still reset on reload (Room's KMP support doesn't cover js/wasmJs);
-    // only the device identity, event log, and preferences persist, to localStorage.
-    single<ApplicationStateStore> { InMemoryApplicationStateStore() }
+    // Applications persist the same way every platform's do now: BrowserEventLog durably writes
+    // every event to localStorage, and InMemoryApplicationStateStore rebuilds the current state
+    // from it on first access — nothing here is Room's KMP support finally covering js/wasmJs,
+    // this platform never needed Room, just a store that replays the (already-persisted) log.
     single<DeviceIdentityStore> { createDeviceIdentityStore() }
     single<EventLog> { BrowserEventLog(get()) }
+    single<ApplicationStateStore> { InMemoryApplicationStateStore(get()) }
     single<JobApplicationRepository> { EventSourcedJobApplicationRepository(get(), get()) }
     single<Settings> { createPreferencesSettings() }
     single<PreferencesStore> { SettingsPreferencesStore(get()) }
