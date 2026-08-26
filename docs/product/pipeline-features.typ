@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.42",
+  revision: "1.43",
   date: "2026-08-25",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -209,6 +209,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.42], [2026-08-25], [Shipped PL-037, Artifact Version from Build Info: `androidApp`'s
     `versionCode`/`versionName` and `desktopApp`'s `packageVersion` now derive from git (commit
     count, `git describe`) instead of numbers hand-set once and never touched again.],
+  [1.43], [2026-08-25], [Shipped PL-039, Platform App Icons: Android, iOS, desktop, and web all
+    now show the "PL" monogram instead of template defaults — the stock Android Studio robot, the
+    Kotlin Multiplatform wizard's hexagon, and no icon at all on desktop and web.],
 )
 
 #part(1, "Core Application",
