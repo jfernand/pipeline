@@ -4,6 +4,7 @@
 
 package org.cr.pipeline
 
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -22,6 +23,7 @@ fun main(args: Array<String>) = application {
         onCloseRequest = ::exitApplication,
         title = "pipeline",
         state = rememberWindowState(size = DpSize(1280.dp, 800.dp)),
+        icon = painterResource("icon.png"),
     ) {
         App(initialDeepLink = deepLink)
     }

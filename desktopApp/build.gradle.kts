@@ -47,6 +47,10 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.cr.pipeline"
             packageVersion = gitPackageVersion
+
+            macOS { iconFile.set(project.file("icon/icon.icns")) }
+            windows { iconFile.set(project.file("icon/icon.ico")) }
+            linux { iconFile.set(project.file("icon/icon.png")) }
         }
     }
 }
