@@ -9,6 +9,7 @@ import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.ContactSummary
+import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.model.ReminderSummary
 import org.cr.pipeline.model.StatusHistoryEntry
@@ -83,6 +84,32 @@ fun ApplicationState.toApplicationDetail(id: Long, today: LocalDate = todayDate(
             .sortedBy { it.dueDate }
             .map { reminder -> ReminderSummary(reminder.message, reminder.dueDate.formatShort(), reminder.dueDate < today) },
     )
+}
+
+/**
+ * Every overdue thing across every application — an overdue [ApplicationState.nextActionDate]
+ * and every overdue [ReminderRecord] are independent signals here, same as they already are on
+ * the list (the "Needs follow-up" section, driven by [toJobApplication]'s overdueDays) and on the
+ * detail screen ([toApplicationDetail]'s reminders, via `OverdueBanner`) — this just flattens both
+ * into one sorted list instead of requiring a screen per application to see them. Not
+ * deduplicated when the two happen to share a date (e.g. a next-action date set to match a
+ * reminder) for the same reason those two existing call sites don't cross-reference each other
+ * either: they're recorded as separate facts, so both are shown.
+ */
+fun List<Pair<Long, ApplicationState>>.toFollowUpItems(today: LocalDate = todayDate()): List<FollowUpItem> {
+    data class Raw(val id: Long, val company: String, val role: String, val message: String, val dueDate: LocalDate)
+
+    return flatMap { (id, state) ->
+        val nextAction = state.nextActionDate
+            ?.takeIf { it < today }
+            ?.let { Raw(id, state.company, state.role, "Next action due", it) }
+        val reminders = state.reminders
+            .filter { it.dueDate < today }
+            .map { reminder -> Raw(id, state.company, state.role, reminder.message, reminder.dueDate) }
+        listOfNotNull(nextAction) + reminders
+    }
+        .sortedBy { it.dueDate }
+        .map { FollowUpItem(it.id, it.company, it.role, it.message, it.dueDate.formatShort()) }
 }
 
 fun ApplicationState.toApplicationInput(): ApplicationInput = ApplicationInput(
