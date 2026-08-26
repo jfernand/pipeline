@@ -23,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavHostController
 import androidx.navigation.NavUri
@@ -49,12 +48,12 @@ import org.cr.pipeline.ui.phone.SettingsScreen
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.cr.pipeline.ui.tablet.DevToolsContent
+import org.cr.pipeline.ui.tablet.FollowUpsContent
 import org.cr.pipeline.ui.tablet.NavDestination
 import org.cr.pipeline.ui.tablet.NavRail
 import org.cr.pipeline.ui.tablet.TabletDetailScreen
 import org.cr.pipeline.ui.tablet.TabletListContent
 import org.cr.pipeline.ui.tablet.TabletSyncContent
-import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 import org.koin.compose.koinInject
 
@@ -123,7 +122,14 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
                 }
                 composable<SyncRoute> { TabletSyncContent() }
-                composable<FollowUpsRoute> { PlaceholderPane("Follow-ups") }
+                composable<FollowUpsRoute> {
+                    FollowUpsContent(
+                        onSelect = { id ->
+                            lastViewedId = id
+                            navController.navigate(DetailRoute(id))
+                        },
+                    )
+                }
                 composable<SettingsRoute> {
                     SettingsScreen(onBack = { navController.popBackStack() }, onPair = { navController.navigate(PairRoute) })
                 }
@@ -161,12 +167,5 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PlaceholderPane(label: String) {
-    Box(Modifier.fillMaxSize().background(PlColors.bgBase), contentAlignment = Alignment.Center) {
-        MonoText("$label — coming soon", size = 11.sp)
     }
 }
