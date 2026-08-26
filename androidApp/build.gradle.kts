@@ -9,6 +9,22 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+// Same source BuildInfo.GIT_DESCRIBE (shared/build.gradle.kts) is generated from — providers.exec
+// rather than a raw process call so this stays configuration-cache-safe. Never fails the build if
+// git is unavailable, matching GenerateGitInfoTask's own fallback there.
+fun gitOutput(vararg args: String): String? {
+    val execOutput = providers.exec {
+        commandLine("git", *args)
+        isIgnoreExitValue = true
+    }
+    return runCatching { execOutput.standardOutput.asText.get().trim() }.getOrNull()?.takeIf { it.isNotBlank() }
+}
+
+// No release tags exist yet to derive a real major.minor.patch from — commit count is the
+// simplest monotonically-increasing stand-in for the versionCode Play requires until there are.
+val gitVersionCode = gitOutput("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
+val gitVersionName = gitOutput("describe", "--tags", "--always", "--dirty") ?: "unknown"
+
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11
@@ -32,8 +48,8 @@ android {
         applicationId = "org.cr.pipeline"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = gitVersionCode
+        versionName = gitVersionName
     }
     packaging {
         resources {
