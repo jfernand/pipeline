@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.model.todayDate
 import org.cr.pipeline.sync.event.ApplicationCreated
@@ -24,6 +25,7 @@ import org.cr.pipeline.sync.event.StatusChanged
 import org.cr.pipeline.sync.event.applyEvent
 import org.cr.pipeline.sync.event.toApplicationDetail
 import org.cr.pipeline.sync.event.toApplicationInput
+import org.cr.pipeline.sync.event.toFollowUpItems
 import org.cr.pipeline.sync.event.toJobApplication
 
 /**
@@ -41,6 +43,9 @@ class EventSourcedJobApplicationRepository(
 
     override fun observeApplicationDetail(id: Long): Flow<ApplicationDetail?> =
         store.observeState(id).map { it?.toApplicationDetail(id) }
+
+    override fun observeFollowUps(): Flow<List<FollowUpItem>> =
+        store.observeAll().map { it.toFollowUpItems() }
 
     override suspend fun getApplicationInput(id: Long): ApplicationInput? =
         store.getState(id)?.toApplicationInput()

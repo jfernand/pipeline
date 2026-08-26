@@ -8,12 +8,17 @@ import kotlinx.coroutines.flow.Flow
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.sync.event.EventProvenance
 
 interface JobApplicationRepository {
     fun observeApplications(): Flow<List<JobApplication>>
     fun observeApplicationDetail(id: Long): Flow<ApplicationDetail?>
+
+    /** Every overdue next-action date and overdue reminder, across every application, sorted by
+     *  due date — see [org.cr.pipeline.sync.event.toFollowUpItems] for what counts. */
+    fun observeFollowUps(): Flow<List<FollowUpItem>>
 
     /** Null when [id] doesn't exist (e.g. it was deleted while the edit screen was open). */
     suspend fun getApplicationInput(id: Long): ApplicationInput?
