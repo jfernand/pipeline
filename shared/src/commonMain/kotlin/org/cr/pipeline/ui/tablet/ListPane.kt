@@ -76,7 +76,7 @@ fun ListPane(
                 }
                 PlSearchField(query = filter.query, onQueryChange = filter.onQueryChange)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    StatusFilterChips(applications.size, filter.statusFilter, filter.onStatusFilterChange)
+                    StatusFilterChips(applications.size, filter.statusFilters, filter.onStatusFilterCycle, filter.onClearStatusFilters)
                 }
             }
             Column(
