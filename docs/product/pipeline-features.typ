@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.41",
+  revision: "1.42",
   date: "2026-08-25",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -206,6 +206,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     original create event, which would have silently broken replay grouping.],
   [1.41], [2026-08-25], [Added and shipped PL-042, Event Log as Source of Truth, formalizing 1.40's
     change in the catalog.],
+  [1.42], [2026-08-25], [Shipped PL-037, Artifact Version from Build Info: `androidApp`'s
+    `versionCode`/`versionName` and `desktopApp`'s `packageVersion` now derive from git (commit
+    count, `git describe`) instead of numbers hand-set once and never touched again.],
 )
 
 #part(1, "Core Application",
