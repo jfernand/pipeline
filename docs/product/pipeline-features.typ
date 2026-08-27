@@ -6,7 +6,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.45",
+  revision: "1.46",
   date: "2026-08-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -221,6 +221,12 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     `PlaceholderPane("Follow-ups")` now lists every overdue next-action date and overdue reminder
     across the whole pipeline, sorted by due date — `JobApplicationRepository.observeFollowUps`,
     backed by a new `toFollowUpItems` mapping over every application's live state.],
+  [1.46], [2026-08-26], [Shipped PL-019, Fake Data Mode: a "Show fake data" switch in Dev Tools
+    now reads and writes a separate demo event chain (`EventLogKind`), seeded once from
+    `SeedData` as real `ApplicationCreated` events rather than synthesized into memory. Closes
+    this catalog's own review's top finding — an empty log is genuinely empty now, replacing the
+    old showingSeedData special-case in `InMemoryApplicationStateStore` that let an edit to
+    ephemeral demo data silently replay to nothing on restart.],
 )
 
 #part(1, "Core Application",
