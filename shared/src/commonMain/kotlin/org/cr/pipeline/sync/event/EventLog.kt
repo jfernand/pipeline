@@ -25,6 +25,16 @@ interface EventLog {
     suspend fun append(event: ApplicationEvent, timestampEpochMillis: Long): EventEnvelope
 }
 
+/**
+ * Which of a device's two independent chains a durable [EventLog] implementation reads and
+ * writes — [REAL] is the user's actual data; [DEMO] is PL-019's sandbox, seeded once from
+ * `seedApplications` (see [org.cr.pipeline.data.DemoSeedingEventLog]) and otherwise a completely
+ * ordinary chain from then on. Two chains, not two databases/files, so both platforms' durable
+ * [EventLog]s (Room, browser storage) only need one extra key/column to keep them apart, not a
+ * second storage implementation.
+ */
+enum class EventLogKind { REAL, DEMO }
+
 /** Chain lives in memory only — for tests, and as a default before a durable [EventLog] is wired
  *  up for a given platform. Every instance starts a fresh chain under a fresh device id. */
 class InMemoryEventLog(private val fixedDeviceId: DeviceId = DeviceId.random()) : EventLog {
