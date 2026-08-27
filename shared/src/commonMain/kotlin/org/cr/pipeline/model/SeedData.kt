@@ -5,15 +5,12 @@
 package org.cr.pipeline.model
 
 import kotlin.time.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.todayIn
-
-data class SeedStatusEvent(val status: AppStatus, val daysAgo: Int, val note: String)
-data class SeedContact(val name: String, val role: String, val email: String)
-
-/** [offsetDays] relative to today: negative is overdue, positive is upcoming. */
-data class SeedReminder(val offsetDays: Int, val message: String)
 
 data class SeedApplication(
     val company: String,
@@ -24,15 +21,18 @@ data class SeedApplication(
     val source: String?,
     val postingUrl: String?,
     val notes: String,
-    val statusHistory: List<SeedStatusEvent>,
-    val contacts: List<SeedContact>,
-    val reminders: List<SeedReminder>,
 )
 
 /**
- * The one source of test/QA data for the app: [org.cr.pipeline.data.InMemoryApplicationStateStore]
- * shows this whenever the event log is empty (a fresh install). Dates are relative offsets from
- * "today" so the app always looks current whenever it's actually run.
+ * The one source of demo data — PL-019's "Show fake data" seeds
+ * [org.cr.pipeline.data.DemoSeedingEventLog] from this, once, the same way a real application
+ * created through the Add/Edit form would be: one [org.cr.pipeline.sync.event.ApplicationCreated]
+ * event per entry, via [toApplicationInput]. Status history, contacts, and reminders aren't part
+ * of this shape — there's no event type that can set any of the three for a real application
+ * either (see docs/product/reports/2026-08-26-codebase-review.typ), so a richer seed shape here
+ * would just be state a real replay could never reproduce, the exact bug this feature exists to
+ * close. [offsetDays] fields are relative to "today" so the app always looks current whenever the
+ * demo log is actually created.
  */
 val seedApplications: List<SeedApplication> = listOf(
     SeedApplication(
@@ -47,20 +47,6 @@ val seedApplications: List<SeedApplication> = listOf(
             "multi-module builds. Comp band 185–205 plus equity. Dana said a decision lands within two " +
             "weeks of the final round.\n\nPrep: draw the sync topology from memory. They asked twice about " +
             "offline conflict handling, so it matters to them.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.APPLIED, daysAgo = 11, note = "Referred by Dana W."),
-            SeedStatusEvent(AppStatus.SCREEN, daysAgo = 4, note = "30 min with recruiter"),
-            SeedStatusEvent(AppStatus.INTERVIEW, daysAgo = 2, note = "Round 1: Compose deep dive"),
-        ),
-        contacts = listOf(
-            SeedContact("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com"),
-            SeedContact("Marcus Oyelaran", "Recruiter", "marcus@northwindlabs.com"),
-        ),
-        reminders = listOf(
-            SeedReminder(-3, "Email Dana about round 2 timing"),
-            SeedReminder(6, "Systems design round"),
-            SeedReminder(11, "Nudge if no reply"),
-        ),
     ),
     SeedApplication(
         company = "Cedar & Byrne",
@@ -72,16 +58,6 @@ val seedApplications: List<SeedApplication> = listOf(
         postingUrl = "cedarandbyrne.com/careers/senior-mobile",
         notes = "Team is expanding the mobile platform group after the last product launch. Recruiter " +
             "mentioned a fast timeline — they want to fill the role within a month.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.APPLIED, daysAgo = 5, note = "Applied via LinkedIn Easy Apply"),
-            SeedStatusEvent(AppStatus.SCREEN, daysAgo = 1, note = "Recruiter screen scheduled"),
-        ),
-        contacts = listOf(
-            SeedContact("Priya Nathan", "Recruiter", "priya.nathan@cedarandbyrne.com"),
-        ),
-        reminders = listOf(
-            SeedReminder(-1, "Confirm screen call time"),
-        ),
     ),
     SeedApplication(
         company = "Meridian Systems",
@@ -93,18 +69,6 @@ val seedApplications: List<SeedApplication> = listOf(
         postingUrl = "meridiansystems.io/careers/senior-mobile",
         notes = "Verbal offer from the hiring manager: base + equity, written offer to follow. Team seems " +
             "strong, good rapport in the final round.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.APPLIED, daysAgo = 27, note = "Applied through company site"),
-            SeedStatusEvent(AppStatus.SCREEN, daysAgo = 20, note = "Recruiter screen"),
-            SeedStatusEvent(AppStatus.INTERVIEW, daysAgo = 8, note = "Onsite loop, 4 rounds"),
-            SeedStatusEvent(AppStatus.OFFER, daysAgo = 1, note = "Verbal offer from hiring manager"),
-        ),
-        contacts = listOf(
-            SeedContact("Owen Castellano", "Hiring manager", "owen.castellano@meridiansystems.io"),
-        ),
-        reminders = listOf(
-            SeedReminder(3, "Respond to offer"),
-        ),
     ),
     SeedApplication(
         company = "Halcyon Freight",
@@ -116,11 +80,6 @@ val seedApplications: List<SeedApplication> = listOf(
         postingUrl = "halcyonfreight.com/careers/platform-lead",
         notes = "Platform team lead role overseeing three mobile engineers. Found through the company's own " +
             "careers page.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.APPLIED, daysAgo = 8, note = "Application submitted"),
-        ),
-        contacts = emptyList(),
-        reminders = emptyList(),
     ),
     SeedApplication(
         company = "Ostrom Analytics",
@@ -131,11 +90,6 @@ val seedApplications: List<SeedApplication> = listOf(
         source = null,
         postingUrl = "ostromanalytics.com/careers/android-ii",
         notes = "Interesting data-visualization-heavy Android role. Want to research the team before applying.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.WISHLIST, daysAgo = 12, note = "Saved for later"),
-        ),
-        contacts = emptyList(),
-        reminders = emptyList(),
     ),
     SeedApplication(
         company = "Kestrel Robotics",
@@ -146,15 +100,6 @@ val seedApplications: List<SeedApplication> = listOf(
         source = "Referral",
         postingUrl = null,
         notes = "Good conversation throughout, but they promoted an internal candidate into the role.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.APPLIED, daysAgo = 21, note = "Referred by a former coworker"),
-            SeedStatusEvent(AppStatus.SCREEN, daysAgo = 14, note = "Screen with the hiring manager"),
-            SeedStatusEvent(AppStatus.REJECTED, daysAgo = 6, note = "Team went with an internal candidate"),
-        ),
-        contacts = listOf(
-            SeedContact("Jules Ferreira", "Hiring manager", "jules.ferreira@kestrelrobotics.com"),
-        ),
-        reminders = emptyList(),
     ),
     SeedApplication(
         company = "Tidewater Health",
@@ -165,13 +110,18 @@ val seedApplications: List<SeedApplication> = listOf(
         source = "Recruiter",
         postingUrl = null,
         notes = "Withdrew after accepting the Meridian Systems offer.",
-        statusHistory = listOf(
-            SeedStatusEvent(AppStatus.APPLIED, daysAgo = 30, note = "Sourced by an external recruiter"),
-            SeedStatusEvent(AppStatus.WITHDRAWN, daysAgo = 1, note = "Withdrew after accepting another offer"),
-        ),
-        contacts = emptyList(),
-        reminders = emptyList(),
     ),
+)
+
+fun SeedApplication.toApplicationInput(today: LocalDate): ApplicationInput = ApplicationInput(
+    company = company,
+    role = role,
+    status = status,
+    dateApplied = today.minus(daysAgoApplied, DateTimeUnit.DAY),
+    nextActionDate = nextActionOffsetDays?.let { today.plus(it, DateTimeUnit.DAY) },
+    postingUrl = postingUrl,
+    source = source,
+    notes = notes,
 )
 
 fun todayDate(): LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -180,4 +130,3 @@ fun LocalDate.formatShort(): String {
     val monthNames = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
     return "${monthNames[month.ordinal]} $day"
 }
-
