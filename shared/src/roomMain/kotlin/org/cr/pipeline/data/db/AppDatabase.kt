@@ -23,7 +23,9 @@ import kotlinx.coroutines.Dispatchers
     // in-memory only now, materialized by replaying event_envelopes at startup
     // (InMemoryApplicationStateStore.kt) instead of being persisted and migrated in place. The
     // event log is the only thing this database still needs to keep.
-    version = 4,
+    // 5: event_envelopes gained logKind (PL-019) — a real device chain and the "Show fake data"
+    // demo chain now share this one table, kept apart by that column.
+    version = 5,
     exportSchema = false,
 )
 @TypeConverters(Converters::class)
@@ -58,6 +60,14 @@ private val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+// A plain ADD COLUMN, defaulted for every existing row — every envelope that predates this column
+// is real device history, never demo data, so 'REAL' is the only correct backfill value.
+private val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE event_envelopes ADD COLUMN logKind TEXT NOT NULL DEFAULT 'REAL'")
+    }
+}
+
 fun buildDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase = builder
     .setDriver(BundledSQLiteDriver())
     // Dispatchers.IO isn't part of kotlinx-coroutines-core's common API — it's a JVM actual, and
@@ -66,7 +76,7 @@ fun buildDatabase(builder: RoomDatabase.Builder<AppDatabase>): AppDatabase = bui
     // SQLite driver isn't doing classic blocking file I/O the way a JDBC driver would, so there's
     // no real IO-vs-CPU distinction being lost by not having a dedicated IO pool here.
     .setQueryCoroutineContext(Dispatchers.Default)
-    .addMigrations(MIGRATION_3_4)
+    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
     // Still no migration story beyond 3->4 (pre-release, exportSchema = false) — a future bump
     // recreates the local DB, including event_envelopes, unless it also gets a real migration
     // the way 3->4 did above.

@@ -18,11 +18,12 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Verifies the one step in the event-log-as-source-of-truth change that could go destructively
- * wrong if it did: opening a real pre-existing version-3 database (applications/status_events/
- * contacts/reminders still present, alongside event_envelopes) must run the hand-written
- * MIGRATION_3_4 — which drops only the four cache tables — not fallbackToDestructiveMigration,
- * which would wipe event_envelopes too, on the exact release meant to make it durable.
+ * Verifies the steps in the event-log-as-source-of-truth and PL-019 changes that could go
+ * destructively wrong if they did: opening a real pre-existing version-3 database (applications/
+ * status_events/contacts/reminders still present, alongside event_envelopes) must run the
+ * hand-written MIGRATION_3_4 (drops only the four cache tables) and MIGRATION_4_5 (adds logKind,
+ * defaulted for every pre-existing row) — not fallbackToDestructiveMigration, which would wipe
+ * event_envelopes too, on releases meant to make it durable and then keep it that way.
  *
  * Builds the "old" file with raw SQL rather than the deleted Room entity classes (gone from the
  * codebase now that the cache is in-memory-only) — table content doesn't matter to a `DROP TABLE`,
@@ -75,12 +76,13 @@ class AppDatabaseMigration3To4Test {
         assertTrue(tableNames().containsAll(listOf("applications", "status_events", "contacts", "reminders", "event_envelopes")))
 
         val db = buildDatabase(Room.databaseBuilder<AppDatabase>(name = dbFile.absolutePath))
-        val envelopes = db.eventEnvelopeDao().observeAll().first()
+        val envelopes = db.eventEnvelopeDao().observeAll("REAL").first()
         db.close()
 
         assertEquals(1, envelopes.size)
         assertEquals("hash-1", envelopes.single().hash)
         assertEquals("{\"pre-existing\":true}", envelopes.single().payload)
+        assertEquals("REAL", envelopes.single().logKind, "a row that predates logKind is real device history, never demo data")
 
         val remaining = tableNames()
         assertTrue("event_envelopes" in remaining, "the durable event log must survive the migration")

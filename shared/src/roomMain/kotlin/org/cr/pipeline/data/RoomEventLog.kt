@@ -13,11 +13,13 @@ import org.cr.pipeline.sync.chain.EventEnvelope
 import org.cr.pipeline.sync.chain.Hash
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.EventLog
+import org.cr.pipeline.sync.event.EventLogKind
 import org.cr.pipeline.sync.event.toEnvelope
 
 internal class RoomEventLog(
     private val identityStore: DeviceIdentityStore,
     private val dao: EventEnvelopeDao,
+    private val kind: EventLogKind = EventLogKind.REAL,
 ) : EventLog {
     // Resolved once and cached: identityStore.getDeviceId() is a storage round trip, and the
     // device id can't change mid-process.
@@ -27,15 +29,15 @@ internal class RoomEventLog(
         cachedDeviceId ?: identityStore.getDeviceId().also { cachedDeviceId = it }
 
     override fun observeChain(): Flow<List<EventEnvelope>> =
-        dao.observeAll().map { list -> list.map { it.toEventEnvelope() } }
+        dao.observeAll(kind.name).map { list -> list.map { it.toEventEnvelope() } }
 
     override suspend fun append(event: ApplicationEvent, timestampEpochMillis: Long): EventEnvelope {
         val id = deviceId()
-        val last = dao.getLast()
+        val last = dao.getLast(kind.name)
         val parentHashes = listOfNotNull(last?.hash?.let { Hash(it) })
         val sequence = (last?.sequence ?: -1) + 1
         val envelope = toEnvelope(event, parentHashes, id, sequence, timestampEpochMillis)
-        dao.insert(envelope.toEntity())
+        dao.insert(envelope.toEntity(kind))
         return envelope
     }
 }
@@ -49,11 +51,12 @@ private fun EventEnvelopeEntity.toEventEnvelope(): EventEnvelope = EventEnvelope
     payload = payload,
 )
 
-private fun EventEnvelope.toEntity(): EventEnvelopeEntity = EventEnvelopeEntity(
+private fun EventEnvelope.toEntity(kind: EventLogKind): EventEnvelopeEntity = EventEnvelopeEntity(
     hash = hash.value,
     parentHashes = parentHashes.map { it.value },
     deviceId = deviceId.value,
     sequence = sequence,
     timestampEpochMillis = timestampEpochMillis,
     payload = payload,
+    logKind = kind.name,
 )
