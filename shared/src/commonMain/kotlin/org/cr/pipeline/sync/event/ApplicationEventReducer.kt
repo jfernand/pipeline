@@ -64,4 +64,11 @@ fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDa
             statusHistory = current.statusHistory + StatusHistoryRecord(event.status, today, event.note),
         )
     }
+
+    is ContactAdded -> {
+        val current = checkNotNull(state) { "ContactAdded for ${event.applicationId} with no prior state" }
+        current.copy(
+            contacts = current.contacts + ContactRecord(event.contact.name, event.contact.role, event.contact.email),
+        )
+    }
 }

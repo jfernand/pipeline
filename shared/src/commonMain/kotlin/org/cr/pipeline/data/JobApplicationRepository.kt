@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.sync.event.EventProvenance
@@ -32,4 +33,9 @@ interface JobApplicationRepository {
      *  entry. [provenance] left null resolves to this device's own [EventProvenance.Device] —
      *  callers reached through another path (the MCP server) pass their own. */
     suspend fun updateStatus(id: Long, status: AppStatus, note: String, provenance: EventProvenance? = null)
+
+    /** Appends [contact] to the application's contact list. [provenance] left null resolves to
+     *  this device's own [EventProvenance.Device] — callers reached through another path (the MCP
+     *  server) pass their own. */
+    suspend fun addContact(id: Long, contact: ContactInput, provenance: EventProvenance? = null)
 }

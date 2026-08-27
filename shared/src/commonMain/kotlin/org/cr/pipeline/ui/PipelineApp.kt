@@ -46,6 +46,7 @@ import org.cr.pipeline.ui.nav.SyncRoute
 import org.cr.pipeline.ui.phone.PairingScreen
 import org.cr.pipeline.ui.phone.SettingsScreen
 import org.cr.pipeline.ui.screens.AddEditScreen
+import org.cr.pipeline.ui.screens.ContactSheet
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.cr.pipeline.ui.tablet.DevToolsContent
 import org.cr.pipeline.ui.tablet.FollowUpsContent
@@ -70,6 +71,8 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
     var lastViewedId by remember { mutableStateOf<Long?>(null) }
     var statusSheetApplicationId by remember { mutableStateOf<Long?>(null) }
     val statusSheetApplication = applications.firstOrNull { it.id == statusSheetApplicationId }
+    var contactSheetApplicationId by remember { mutableStateOf<Long?>(null) }
+    val contactSheetApplication = applications.firstOrNull { it.id == contactSheetApplicationId }
 
     Row(Modifier.fillMaxSize().background(PlColors.bgBase).statusBarsPadding()) {
         NavRail(
@@ -115,6 +118,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                         onBack = { navController.popBackStack() },
                         onEdit = { navController.navigate(AddEditRoute(route.id)) },
                         onUpdateStatus = { statusSheetApplicationId = route.id },
+                        onAddContact = { contactSheetApplicationId = route.id },
                     )
                 }
                 composable<AddEditRoute> { backStackEntry ->
@@ -162,6 +166,18 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     onSave = { status, note ->
                         scope.launch { repository.updateStatus(statusSheetApplication.id, status, note) }
                         statusSheetApplicationId = null
+                    },
+                    modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 480.dp).padding(bottom = 20.dp),
+                )
+            }
+            if (contactSheetApplication != null) {
+                ContactSheet(
+                    company = contactSheetApplication.company,
+                    role = contactSheetApplication.role,
+                    onCancel = { contactSheetApplicationId = null },
+                    onSave = { contact ->
+                        scope.launch { repository.addContact(contactSheetApplication.id, contact) }
+                        contactSheetApplicationId = null
                     },
                     modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 480.dp).padding(bottom = 20.dp),
                 )

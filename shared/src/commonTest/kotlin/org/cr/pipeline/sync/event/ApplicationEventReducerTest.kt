@@ -7,6 +7,7 @@ package org.cr.pipeline.sync.event
 import kotlinx.datetime.LocalDate
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.ContactInput
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -107,5 +108,30 @@ class ApplicationEventReducerTest {
         assertEquals(created.postingUrl, changed.postingUrl)
         assertEquals(created.source, changed.source)
         assertEquals(created.notes, changed.notes)
+    }
+
+    @Test
+    fun `ContactAdded appends a contact without touching other fields`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val contact = ContactInput("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")
+
+        val withContact = applyEvent(created, ContactAdded(applicationId, contact), today)
+
+        assertEquals(listOf(ContactRecord("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")), withContact.contacts)
+        assertEquals(created.company, withContact.company)
+        assertEquals(created.status, withContact.status)
+        assertEquals(created.statusHistory, withContact.statusHistory)
+    }
+
+    @Test
+    fun `ContactAdded appends to, rather than replaces, existing contacts`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val first = applyEvent(created, ContactAdded(applicationId, ContactInput("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")), today)
+
+        val second = applyEvent(first, ContactAdded(applicationId, ContactInput("Marcus Oyelaran", "Recruiter", "marcus@northwindlabs.com")), today)
+
+        assertEquals(2, second.contacts.size)
+        assertEquals("Dana Whitfield", second.contacts.first().name)
+        assertEquals("Marcus Oyelaran", second.contacts.last().name)
     }
 }

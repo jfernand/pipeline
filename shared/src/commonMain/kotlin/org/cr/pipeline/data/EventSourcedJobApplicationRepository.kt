@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.model.todayDate
@@ -19,6 +20,7 @@ import org.cr.pipeline.sync.event.ApplicationEdited
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.ApplicationState
+import org.cr.pipeline.sync.event.ContactAdded
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.sync.event.StatusChanged
@@ -66,6 +68,11 @@ class EventSourcedJobApplicationRepository(
     override suspend fun updateStatus(id: Long, status: AppStatus, note: String, provenance: EventProvenance?) {
         val current = store.getState(id) ?: return
         persist(id, current, StatusChanged(current.applicationId, status, note, resolveProvenance(provenance)))
+    }
+
+    override suspend fun addContact(id: Long, contact: ContactInput, provenance: EventProvenance?) {
+        val current = store.getState(id) ?: return
+        persist(id, current, ContactAdded(current.applicationId, contact, resolveProvenance(provenance)))
     }
 
     // deviceId() is a storage round trip on first call (then cached by eventLog itself), so this

@@ -19,3 +19,11 @@ data class ApplicationInput(
     val source: String?,
     val notes: String,
 )
+
+/** The fields gathered by the "Add contact" sheet. */
+@Serializable
+data class ContactInput(
+    val name: String,
+    val role: String,
+    val email: String,
+)

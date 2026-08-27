@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -193,18 +192,31 @@ fun NotesSection(notes: String, onSave: (String) -> Unit, modifier: Modifier = M
     }
 }
 
-/** The "Contacts" list block shown on both phone and tablet detail views. */
+/** The "Contacts" list block shown on both phone and tablet detail views. [onAdd] is always
+ *  wired, including when [contacts] is empty — that's the only way to add the first one. */
 @Composable
-fun ContactsSection(contacts: List<ContactSummary>, modifier: Modifier = Modifier) {
-    if (contacts.isEmpty()) return
+fun ContactsSection(contacts: List<ContactSummary>, onAdd: () -> Unit, modifier: Modifier = Modifier) {
     DetailSection(
         label = "Contacts",
-        right = { Icon(Icons.Filled.Add, null, tint = PlColors.fgMuted, modifier = Modifier.size(16.dp)) },
+        right = {
+            PlIconButton(
+                Icons.Filled.Add,
+                onClick = onAdd,
+                size = 24.dp,
+                iconSize = 16.dp,
+                tint = PlColors.fgMuted,
+                contentDescription = "Add contact",
+            )
+        },
         modifier = modifier,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            contacts.forEach { contact ->
-                ContactRow(ContactInfo(contact.name.contactInitials(), contact.name, contact.role, contact.email))
+        if (contacts.isEmpty()) {
+            BodyText("No contacts yet", size = 13.5f.sp, color = PlColors.fgMuted)
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                contacts.forEach { contact ->
+                    ContactRow(ContactInfo(contact.name.contactInitials(), contact.name, contact.role, contact.email))
+                }
             }
         }
     }

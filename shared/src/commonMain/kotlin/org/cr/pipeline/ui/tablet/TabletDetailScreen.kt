@@ -33,6 +33,7 @@ fun TabletDetailScreen(
     onBack: () -> Unit = {},
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onAddContact: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize()) {
         Row(
@@ -49,6 +50,7 @@ fun TabletDetailScreen(
             applicationId = applicationId,
             onUpdateStatus = onUpdateStatus,
             onEdit = onEdit,
+            onAddContact = onAddContact,
             modifier = Modifier.weight(1f),
         )
     }

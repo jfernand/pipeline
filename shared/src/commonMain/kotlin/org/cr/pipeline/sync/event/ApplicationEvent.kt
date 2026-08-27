@@ -7,6 +7,7 @@ package org.cr.pipeline.sync.event
 import kotlinx.serialization.Serializable
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.ContactInput
 
 /**
  * One user-initiated change to an application, in the shape it needs to be replayed or diffed —
@@ -46,5 +47,14 @@ data class StatusChanged(
     override val applicationId: ApplicationId,
     val status: AppStatus,
     val note: String,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
+) : ApplicationEvent
+
+/** The "Contacts" section's "+" affordance — appends one contact, always to the end of the
+ *  existing list, never a diff against it. */
+@Serializable
+data class ContactAdded(
+    override val applicationId: ApplicationId,
+    val contact: ContactInput,
     override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent

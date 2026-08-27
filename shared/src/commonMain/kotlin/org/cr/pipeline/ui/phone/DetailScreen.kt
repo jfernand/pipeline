@@ -59,6 +59,7 @@ fun DetailScreen(
     onBack: () -> Unit = {},
     onUpdate: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onAddContact: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
     val repository = koinInject<JobApplicationRepository>()
@@ -70,6 +71,7 @@ fun DetailScreen(
         onBack,
         onUpdate,
         onEdit,
+        onAddContact,
         onSaveNotes = { notes ->
             val id = applicationId ?: return@DetailScreenContent
             scope.launch {
@@ -89,6 +91,7 @@ private fun DetailScreenContent(
     onBack: () -> Unit = {},
     onUpdate: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onAddContact: () -> Unit = {},
     onSaveNotes: (String) -> Unit = {},
 ) {
     DimmedOverlay(dimmed, modifier.background(PlColors.bgBase)) {
@@ -116,7 +119,7 @@ private fun DetailScreenContent(
             }
             Spacer(Modifier.height(18.dp))
             StatusHistorySection(detail.statusHistory, modifier = Modifier.padding(horizontal = 16.dp))
-            ContactsSection(detail.contacts, modifier = Modifier.padding(horizontal = 16.dp))
+            ContactsSection(detail.contacts, onAdd = onAddContact, modifier = Modifier.padding(horizontal = 16.dp))
             NotesSection(detail.notes, onSaveNotes, modifier = Modifier.padding(horizontal = 16.dp))
             PostingSection(detail, modifier = Modifier.padding(horizontal = 16.dp))
         }

@@ -11,8 +11,10 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEvent
+import org.cr.pipeline.sync.event.ContactAdded
 import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import org.cr.pipeline.sync.event.StatusChanged
@@ -95,6 +97,42 @@ class EventSourcedJobApplicationRepositoryTest {
         repository.updateStatus(999, AppStatus.OFFER, "shouldn't happen")
 
         assertEquals(emptyMap(), store.states)
+    }
+
+    @Test
+    fun `addContact appends a contact and persists it`() = runTest {
+        val store = FakeApplicationStateStore()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+        val id = repository.saveApplication(null, input)
+
+        repository.addContact(id, ContactInput("Priya Nathan", "Recruiter", "priya.nathan@cedarandbyrne.com"))
+
+        val state = store.states.getValue(id)
+        assertEquals(1, state.contacts.size)
+        assertEquals("Priya Nathan", state.contacts.single().name)
+    }
+
+    @Test
+    fun `addContact on an unknown id is a no-op`() = runTest {
+        val store = FakeApplicationStateStore()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+
+        repository.addContact(999, ContactInput("Priya Nathan", "Recruiter", "priya.nathan@cedarandbyrne.com"))
+
+        assertEquals(emptyMap(), store.states)
+    }
+
+    @Test
+    fun `addContact appends a correctly chained ContactAdded envelope`() = runTest {
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(FakeApplicationStateStore(), eventLog)
+        val id = repository.saveApplication(null, input)
+
+        repository.addContact(id, ContactInput("Priya Nathan", "Recruiter", "priya.nathan@cedarandbyrne.com"))
+
+        val chain = eventLog.observeChain().first()
+        assertEquals(2, chain.size)
+        assertIs<ContactAdded>(Json.decodeFromString<ApplicationEvent>(chain[1].payload))
     }
 
     @Test

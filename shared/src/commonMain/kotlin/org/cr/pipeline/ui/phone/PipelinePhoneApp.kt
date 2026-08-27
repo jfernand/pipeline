@@ -40,6 +40,7 @@ import org.cr.pipeline.ui.nav.PairRoute
 import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.nav.SyncRoute
 import org.cr.pipeline.ui.screens.AddEditScreen
+import org.cr.pipeline.ui.screens.ContactSheet
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.koin.compose.koinInject
 
@@ -52,6 +53,8 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
     var sheetApplicationId by remember { mutableStateOf<Long?>(null) }
     val sheetApplication = applications.firstOrNull { it.id == sheetApplicationId }
+    var contactSheetApplicationId by remember { mutableStateOf<Long?>(null) }
+    val contactSheetApplication = applications.firstOrNull { it.id == contactSheetApplicationId }
     val currentEntry by navController.currentBackStackEntryAsState()
     val onListRoute = currentEntry?.destination?.hasRoute<ListRoute>() == true
 
@@ -60,7 +63,7 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
             composable<ListRoute> {
                 ListScreen(
                     applications = applications,
-                    dimmed = sheetApplication != null,
+                    dimmed = sheetApplication != null || contactSheetApplication != null,
                     onCard = { app -> navController.navigate(DetailRoute(app.id)) },
                     onSettings = { navController.navigate(SettingsRoute) },
                 )
@@ -74,10 +77,11 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 val route = backStackEntry.toRoute<DetailRoute>()
                 DetailScreen(
                     applicationId = route.id,
-                    dimmed = sheetApplication != null,
+                    dimmed = sheetApplication != null || contactSheetApplication != null,
                     onBack = { navController.popBackStack() },
                     onUpdate = { sheetApplicationId = route.id },
                     onEdit = { navController.navigate(AddEditRoute(route.id)) },
+                    onAddContact = { contactSheetApplicationId = route.id },
                 )
             }
             composable<AddEditRoute> { backStackEntry ->
@@ -118,7 +122,7 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(deepLink)).build())
             }
         }
-        if (onListRoute && sheetApplication == null) {
+        if (onListRoute && sheetApplication == null && contactSheetApplication == null) {
             PlFab(
                 onClick = { navController.navigate(AddEditRoute()) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 20.dp),
@@ -133,6 +137,18 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 onSave = { status, note ->
                     scope.launch { repository.updateStatus(sheetApplication.id, status, note) }
                     sheetApplicationId = null
+                },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+        if (contactSheetApplication != null) {
+            ContactSheet(
+                company = contactSheetApplication.company,
+                role = contactSheetApplication.role,
+                onCancel = { contactSheetApplicationId = null },
+                onSave = { contact ->
+                    scope.launch { repository.addContact(contactSheetApplication.id, contact) }
+                    contactSheetApplicationId = null
                 },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )

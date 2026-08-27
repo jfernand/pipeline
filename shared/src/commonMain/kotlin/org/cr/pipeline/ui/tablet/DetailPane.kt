@@ -64,6 +64,7 @@ fun DetailPane(
     modifier: Modifier = Modifier,
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onAddContact: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
     val repository = koinInject<JobApplicationRepository>()
@@ -73,6 +74,7 @@ fun DetailPane(
         modifier,
         onUpdateStatus,
         onEdit,
+        onAddContact,
         onSaveNotes = { notes ->
             val id = applicationId ?: return@DetailPaneContent
             scope.launch {
@@ -90,6 +92,7 @@ private fun DetailPaneContent(
     modifier: Modifier = Modifier,
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onAddContact: () -> Unit = {},
     onSaveNotes: (String) -> Unit = {},
 ) {
     Column(modifier.fillMaxHeight().fillMaxWidth().background(PlColors.bgBase)) {
@@ -110,6 +113,7 @@ private fun DetailPaneContent(
         Row(Modifier.weight(1f).fillMaxWidth()) {
             DetailPrimaryColumn(
                 detail,
+                onAddContact,
                 modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).drawRightBorder(PlColors.borderDefault),
             )
             DetailSecondaryColumn(
@@ -172,7 +176,7 @@ private fun HeaderActions(detail: ApplicationDetail, onUpdateStatus: () -> Unit,
 }
 
 @Composable
-private fun DetailPrimaryColumn(detail: ApplicationDetail, modifier: Modifier = Modifier) {
+private fun DetailPrimaryColumn(detail: ApplicationDetail, onAddContact: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier) {
         val overdueReminder = detail.reminders.firstOrNull { it.overdue }
         if (overdueReminder != null) {
@@ -183,7 +187,7 @@ private fun DetailPrimaryColumn(detail: ApplicationDetail, modifier: Modifier = 
             )
         }
         StatusHistorySection(detail.statusHistory, modifier = Modifier.padding(horizontal = 24.dp))
-        ContactsSection(detail.contacts, modifier = Modifier.padding(horizontal = 24.dp))
+        ContactsSection(detail.contacts, onAdd = onAddContact, modifier = Modifier.padding(horizontal = 24.dp))
     }
 }
 
