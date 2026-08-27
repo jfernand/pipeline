@@ -93,6 +93,10 @@ typst compile pipeline-features.typ                     # standard PDF
 typst compile --input print=true pipeline-features.typ   # hatch fill instead of solid ink, for printing
 ```
 
+The Data Model appendix draws its diagram with `@preview/cetz` — the one non-vendored dependency
+in this build. Typst fetches and caches it locally on first compile, so that first run needs
+network access; every run after that is offline again, same as the rest of the catalog.
+
 Compile after every change and check the output — Typst errors point at the file and line, but a
 silently-wrong layout (a margin note landing off the page, a heading wrapping badly) only shows up
 by looking at the render.

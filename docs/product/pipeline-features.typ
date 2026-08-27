@@ -1,5 +1,6 @@
 #import "isss-doc.typ": *
 #import "template.typ": feature, release-badge, status-stamp
+#import "@preview/cetz:0.4.2": canvas, draw
 
 #show: isss-doc.with(
   title: "Pipeline",
@@ -436,3 +437,145 @@ link if it has one, and the MCP tool that reaches it, if any.
 `FollowUpsRoute` is the one route on this table with no phone entry point at all —
 `PipelinePhoneApp`'s `NavHost` never registers it, unlike every other route here. Reachable on
 tablet only, via `NavRail`'s "Follow-ups" tab.
+
+#pagebreak(weak: true, to: "odd")
+#heading(level: 1, numbering: none)[Data Model]
+
+#let dm-box(pos, w, h, title, body, accent: amber, title-size: 7.3pt) = {
+  import draw: *
+  let (x, y) = pos
+  rect((x, y), (x + w, y - h), fill: panel, stroke: rule-w + accent, radius: 3pt)
+  content((x, y), (x + w, y - h))[
+    #box(width: w * 1cm - 12pt)[
+      #text(font: mono-font, size: title-size, weight: 600, fill: ink, tracking: 0.01em)[#title]
+      #v(4pt)
+      #text(font: mono-font, size: 6.1pt, fill: ink-second, tracking: 0.01em)[#body]
+    ]
+  ]
+}
+
+// Labelled at the arrow's midpoint rather than via content()'s own (from, to) bounding-box sizing
+// — for a mostly-vertical arrow that bounding box is only as wide as the x-offset between the two
+// points, which for a near-straight-down arrow is close to zero and wraps the label one word per
+// line. An explicit width sidesteps that entirely.
+#let dm-arrow(from, to, label: none, label-width: 3.6cm) = {
+  import draw: *
+  line(from, to, stroke: rule-w + ink-faint, mark: (end: ">", fill: ink-faint, scale: 0.45))
+  if label != none {
+    let mid = ((from.at(0) + to.at(0)) / 2, (from.at(1) + to.at(1)) / 2)
+    content(mid)[
+      #box(fill: paper-bg, inset: (x: 3pt, y: 1pt), width: label-width)[
+        #align(center)[#text(font: mono-font, size: 5.5pt, fill: ink-faint, tracking: 0.01em)[#label]]
+      ]
+    ]
+  }
+}
+
+== Applications
+
+`ApplicationState` (`sync/event/ApplicationState.kt`) is the one entity in this app — a job
+application, and the three small collections that belong to it. `StatusHistoryEntry`, `Contact`,
+and `Reminder` aren't rows in their own table with a foreign key back — they have no id of their
+own at all. Each lives entirely inside its application's own `ApplicationState`, held as a plain
+nested list, replayed and discarded as one unit with it.
+
+#v(4pt)
+
+#align(center)[
+  #canvas(length: 1cm, {
+    import draw: *
+
+    dm-box(
+      (0.9, 0), 9.6, 2.6,
+      [Application],
+      [applicationId · company · role · status
+
+        dateApplied · nextActionDate · postingUrl
+
+        source · notes],
+      accent: amber-deep,
+    )
+
+    dm-arrow((2.6, -2.6), (1.8, -4.6))
+    dm-arrow((5.7, -2.6), (5.7, -4.6), label: [one Application, many of each — nested, not joined], label-width: 4cm)
+    dm-arrow((8.8, -2.6), (9.6, -4.6))
+
+    dm-box((0, -4.6), 3.6, 1.8, [StatusHistoryEntry], [status · date · note])
+    dm-box((4.0, -4.6), 3.6, 1.8, [Contact], [name · role · email])
+    dm-box((8.0, -4.6), 3.4, 1.8, [Reminder], [message · dueDate])
+  })
+]
+
+#v(4pt)
+
+`ApplicationDetail` (the detail screen) and `FollowUpItem` (PL-010) both read `Contact` and
+`Reminder` at display time — `toApplicationDetail`, `toFollowUpItems` — but neither the app nor
+the MCP server has a write path for either one yet: every `Contact` and `Reminder` on a real
+application today only ever got there through `SeedData`. `AddEditScreen` and the event vocabulary
+below cover every other field.
+
+== Event Sourcing
+
+One table, not several. `event_envelopes` (PL-011, PL-042) is the only thing any platform
+persists — every shape below it, `ApplicationState` included, is a pure, in-process function of
+what that table holds, recomputed at read time, never itself written to disk. Editing an
+application doesn't update a row; it appends an event and re-folds.
+
+#v(4pt)
+
+#align(center)[
+  #canvas(length: 1cm, {
+    import draw: *
+
+    // Row A — the event vocabulary (ApplicationEvent, sealed)
+    dm-box((0, 0), 3.6, 1.5, [ApplicationCreated], [applicationId · input · provenance], title-size: 6.4pt)
+    dm-box((4.0, 0), 3.6, 1.5, [ApplicationEdited], [applicationId · input · provenance], title-size: 6.4pt)
+    dm-box((8.0, 0), 3.4, 1.5, [StatusChanged], [applicationId · status · note], title-size: 6.4pt)
+
+    dm-arrow((1.8, -1.5), (4.6, -3.3), label: [append() —], label-width: 2.4cm)
+    dm-arrow((5.8, -1.5), (5.7, -3.3), label: [hash-chained], label-width: 2.4cm)
+    dm-arrow((9.7, -1.5), (6.8, -3.3), label: [per device], label-width: 2.4cm)
+
+    // Row B — the one durable table
+    dm-box(
+      (0, -3.3), 11.4, 3.0,
+      [event_envelopes — the only table],
+      [id · hash · parentHashes · deviceId
+
+        sequence · timestampEpochMillis
+
+        payload · logKind (REAL | DEMO, PL-019)],
+      accent: amber-deep,
+    )
+
+    dm-arrow((5.7, -6.3), (5.7, -8.3), label: [replay(): fold every event through applyEvent, per application], label-width: 4.6cm)
+
+    // Row C — the in-memory projection every read starts from
+    dm-box(
+      (1.7, -8.3), 8.0, 2.8,
+      [ApplicationState — in memory only],
+      [applicationId · company · role · status
+
+        dateApplied · nextActionDate · postingUrl · source · notes
+
+        statusHistory[] · contacts[] · reminders[]],
+    )
+
+    dm-arrow((3.2, -11.1), (1.8, -13.1))
+    dm-arrow((5.7, -11.1), (5.9, -13.1), label: [read-time projection], label-width: 3.6cm)
+    dm-arrow((8.2, -11.1), (9.8, -13.1))
+
+    // Row D — what each screen actually reads
+    dm-box((0, -13.1), 3.6, 2.0, [JobApplication], [the list — toJobApplication])
+    dm-box((4.0, -13.1), 3.6, 2.0, [ApplicationDetail], [the detail screen — toApplicationDetail])
+    dm-box((8.0, -13.1), 3.4, 2.0, [FollowUpItem], [Follow-ups (PL-010) — toFollowUpItems])
+  })
+]
+
+#v(4pt)
+
+`logKind` is the only thing separating PL-019's demo sandbox from real data — one table holds two
+independent hash-chained sequences, not two tables, so a schema change to one is a schema change
+to both by construction. `ApplicationState` itself has no opinion on which chain it was replayed
+from; `DemoSeedingEventLog` seeds an empty `DEMO` chain exactly once, and from then on it's
+indistinguishable, to every layer above it, from a real one.
