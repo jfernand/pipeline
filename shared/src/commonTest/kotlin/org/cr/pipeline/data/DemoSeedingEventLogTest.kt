@@ -18,13 +18,16 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DemoSeedingEventLogTest {
+    // One ApplicationCreated per seed entry, plus one ContactAdded per contact in that entry.
+    private val expectedEventCount = seedApplications.size + seedApplications.sumOf { it.contacts.size }
+
     @Test
-    fun `an empty demo log is seeded with one ApplicationCreated per seed entry`() = runTest {
+    fun `an empty demo log is seeded with one ApplicationCreated and one ContactAdded per seed contact`() = runTest {
         val demo = DemoSeedingEventLog(InMemoryEventLog())
 
         val chain = demo.observeChain().first()
 
-        assertEquals(seedApplications.size, chain.size)
+        assertEquals(expectedEventCount, chain.size)
     }
 
     @Test
@@ -34,7 +37,7 @@ class DemoSeedingEventLogTest {
 
         val chain = demo.observeChain().first()
 
-        assertEquals(seedApplications.size, chain.size)
+        assertEquals(expectedEventCount, chain.size)
     }
 
     @Test
@@ -86,7 +89,21 @@ class DemoSeedingEventLogTest {
         demo.append(ApplicationCreated(ApplicationId.random(), input), 1000L)
 
         val chain = delegate.observeChain().first()
-        assertEquals(seedApplications.size + 1, chain.size)
+        assertEquals(expectedEventCount + 1, chain.size)
         assertTrue(chain.any { it.payload.contains("Triggers Seeding Inc") })
+    }
+
+    @Test
+    fun `seeded contacts replay onto their application`() = runTest {
+        val demo = DemoSeedingEventLog(InMemoryEventLog())
+        val store = InMemoryApplicationStateStore(demo)
+
+        val applications = store.observeAll().first()
+
+        val northwind = applications.single { it.second.company == "Northwind Labs" }.second
+        assertEquals(listOf("Dana Whitfield", "Marcus Oyelaran"), northwind.contacts.map { it.name })
+
+        val halcyon = applications.single { it.second.company == "Halcyon Freight" }.second
+        assertEquals(emptyList(), halcyon.contacts)
     }
 }

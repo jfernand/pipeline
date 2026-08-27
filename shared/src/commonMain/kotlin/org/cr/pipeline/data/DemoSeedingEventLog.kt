@@ -19,16 +19,18 @@ import org.cr.pipeline.sync.chain.EventEnvelope
 import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
+import org.cr.pipeline.sync.event.ContactAdded
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.sync.event.EventProvenance
 
 /**
  * PL-019: wraps a fresh, empty demo [EventLog] (see [org.cr.pipeline.sync.event.EventLogKind]),
  * seeding it from [seedApplications] the first time anything reads from or writes to it, if it's
- * still empty. One real [ApplicationCreated] event per seed entry — the same shape a user
- * creating that application by hand through the Add/Edit form would produce — so every
- * application this store ever holds, seeded or not, replays correctly. Once seeded, this behaves
- * exactly like the [delegate] it wraps; nothing here runs a second time.
+ * still empty. One real [ApplicationCreated] event per seed entry, followed by one [ContactAdded]
+ * per entry in that seed's contacts — the same shapes a user creating that application and adding
+ * its contacts by hand would produce — so every application this store ever holds, seeded or not,
+ * replays correctly. Once seeded, this behaves exactly like the [delegate] it wraps; nothing here
+ * runs a second time.
  *
  * Lazy rather than run once at startup, and gated by a [Mutex] the same way
  * [InMemoryApplicationStateStore]'s own materialization is — so this works identically on every
@@ -48,8 +50,13 @@ class DemoSeedingEventLog(private val delegate: EventLog) : EventLog {
                 val today = todayDate()
                 var timestamp = Clock.System.now().toEpochMilliseconds()
                 for (seed in seedApplications) {
-                    val event: ApplicationEvent = ApplicationCreated(ApplicationId.random(), seed.toApplicationInput(today), provenance)
-                    delegate.append(event, timestamp++)
+                    val applicationId = ApplicationId.random()
+                    val created: ApplicationEvent = ApplicationCreated(applicationId, seed.toApplicationInput(today), provenance)
+                    delegate.append(created, timestamp++)
+                    for (contact in seed.contacts) {
+                        val contactAdded: ApplicationEvent = ContactAdded(applicationId, contact, provenance)
+                        delegate.append(contactAdded, timestamp++)
+                    }
                 }
             }
             seeded = true

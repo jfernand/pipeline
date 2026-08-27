@@ -21,18 +21,21 @@ data class SeedApplication(
     val source: String?,
     val postingUrl: String?,
     val notes: String,
+    val contacts: List<ContactInput> = emptyList(),
 )
 
 /**
  * The one source of demo data — PL-019's "Show fake data" seeds
  * [org.cr.pipeline.data.DemoSeedingEventLog] from this, once, the same way a real application
  * created through the Add/Edit form would be: one [org.cr.pipeline.sync.event.ApplicationCreated]
- * event per entry, via [toApplicationInput]. Status history, contacts, and reminders aren't part
- * of this shape — there's no event type that can set any of the three for a real application
- * either (see docs/product/reports/2026-08-26-codebase-review.typ), so a richer seed shape here
- * would just be state a real replay could never reproduce, the exact bug this feature exists to
- * close. [offsetDays] fields are relative to "today" so the app always looks current whenever the
- * demo log is actually created.
+ * event per entry, via [toApplicationInput], followed by one
+ * [org.cr.pipeline.sync.event.ContactAdded] per entry in [contacts] — the same two event types a
+ * user would produce by hand via the Add/Edit form and the "Contacts" section's "+" button.
+ * Status history beyond creation and reminders still aren't part of this shape — there's no event
+ * type that can set either for a real application (see
+ * docs/product/reports/2026-08-26-codebase-review.typ), so seeding either here would still be
+ * state a real replay could never reproduce. [offsetDays] fields are relative to "today" so the
+ * app always looks current whenever the demo log is actually created.
  */
 val seedApplications: List<SeedApplication> = listOf(
     SeedApplication(
@@ -47,6 +50,10 @@ val seedApplications: List<SeedApplication> = listOf(
             "multi-module builds. Comp band 185–205 plus equity. Dana said a decision lands within two " +
             "weeks of the final round.\n\nPrep: draw the sync topology from memory. They asked twice about " +
             "offline conflict handling, so it matters to them.",
+        contacts = listOf(
+            ContactInput("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com"),
+            ContactInput("Marcus Oyelaran", "Recruiter", "marcus@northwindlabs.com"),
+        ),
     ),
     SeedApplication(
         company = "Cedar & Byrne",
@@ -58,6 +65,9 @@ val seedApplications: List<SeedApplication> = listOf(
         postingUrl = "cedarandbyrne.com/careers/senior-mobile",
         notes = "Team is expanding the mobile platform group after the last product launch. Recruiter " +
             "mentioned a fast timeline — they want to fill the role within a month.",
+        contacts = listOf(
+            ContactInput("Priya Nathan", "Recruiter", "priya.nathan@cedarandbyrne.com"),
+        ),
     ),
     SeedApplication(
         company = "Meridian Systems",
@@ -69,6 +79,9 @@ val seedApplications: List<SeedApplication> = listOf(
         postingUrl = "meridiansystems.io/careers/senior-mobile",
         notes = "Verbal offer from the hiring manager: base + equity, written offer to follow. Team seems " +
             "strong, good rapport in the final round.",
+        contacts = listOf(
+            ContactInput("Owen Castellano", "Hiring manager", "owen.castellano@meridiansystems.io"),
+        ),
     ),
     SeedApplication(
         company = "Halcyon Freight",
@@ -100,6 +113,9 @@ val seedApplications: List<SeedApplication> = listOf(
         source = "Referral",
         postingUrl = null,
         notes = "Good conversation throughout, but they promoted an internal candidate into the role.",
+        contacts = listOf(
+            ContactInput("Jules Ferreira", "Hiring manager", "jules.ferreira@kestrelrobotics.com"),
+        ),
     ),
     SeedApplication(
         company = "Tidewater Health",
