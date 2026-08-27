@@ -22,17 +22,22 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.time.Instant
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.DeviceIdentityStore
+import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.sync.chain.EventEnvelope
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.ui.components.SectionLabel
+import org.cr.pipeline.ui.components.SettingsRow
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
@@ -47,8 +52,11 @@ import org.koin.compose.koinInject
 fun DevToolsContent(modifier: Modifier = Modifier) {
     val deviceIdentityStore = koinInject<DeviceIdentityStore>()
     val eventLog = koinInject<EventLog>()
+    val preferencesStore = koinInject<PreferencesStore>()
+    val scope = rememberCoroutineScope()
     var deviceId by remember { mutableStateOf<String?>(null) }
     val chain by eventLog.observeChain().collectAsState(initial = emptyList())
+    val preferences by preferencesStore.observePreferences().collectAsState(initial = AppPreferences())
 
     LaunchedEffect(Unit) { deviceId = deviceIdentityStore.getDeviceId().value }
 
@@ -68,6 +76,25 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
                 color = PlColors.fgSecondary,
                 modifier = Modifier.padding(top = 10.dp),
             )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionLabel("Sandbox")
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                    .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp)),
+            ) {
+                SettingsRow(
+                    "Show fake data",
+                    value = "A separate, seeded-once demo chain — your real data is untouched",
+                    chevron = false,
+                    trailingText = if (preferences.showFakeData) "ON" else "OFF",
+                    trailingColor = if (preferences.showFakeData) PlColors.brandPrimary else PlColors.fgMuted,
+                    onClick = { scope.launch { preferencesStore.setShowFakeData(!preferences.showFakeData) } },
+                )
+            }
+            BodyText("Restart the app for this to take effect.", size = 12.sp, color = PlColors.fgMuted)
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             SectionLabel("Device")
