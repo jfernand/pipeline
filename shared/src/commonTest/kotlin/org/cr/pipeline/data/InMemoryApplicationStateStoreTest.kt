@@ -9,16 +9,12 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
-import org.cr.pipeline.model.seedApplications
 import org.cr.pipeline.sync.event.InMemoryEventLog
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 class InMemoryApplicationStateStoreTest {
     private val input = ApplicationInput(
-        // Deliberately not a name from seedApplications — a test asserting real data isn't
-        // confused with seed data would give a false pass if it were.
         company = "Zenith Testing Co",
         role = "Senior Mobile Engineer",
         status = AppStatus.APPLIED,
@@ -30,17 +26,16 @@ class InMemoryApplicationStateStoreTest {
     )
 
     @Test
-    fun `an empty event log shows seed data`() = runTest {
+    fun `an empty event log is genuinely empty, not seeded with demo content`() = runTest {
         val store = InMemoryApplicationStateStore(InMemoryEventLog())
 
         val applications = store.observeAll().first()
 
-        assertEquals(seedApplications.size, applications.size)
-        assertEquals(seedApplications.first().company, applications.first().second.company)
+        assertEquals(emptyList(), applications)
     }
 
     @Test
-    fun `a second store over the same event log recovers identical state, not seed data`() = runTest {
+    fun `a second store over the same event log recovers identical state`() = runTest {
         val eventLog = InMemoryEventLog()
         val repository = EventSourcedJobApplicationRepository(InMemoryApplicationStateStore(eventLog), eventLog)
         val id = repository.saveApplication(null, input)
@@ -57,6 +52,5 @@ class InMemoryApplicationStateStoreTest {
         assertEquals(input.company, state.company)
         assertEquals(AppStatus.OFFER, state.status)
         assertEquals(2, state.statusHistory.size)
-        assertFalse(seedApplications.any { it.company == state.company }, "real data should replace seed data, not sit alongside it")
     }
 }

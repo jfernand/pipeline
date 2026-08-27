@@ -14,18 +14,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import org.cr.pipeline.model.SeedApplication
-import org.cr.pipeline.model.seedApplications
 import org.cr.pipeline.model.todayDate
-import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.ApplicationState
-import org.cr.pipeline.sync.event.ContactRecord
 import org.cr.pipeline.sync.event.EventLog
-import org.cr.pipeline.sync.event.ReminderRecord
-import org.cr.pipeline.sync.event.StatusHistoryRecord
 import org.cr.pipeline.sync.event.replayApplicationState
 
 /**
@@ -37,10 +28,10 @@ import org.cr.pipeline.sync.event.replayApplicationState
  * Compose UI and the MCP server (which never goes through Compose at all) reach a correctly
  * populated store no matter which one touches it first.
  *
- * A fresh install (empty event log) shows [seedApplications] instead — demo content that stays
- * out of the event log entirely, regenerated fresh on every launch, and gone for good — including
- * any edits made to it in the meantime, which become orphan events skipped on the next replay —
- * the moment any real event lands in the log.
+ * A fresh install (empty event log) is genuinely empty — no synthesized demo content here, not
+ * since PL-019. [eventLog] is the only thing this store ever reads from; if [eventLog] happens to
+ * be a [org.cr.pipeline.data.DemoSeedingEventLog], that's an entirely separate concern this class
+ * doesn't know or care about.
  */
 class InMemoryApplicationStateStore(
     private val eventLog: EventLog,
@@ -53,24 +44,14 @@ class InMemoryApplicationStateStore(
     private val materializeMutex = Mutex()
     private var materialized = false
 
-    // True only while [records] holds seed data rather than a real replay. A create arriving
-    // while this is true means the log just went from empty to non-empty — see [write].
-    private var showingSeedData = false
-
     private suspend fun ensureMaterialized() {
         if (materialized) return
         materializeMutex.withLock {
             if (materialized) return@withLock
             val envelopes = eventLog.observeChain().first()
-            if (envelopes.isEmpty()) {
-                records.value = seedApplications.mapIndexed { index, seed -> seed.toRecord(id = index + 1L) }
-                showingSeedData = true
-            } else {
-                records.value = replayApplicationState(envelopes, todayDate()) { envelope, error ->
-                    logger.w(error) { "Skipping unreplayable event: seq=${envelope.sequence} hash=${envelope.hash.value}" }
-                }.sortedByDescending { it.first }.map { (id, state) -> Record(id, state) }
-                showingSeedData = false
-            }
+            records.value = replayApplicationState(envelopes, todayDate()) { envelope, error ->
+                logger.w(error) { "Skipping unreplayable event: seq=${envelope.sequence} hash=${envelope.hash.value}" }
+            }.sortedByDescending { it.first }.map { (id, state) -> Record(id, state) }
             nextId = (records.value.maxOfOrNull { it.id } ?: 0L) + 1L
             materialized = true
         }
@@ -94,40 +75,11 @@ class InMemoryApplicationStateStore(
     override suspend fun write(id: Long?, state: ApplicationState): Long {
         ensureMaterialized()
         if (id == null) {
-            if (showingSeedData) {
-                // The first real event just landed — the log this store was materialized from is
-                // no longer the empty one that put it in seed mode. Clear seed data so it never
-                // coexists with real data, and so real numbering always starts at 1 regardless of
-                // whether seed happened to be showing a moment ago (matching what a fresh replay
-                // of this same log — e.g. after a restart — would independently produce).
-                records.value = emptyList()
-                nextId = 1L
-                showingSeedData = false
-            }
             val newId = nextId++
             records.update { list -> listOf(Record(newId, state)) + list }
             return newId
         }
         records.update { list -> list.map { record -> if (record.id == id) record.copy(state = state) else record } }
         return id
-    }
-
-    private fun SeedApplication.toRecord(id: Long): Record {
-        val today = todayDate()
-        val state = ApplicationState(
-            applicationId = ApplicationId.random(),
-            company = company,
-            role = role,
-            status = status,
-            dateApplied = today.minus(daysAgoApplied, DateTimeUnit.DAY),
-            nextActionDate = nextActionOffsetDays?.let { today.plus(it, DateTimeUnit.DAY) },
-            postingUrl = postingUrl,
-            source = source,
-            notes = notes,
-            statusHistory = statusHistory.map { StatusHistoryRecord(it.status, today.minus(it.daysAgo, DateTimeUnit.DAY), it.note) },
-            contacts = contacts.map { ContactRecord(it.name, it.role, it.email) },
-            reminders = reminders.map { ReminderRecord(it.message, today.plus(it.offsetDays, DateTimeUnit.DAY)) },
-        )
-        return Record(id, state)
     }
 }
