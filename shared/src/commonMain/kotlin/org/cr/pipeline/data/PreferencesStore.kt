@@ -13,6 +13,10 @@ interface PreferencesStore {
     fun observePreferences(): Flow<AppPreferences>
     suspend fun setSyncNetworkMode(mode: SyncNetworkMode)
     suspend fun setDeveloperMode(enabled: Boolean)
+
+    /** Restart required to take effect — which physical [org.cr.pipeline.sync.event.EventLog]
+     *  backs the app is decided once, when the DI graph is built (see `platformDataModule`). */
+    suspend fun setShowFakeData(enabled: Boolean)
     suspend fun setMcpServerEnabled(enabled: Boolean)
     suspend fun setMcpServerPort(port: Int)
 }

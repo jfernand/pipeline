@@ -12,6 +12,12 @@ private const val KEY_SYNC_NETWORK_MODE = "syncNetworkMode"
 private const val KEY_DEVELOPER_MODE = "developerMode"
 private const val KEY_MCP_SERVER_ENABLED = "mcpServerEnabled"
 private const val KEY_MCP_SERVER_PORT = "mcpServerPort"
+private const val KEY_SHOW_FAKE_DATA = "showFakeData"
+
+/** Read directly off [Settings] rather than through [PreferencesStore] — the platform DI modules
+ *  need this at module-composition time, before a [PreferencesStore] (or anything else) exists to
+ *  ask, to decide which [org.cr.pipeline.sync.event.EventLog] to bind. */
+internal fun Settings.showFakeData(): Boolean = getBoolean(KEY_SHOW_FAKE_DATA, false)
 
 /**
  * The one [PreferencesStore] implementation, shared across every platform — [Settings]'s plain
@@ -36,6 +42,11 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
         state.value = state.value.copy(developerMode = enabled)
     }
 
+    override suspend fun setShowFakeData(enabled: Boolean) {
+        settings.putBoolean(KEY_SHOW_FAKE_DATA, enabled)
+        state.value = state.value.copy(showFakeData = enabled)
+    }
+
     override suspend fun setMcpServerEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_MCP_SERVER_ENABLED, enabled)
         state.value = state.value.copy(mcpServerEnabled = enabled)
@@ -53,6 +64,7 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
         return AppPreferences(
             syncNetworkMode = mode,
             developerMode = settings.getBoolean(KEY_DEVELOPER_MODE, false),
+            showFakeData = settings.showFakeData(),
             mcpServerEnabled = settings.getBoolean(KEY_MCP_SERVER_ENABLED, false),
         )
     }

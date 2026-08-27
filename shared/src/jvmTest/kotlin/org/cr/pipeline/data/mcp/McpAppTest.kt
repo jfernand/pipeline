@@ -69,6 +69,10 @@ internal class FakePreferencesStore(initial: AppPreferences = AppPreferences()) 
         state.value = state.value.copy(developerMode = enabled)
     }
 
+    override suspend fun setShowFakeData(enabled: Boolean) {
+        state.value = state.value.copy(showFakeData = enabled)
+    }
+
     override suspend fun setMcpServerEnabled(enabled: Boolean) {
         state.value = state.value.copy(mcpServerEnabled = enabled)
     }
