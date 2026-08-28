@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.50",
+  revision: "1.51",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -254,6 +254,18 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     yet to exercise this any other way. Event Log appendix gained both events; Data Model appendix's
     entity diagram gained `Attachment`, and its event-vocabulary box was simplified to point at the
     Event Log appendix instead of re-listing every case (it had already drifted out of sync once).],
+  [1.51], [2026-08-27], [Shipped PL-018's MCP door: `attach_resume`, `attach_cover_letter`, and
+    `attach_file` tools, each reading a file from a `path` argument on the MCP server's own
+    device and attaching it through PL-031's archive. Replaced the single `kind`-parameterized
+    `AttachmentAdded` event with three: `ResumeAttached`, `CoverLetterAttached`, `FileAttached` —
+    each reads on its own in the event log the way `StatusChanged` does, rather than requiring a
+    reader to know what values a `kind` field can take. `JobApplicationRepository` gained
+    `attachResume`/`attachCoverLetter`/`attachFile` to match; Dev Tools' test-file button now goes
+    through `attachFile`. PL-018 stays `Planned` — only its MCP door exists, not the Add/Edit
+    form's attach affordance or PL-020's file picker. Event Log and Data Model appendices, and
+    PL-031's own page, updated to match; the Data Model diagram's event-vocabulary box (simplified
+    in 1.50 specifically so it wouldn't need this) turned out to still name individual events —
+    fixed to genuinely just point at the Event Log appendix this time.],
 )
 
 #part(1, "Core Application",
@@ -529,21 +541,37 @@ below.
     event has something stable to target. No such event exists yet.],
 )
 #event-row(
-  [AttachmentAdded],
-  [`applicationId` · `attachmentId: AttachmentId` · `kind: AttachmentKind` · `fileName` · `provenance`],
-  [`addAttachment(...)` — Dev Tools' Files section "Add test file" button, the only caller today;
-    PL-018's actual attach-file form doesn't exist yet],
-  notes: [`RESUME`/`COVER_LETTER` are one slot each — a new one replaces whichever one of that
-    kind is already on the application, enforced in `applyEvent` itself. `MISC` has no slot limit,
-    every add just appends. The bytes never go in this event's payload — those go straight to
+  [ResumeAttached],
+  [`applicationId` · `attachmentId: AttachmentId` · `fileName` · `provenance`],
+  [`attachResume(...)` — `attach_resume` (MCP, PL-018); Dev Tools' Files section "Add test file"
+    button attaches a `FileAttached` instead, so this one has no in-app caller yet],
+  notes: [One slot — a new one replaces whichever résumé is already on the application, enforced
+    in `applyEvent` itself. The bytes never go in this event's payload — those go straight to
     `FileArchiveService` (PL-031); this just records that it happened.],
+)
+#event-row(
+  [CoverLetterAttached],
+  [`applicationId` · `attachmentId: AttachmentId` · `fileName` · `provenance`],
+  [`attachCoverLetter(...)` — `attach_cover_letter` (MCP, PL-018)],
+  notes: [The cover-letter counterpart to `ResumeAttached` — same one-slot-replaces-the-old
+    semantics, its own kind and its own event type rather than a shared `kind` field, so each
+    reads on its own in this table the way `StatusChanged` does.],
+)
+#event-row(
+  [FileAttached],
+  [`applicationId` · `attachmentId: AttachmentId` · `fileName` · `provenance`],
+  [`attachFile(...)` — `attach_file` (MCP, PL-018); Dev Tools' Files section "Add test file"
+    button],
+  notes: [Unlike `ResumeAttached`/`CoverLetterAttached`, no slot limit — every attach just
+    appends.],
 )
 #event-row(
   [AttachmentRemoved],
   [`applicationId` · `attachmentId: AttachmentId` · `provenance`],
-  [`removeAttachment(...)`; no caller exists yet — PL-018's form doesn't either],
+  [`removeAttachment(...)`; no caller exists yet — no MCP tool, no in-app affordance],
   notes: [Detaches one file — removes it from `FileArchiveService`'s archive and from
-    `attachments`. Deleting the application itself leaves the archive alone (PL-031).],
+    `attachments`. Deleting the application itself leaves the archive alone (PL-031). One event
+    regardless of kind, unlike attaching — nothing about removal needs to distinguish them.],
 )
 
 #pagebreak(weak: true, to: "odd")
@@ -585,8 +613,9 @@ below.
 application, and the four small collections that belong to it. None are rows in their own table
 with a foreign key back. `StatusHistoryEntry` and `Reminder` have no id of their own at all;
 `Contact` and `Attachment` do (`contactId`, `attachmentId` — see the Event Log appendix's
-`ContactAdded`/`AttachmentAdded`), but neither is an independent row: no foreign key, no lifecycle
-of its own outside its application's. `Attachment` carries no bytes — those live only in
+`ContactAdded` and `ResumeAttached`/`CoverLetterAttached`/`FileAttached`), but neither is an
+independent row: no foreign key, no lifecycle of its own outside its application's. `Attachment`
+carries no bytes — those live only in
 `FileArchiveService`'s zip archive (PL-031), keyed by `attachmentId`; this is just the metadata a
 real event can carry. Each lives entirely inside its application's own `ApplicationState`, held as
 a plain nested list, replayed and discarded as one unit with it.
@@ -624,10 +653,11 @@ a plain nested list, replayed and discarded as one unit with it.
 
 `ApplicationDetail` (the detail screen) and `FollowUpItem` (PL-010) both read `Contact` and
 `Reminder` at display time — `toApplicationDetail`, `toFollowUpItems`. `ApplicationDetail` also
-reads `Attachment`, though nothing displays it yet (PL-018 doesn't exist). `Contact` and
-`Attachment` each have a write path now (`ContactAdded`, `AttachmentAdded` — see the Event Log
-appendix); `Reminder` still has none — every `Reminder` on a real application today only ever got
-there through `SeedData`. `AddEditScreen` and the event vocabulary below cover every other field.
+reads `Attachment`, though nothing displays it yet — PL-018's UI half doesn't exist, only its MCP
+door. `Contact` and `Attachment` each have a write path now (`ContactAdded`; `ResumeAttached`,
+`CoverLetterAttached`, `FileAttached` — see the Event Log appendix); `Reminder` still has none —
+every `Reminder` on a real application today only ever got there through `SeedData`.
+`AddEditScreen` and the event vocabulary below cover every other field.
 
 == Event Sourcing
 
@@ -648,8 +678,8 @@ application doesn't update a row; it appends an event and re-folds.
     dm-box(
       (0, 0), 11.4, 1.5,
       [ApplicationEvent — sealed],
-      [ApplicationCreated · ApplicationEdited · StatusChanged · ContactAdded · AttachmentAdded ·
-        AttachmentRemoved — see the Event Log appendix],
+      [Every case `event_envelopes` can hold — full list, fields, and emitters in the Event Log
+        appendix, not repeated here],
       title-size: 6.8pt,
     )
 

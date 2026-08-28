@@ -30,23 +30,29 @@
     of a resume, cover letter, or miscellanous file. Detachment means removal from the zip archive. Deletion of an application leaves
     the archive alone, unless the archive is compacted (if such a feature appears).
 
-    Shipped scope: the archive, the `AttachmentAdded`/`AttachmentRemoved` events, and a Dev Tools
-    viewer for what's actually in it (plus a test-file button, since PL-018 doesn't have an
-    attach-file form yet to exercise this any other way). The `pipeline/` folder — a copy of the
-    event log for backup — isn't populated by anything yet; the spec's own "e.g." always read as
-    illustrative rather than a concrete requirement. Real on JVM and Android; iOS/js/wasmJs get a
-    stub that no-ops, same rollout shape as PL-014's `DataPortController`.
+    Shipped scope: the archive, the `ResumeAttached`/`CoverLetterAttached`/`FileAttached`/
+    `AttachmentRemoved` events, and a Dev Tools viewer for what's actually in it (plus a test-file
+    button, for exercising the archive independent of PL-018's own attach paths). The `pipeline/`
+    folder — a copy of the event log for backup — isn't populated by anything yet; the spec's own
+    "e.g." always read as illustrative rather than a concrete requirement. Real on JVM and
+    Android; iOS/js/wasmJs get a stub that no-ops, same rollout shape as PL-014's
+    `DataPortController`.
+
+    The three event types, not one parameterized by kind — `ResumeAttached`/`CoverLetterAttached`
+    read on their own in the event log the way `StatusChanged` does, without opening
+    `ApplicationEvent.kt` to check what a `kind` field's possible values are.
   ],
   implementation: (
-    "shared/src/commonMain/kotlin/org/cr/pipeline/model/AttachmentKind.kt — RESUME/COVER_LETTER/MISC",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/AttachmentId.kt, ApplicationEvent.kt — AttachmentAdded/AttachmentRemoved",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationEventReducer.kt — RESUME/COVER_LETTER are one slot each (a new one replaces the old), MISC just appends",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/model/AttachmentKind.kt — RESUME/COVER_LETTER/MISC, the read-side kind on AttachmentRecord",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/AttachmentId.kt, ApplicationEvent.kt — ResumeAttached/CoverLetterAttached/FileAttached/AttachmentRemoved",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationEventReducer.kt — ResumeAttached/CoverLetterAttached each replace the prior one of that kind, FileAttached just appends",
     "shared/src/commonMain/kotlin/org/cr/pipeline/data/io/FileArchiveService.kt — the archive interface, entry path convention, UnsupportedFileArchiveService",
     "shared/src/jvmAndroidMain/kotlin/org/cr/pipeline/data/io/JavaZipFileArchiveService.kt — java.util.zip-backed, shared by JVM and Android (new jvmAndroidMain source set in shared/build.gradle.kts)",
     "shared/src/jvmMain, androidMain/kotlin/org/cr/pipeline/data/io/FileArchiveService.*.kt — ~/.pipeline/pipeline-files.zip (JVM), filesDir/pipeline-files.zip (Android)",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/data/EventSourcedJobApplicationRepository.kt, JobApplicationRepository.kt — addAttachment/removeAttachment",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/data/EventSourcedJobApplicationRepository.kt, JobApplicationRepository.kt — attachResume/attachCoverLetter/attachFile/removeAttachment",
     "shared/src/commonMain/kotlin/org/cr/pipeline/di/FileArchiveModule.kt",
     "shared/src/commonMain/kotlin/org/cr/pipeline/ui/tablet/DevToolsContent.kt — the Files section and its test-file button",
+    "shared/src/jvmMain/kotlin/org/cr/pipeline/data/mcp/McpApp.kt — attach_resume/attach_cover_letter/attach_file (PL-018)",
   ),
   related: (
     ("PL-018", [Document Attachments (Resume & Cover Letter)]),
