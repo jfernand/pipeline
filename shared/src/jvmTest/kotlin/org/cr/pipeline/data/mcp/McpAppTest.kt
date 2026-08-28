@@ -19,11 +19,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import java.io.File
 import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.EventSourcedJobApplicationRepository
 import org.cr.pipeline.data.FakeApplicationStateStore
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.SyncNetworkMode
+import org.cr.pipeline.data.io.FakeFileArchiveService
+import org.cr.pipeline.data.io.FileArchiveService
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.nav.DeepLinkBus
 import org.cr.pipeline.sync.event.ApplicationEvent
@@ -103,8 +106,9 @@ class McpAppTest {
         store: FakeApplicationStateStore,
         preferencesStore: PreferencesStore = FakePreferencesStore(),
         deepLinkBus: DeepLinkBus = FakeDeepLinkBus(),
+        fileService: FileArchiveService = FakeFileArchiveService(),
     ): HttpNonStreamingMcpClient {
-        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog(), fileService)
         return HttpNonStreamingMcpClient(
             Uri.of("http://in-memory/mcp"),
             http = buildMcpApp(repository, preferencesStore, deepLinkBus),
@@ -112,13 +116,16 @@ class McpAppTest {
     }
 
     @Test
-    fun `lists add_application, edit_application, list_applications, list_settings and open_application`() {
+    fun `lists add_application, edit_application, list_applications, list_settings, open_application, and the three attach tools`() {
         val client = clientAgainst(FakeApplicationStateStore())
 
         val names = client.tools().list().orFail().map { it.name.value }
 
         assertEquals(
-            setOf("add_application", "edit_application", "list_applications", "list_settings", "open_application"),
+            setOf(
+                "add_application", "edit_application", "list_applications", "list_settings", "open_application",
+                "attach_resume", "attach_cover_letter", "attach_file",
+            ),
             names.toSet(),
         )
     }
@@ -204,6 +211,93 @@ class McpAppTest {
 
         assertIs<Failure<*>>(result)
         assertEquals(emptyList(), deepLinkBus.navigatedTo)
+    }
+
+    @Test
+    fun `attach_resume reads the file at path and attaches it, replacing any prior resume`() {
+        val store = FakeApplicationStateStore()
+        val fileService = FakeFileArchiveService()
+        val client = clientAgainst(store, fileService = fileService)
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+        val resume = File.createTempFile("resume", ".pdf").apply { writeText("resume v1") }
+
+        try {
+            val result = client.tools().call(ToolName.of("attach_resume"), ToolRequest(mapOf("id" to id, "path" to resume.absolutePath))).orFail()
+
+            assertIs<ToolResponse.Ok>(result)
+            assertEquals(1, store.states.getValue(id).attachments.size)
+            assertEquals(resume.name, store.states.getValue(id).attachments.single().fileName)
+            assertEquals(1, fileService.writes.size)
+        } finally {
+            resume.delete()
+        }
+    }
+
+    @Test
+    fun `attach_cover_letter reads the file at path and attaches it, replacing any prior cover letter`() {
+        val store = FakeApplicationStateStore()
+        val client = clientAgainst(store)
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+        val coverLetter = File.createTempFile("cover-letter", ".pdf").apply { writeText("cover letter") }
+
+        try {
+            val result = client.tools().call(ToolName.of("attach_cover_letter"), ToolRequest(mapOf("id" to id, "path" to coverLetter.absolutePath))).orFail()
+
+            assertIs<ToolResponse.Ok>(result)
+            assertEquals(coverLetter.name, store.states.getValue(id).attachments.single().fileName)
+        } finally {
+            coverLetter.delete()
+        }
+    }
+
+    @Test
+    fun `attach_file reads the file at path and appends it without replacing anything`() {
+        val store = FakeApplicationStateStore()
+        val client = clientAgainst(store)
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+        val fileA = File.createTempFile("misc-a", ".txt").apply { writeText("a") }
+        val fileB = File.createTempFile("misc-b", ".txt").apply { writeText("b") }
+
+        try {
+            client.tools().call(ToolName.of("attach_file"), ToolRequest(mapOf("id" to id, "path" to fileA.absolutePath))).orFail()
+            client.tools().call(ToolName.of("attach_file"), ToolRequest(mapOf("id" to id, "path" to fileB.absolutePath))).orFail()
+
+            assertEquals(
+                listOf(fileA.name, fileB.name),
+                store.states.getValue(id).attachments.map { it.fileName },
+            )
+        } finally {
+            fileA.delete()
+            fileB.delete()
+        }
+    }
+
+    @Test
+    fun `attach_resume with a path that doesn't exist returns an error, not silently ignored`() {
+        val store = FakeApplicationStateStore()
+        val client = clientAgainst(store)
+        client.tools().call(
+            ToolName.of("add_application"),
+            ToolRequest(mapOf("company" to "Acme Rockets", "role" to "Staff Engineer", "status" to "APPLIED")),
+        ).orFail()
+        val id = store.states.keys.single()
+
+        val result = client.tools().call(ToolName.of("attach_resume"), ToolRequest(mapOf("id" to id, "path" to "/no/such/file.pdf"))).orFail()
+
+        assertIs<ToolResponse.Error>(result)
+        assertEquals(emptyList(), store.states.getValue(id).attachments)
     }
 
     @Test

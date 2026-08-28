@@ -5,6 +5,7 @@
 package org.cr.pipeline.data.mcp
 
 import co.touchlab.kermit.Logger
+import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.toKotlinLocalDate
@@ -50,6 +51,24 @@ fun buildMcpApp(
     val listApplications = Tool("list_applications", "List all job applications currently tracked in Pipeline.")
     val listSettings = Tool("list_settings", "List Pipeline's current app-level settings for this device.")
     val openApplication = Tool("open_application", "Open a job application's detail screen in the running Pipeline app.", idArg)
+    val attachResume = Tool(
+        "attach_resume",
+        "Attach a résumé file to a job application, identified by id. Replaces the current résumé, if any.",
+        idArg,
+        filePathArg,
+    )
+    val attachCoverLetter = Tool(
+        "attach_cover_letter",
+        "Attach a cover letter file to a job application, identified by id. Replaces the current cover letter, if any.",
+        idArg,
+        filePathArg,
+    )
+    val attachFile = Tool(
+        "attach_file",
+        "Attach a miscellaneous file to a job application, identified by id. Doesn't replace any existing attachment.",
+        idArg,
+        filePathArg,
+    )
 
     // The MCP transport (NoMcpSecurity, no session layer) doesn't hand this app a per-client or
     // per-session identifier to attribute a call to — "mcp" is the most specific token available
@@ -110,6 +129,51 @@ fun buildMcpApp(
             logger.d { "MCP tool response: open_application -> #$id" }
             ToolResponse.Ok(message)
         },
+        attachResume bind { request: ToolRequest ->
+            val id = idArg(request)
+            val path = filePathArg(request)
+            logger.d { "MCP tool call: attach_resume with id=$id, path=$path" }
+            val file = readAttachableFile(path)
+            if (file == null) {
+                logger.d { "MCP tool response: attach_resume -> no file at $path" }
+                ToolResponse.Error("No file found at $path")
+            } else {
+                runBlocking { repository.attachResume(id, file.name, file.readBytes(), mcpProvenance) }
+                val message = "Attached résumé \"${file.name}\" to application #$id."
+                logger.d { "MCP tool response: attach_resume -> #$id" }
+                ToolResponse.Ok(message)
+            }
+        },
+        attachCoverLetter bind { request: ToolRequest ->
+            val id = idArg(request)
+            val path = filePathArg(request)
+            logger.d { "MCP tool call: attach_cover_letter with id=$id, path=$path" }
+            val file = readAttachableFile(path)
+            if (file == null) {
+                logger.d { "MCP tool response: attach_cover_letter -> no file at $path" }
+                ToolResponse.Error("No file found at $path")
+            } else {
+                runBlocking { repository.attachCoverLetter(id, file.name, file.readBytes(), mcpProvenance) }
+                val message = "Attached cover letter \"${file.name}\" to application #$id."
+                logger.d { "MCP tool response: attach_cover_letter -> #$id" }
+                ToolResponse.Ok(message)
+            }
+        },
+        attachFile bind { request: ToolRequest ->
+            val id = idArg(request)
+            val path = filePathArg(request)
+            logger.d { "MCP tool call: attach_file with id=$id, path=$path" }
+            val file = readAttachableFile(path)
+            if (file == null) {
+                logger.d { "MCP tool response: attach_file -> no file at $path" }
+                ToolResponse.Error("No file found at $path")
+            } else {
+                runBlocking { repository.attachFile(id, file.name, file.readBytes(), mcpProvenance) }
+                val message = "Attached \"${file.name}\" to application #$id."
+                logger.d { "MCP tool response: attach_file -> #$id" }
+                ToolResponse.Ok(message)
+            }
+        },
     )
 
     val loggingFilter = Filter { next ->
@@ -163,3 +227,11 @@ private fun ToolRequest.toApplicationInput() = ApplicationInput(
     source = sourceArg(this)?.takeIf { it.isNotBlank() },
     notes = notesArg(this),
 )
+
+// PL-018: "not a raw file upload, but whatever shape the protocol treats as first-class" — the
+// MCP server and the client it's serving always run on the same machine, so a filesystem path is
+// that shape here, the same way open_application treats a deep link as first-class instead of
+// re-implementing navigation over MCP.
+private val filePathArg = Tool.Arg.string().required("path", "Absolute path, on this device, to the file to attach.")
+
+private fun readAttachableFile(path: String): File? = File(path).takeIf { it.isFile }
