@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.52",
+  revision: "1.54",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -278,6 +278,21 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     JVM, `UnsupportedFilePicker` everywhere else, same rollout shape as
     `DataPortController`/`FileArchiveService`. Event Log appendix's `ResumeAttached`/
     `AttachmentRemoved` rows updated — both have an in-app caller now, not just MCP.],
+  [1.53], [2026-08-27], [Shipped PL-021, Remember Last Route: `AppPreferences` gained
+    `lastDetailApplicationId` — `null` for the list, an id for that application's detail screen,
+    the only two screens worth reopening into. Restored the same way an incoming deep link already
+    was: a `LaunchedEffect` inside `PipelinePhoneApp`/`PipelineTabletApp` navigating to the saved
+    route on launch, on top of the graph's unchanged `ListRoute` start destination rather than
+    replacing it, so Back still has somewhere to pop to. `PreferencesStore` gained a synchronous
+    `currentPreferences` snapshot alongside its existing `Flow` — the launch-time redirect needs
+    the saved value before a coroutine gets to run, not after.],
+  [1.54], [2026-08-27], [Shipped PL-034, Event Provenance Indicator: `ApplicationState` gained
+    `lastProvenance`, set once in `applyEvent` from whichever event was just folded rather than
+    in each of its eight branches, and carried through `toJobApplication`/`toApplicationDetail`
+    onto `JobApplication`/`ApplicationDetail`. A new shared `ProvenanceIcon` — `Person` for
+    `Device`, `SmartToy` for `McpClient`, nothing for `Unknown` — appears on every list card next
+    to the status chip, and alongside the full `deviceId`/`clientId` text in both detail headers.
+    An MCP tool call no longer reads as indistinguishable from a human edit made by tapping.],
 )
 
 #part(1, "Core Application",
@@ -380,8 +395,9 @@ in sync with the real one by hand.
 
 The server binds to loopback only; nothing it does is reachable off the device it runs on, matching
 the no-server stance the rest of the data model holds to. Every MCP tool call becomes a normal
-event in PL-011's log, indistinguishable today from one a human made by tapping — which is exactly
-the gap PL-033 and PL-034 exist to close.
+event in PL-011's log — PL-033 tags it with where it came from, and PL-034 surfaces that on the
+list and detail views, so it no longer reads as indistinguishable from one a human made by
+tapping.
 
 #include "features/PL-013-mcp-server-infrastructure.typ"
 #include "features/PL-015-list-applications.typ"
