@@ -7,6 +7,7 @@ package org.cr.pipeline.sync.event
 import kotlinx.serialization.Serializable
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 
 /**
@@ -51,10 +52,36 @@ data class StatusChanged(
 ) : ApplicationEvent
 
 /** The "Contacts" section's "+" affordance — appends one contact, always to the end of the
- *  existing list, never a diff against it. */
+ *  existing list, never a diff against it. [contactId] is assigned here, at construction, rather
+ *  than derived from list position — that's what would let a future edit/remove event target this
+ *  contact specifically, the way [StatusChanged] targets an application by [applicationId] rather
+ *  than "whichever one is current". */
 @Serializable
 data class ContactAdded(
     override val applicationId: ApplicationId,
+    val contactId: ContactId,
     val contact: ContactInput,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
+) : ApplicationEvent
+
+/** PL-031: attaches a résumé, cover letter, or misc file — the bytes themselves go straight to
+ *  [org.cr.pipeline.data.io.FileArchiveService], never into this event's payload; this just
+ *  records that it happened and what it was. [attachmentId] is assigned at construction, same
+ *  reasoning as [ContactAdded]'s [ContactAdded.contactId]. */
+@Serializable
+data class AttachmentAdded(
+    override val applicationId: ApplicationId,
+    val attachmentId: AttachmentId,
+    val kind: AttachmentKind,
+    val fileName: String,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
+) : ApplicationEvent
+
+/** Detaches one attachment — removal from the archive, not deletion of the application. Deleting
+ *  an application leaves its attachments in the archive alone (see PL-031). */
+@Serializable
+data class AttachmentRemoved(
+    override val applicationId: ApplicationId,
+    val attachmentId: AttachmentId,
     override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent

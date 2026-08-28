@@ -124,6 +124,15 @@ kotlin {
         iosArm64Main.get().dependsOn(iosMain.get())
         iosSimulatorArm64Main.get().dependsOn(iosMain.get())
 
+        // PL-031's FileArchiveService is plain java.util.zip/java.io — real on Android and JVM,
+        // both of which can share this one implementation; iOS/js/wasmJs stay on
+        // UnsupportedFileArchiveService instead of pulling in a Kotlin/Native zip dependency for it.
+        val jvmAndroidMain by creating {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(jvmAndroidMain)
+        jvmMain.get().dependsOn(jvmAndroidMain)
+
         // js and wasmJs share browser storage access (localStorage) but need different bindings
         // for it: js gets kotlinx.browser for free from kotlin-stdlib-js, wasmJs needs the
         // separate kotlinx-browser library (wasmJs-only — it doesn't publish a js variant).

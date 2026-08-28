@@ -5,6 +5,7 @@
 package org.cr.pipeline.sync.event
 
 import kotlinx.datetime.LocalDate
+import org.cr.pipeline.model.AttachmentKind
 
 /**
  * Folds one [ApplicationEvent] onto the application's current [state] (null only for that
@@ -36,6 +37,7 @@ fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDa
         statusHistory = listOf(StatusHistoryRecord(event.input.status, event.input.dateApplied ?: today, "Application created")),
         contacts = emptyList(),
         reminders = emptyList(),
+        attachments = emptyList(),
     )
 
     is ApplicationEdited -> {
@@ -68,7 +70,26 @@ fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDa
     is ContactAdded -> {
         val current = checkNotNull(state) { "ContactAdded for ${event.applicationId} with no prior state" }
         current.copy(
-            contacts = current.contacts + ContactRecord(event.contact.name, event.contact.role, event.contact.email),
+            contacts = current.contacts + ContactRecord(event.contactId, event.contact.name, event.contact.role, event.contact.email),
         )
+    }
+
+    is AttachmentAdded -> {
+        val current = checkNotNull(state) { "AttachmentAdded for ${event.applicationId} with no prior state" }
+        // RESUME/COVER_LETTER are one slot each — adding a new one replaces whichever one of the
+        // same kind is already there; MISC has no slot limit, every add just appends.
+        val withoutSameSlot = if (event.kind == AttachmentKind.MISC) {
+            current.attachments
+        } else {
+            current.attachments.filterNot { it.kind == event.kind }
+        }
+        current.copy(
+            attachments = withoutSameSlot + AttachmentRecord(event.attachmentId, event.kind, event.fileName),
+        )
+    }
+
+    is AttachmentRemoved -> {
+        val current = checkNotNull(state) { "AttachmentRemoved for ${event.applicationId} with no prior state" }
+        current.copy(attachments = current.attachments.filterNot { it.id == event.attachmentId })
     }
 }

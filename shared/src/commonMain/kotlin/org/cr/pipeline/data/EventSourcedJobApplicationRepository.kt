@@ -8,9 +8,12 @@ import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.cr.pipeline.data.io.FileArchiveService
+import org.cr.pipeline.data.io.UnsupportedFileArchiveService
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
@@ -20,7 +23,11 @@ import org.cr.pipeline.sync.event.ApplicationEdited
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.ApplicationState
+import org.cr.pipeline.sync.event.AttachmentAdded
+import org.cr.pipeline.sync.event.AttachmentId
+import org.cr.pipeline.sync.event.AttachmentRemoved
 import org.cr.pipeline.sync.event.ContactAdded
+import org.cr.pipeline.sync.event.ContactId
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.sync.event.StatusChanged
@@ -39,6 +46,7 @@ import org.cr.pipeline.sync.event.toJobApplication
 class EventSourcedJobApplicationRepository(
     private val store: ApplicationStateStore,
     private val eventLog: EventLog,
+    private val fileService: FileArchiveService = UnsupportedFileArchiveService,
 ) : JobApplicationRepository {
     override fun observeApplications(): Flow<List<JobApplication>> =
         store.observeAll().map { list -> list.map { (id, state) -> state.toJobApplication(id) } }
@@ -72,7 +80,28 @@ class EventSourcedJobApplicationRepository(
 
     override suspend fun addContact(id: Long, contact: ContactInput, provenance: EventProvenance?) {
         val current = store.getState(id) ?: return
-        persist(id, current, ContactAdded(current.applicationId, contact, resolveProvenance(provenance)))
+        persist(id, current, ContactAdded(current.applicationId, ContactId.random(), contact, resolveProvenance(provenance)))
+    }
+
+    override suspend fun addAttachment(id: Long, kind: AttachmentKind, fileName: String, bytes: ByteArray, provenance: EventProvenance?) {
+        val current = store.getState(id) ?: return
+        // A single-slot kind's prior file would otherwise sit orphaned in the archive forever —
+        // applyEvent drops it from ApplicationState.attachments, but only this repository ever
+        // touches the archive itself, so cleaning up the bytes is on it, not the (pure) reducer.
+        if (kind != AttachmentKind.MISC) {
+            current.attachments.firstOrNull { it.kind == kind }?.let { fileService.delete(current.applicationId, it.id) }
+        }
+        val attachmentId = AttachmentId.random()
+        fileService.write(current.applicationId, attachmentId, kind, fileName, bytes)
+        persist(id, current, AttachmentAdded(current.applicationId, attachmentId, kind, fileName, resolveProvenance(provenance)))
+    }
+
+    override suspend fun removeAttachment(id: Long, attachmentId: String, provenance: EventProvenance?) {
+        val current = store.getState(id) ?: return
+        val target = AttachmentId(attachmentId)
+        if (current.attachments.none { it.id == target }) return
+        fileService.delete(current.applicationId, target)
+        persist(id, current, AttachmentRemoved(current.applicationId, target, resolveProvenance(provenance)))
     }
 
     // deviceId() is a storage round trip on first call (then cached by eventLog itself), so this

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
@@ -38,4 +39,15 @@ interface JobApplicationRepository {
      *  this device's own [EventProvenance.Device] — callers reached through another path (the MCP
      *  server) pass their own. */
     suspend fun addContact(id: Long, contact: ContactInput, provenance: EventProvenance? = null)
+
+    /** Writes [bytes] to the file archive (PL-031) and records an attachment of [kind]. A new
+     *  RESUME or COVER_LETTER replaces whichever one of that kind is already there — see
+     *  [org.cr.pipeline.sync.event.applyEvent]; MISC has no slot limit. [provenance] left null
+     *  resolves to this device's own [EventProvenance.Device]. */
+    suspend fun addAttachment(id: Long, kind: AttachmentKind, fileName: String, bytes: ByteArray, provenance: EventProvenance? = null)
+
+    /** Removes one attachment from the archive and the application's attachment list.
+     *  [attachmentId] is an [org.cr.pipeline.model.AttachmentSummary.id]. [provenance] left null
+     *  resolves to this device's own [EventProvenance.Device]. */
+    suspend fun removeAttachment(id: Long, attachmentId: String, provenance: EventProvenance? = null)
 }

@@ -50,7 +50,7 @@ fun replayApplicationState(
                 idOrder[event.applicationId] = idOrder.size + 1L
                 states[event.applicationId] = applyEvent(null, event, today)
             }
-            is ApplicationEdited, is StatusChanged, is ContactAdded -> {
+            is ApplicationEdited, is StatusChanged, is ContactAdded, is AttachmentAdded, is AttachmentRemoved -> {
                 val current = states[event.applicationId]
                 if (current == null) {
                     onSkippedEnvelope(envelope, IllegalStateException("${event::class.simpleName} for ${event.applicationId} with no prior create"))

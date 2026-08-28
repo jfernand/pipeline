@@ -21,6 +21,7 @@ import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.mcp.McpServerController
 import org.cr.pipeline.di.dataPortModule
+import org.cr.pipeline.di.fileArchiveModule
 import org.cr.pipeline.di.loggingModule
 import org.cr.pipeline.di.mcpDataModule
 import org.cr.pipeline.di.platformDataModule
@@ -49,7 +50,7 @@ fun App(
     initialDeepLink: String? = null,
     onNavHostReady: suspend (NavHostController) -> Unit = {},
 ) {
-    KoinApplication(koinConfiguration { modules(loggingModule, platformDataModule, mcpDataModule, dataPortModule) }) {
+    KoinApplication(koinConfiguration { modules(loggingModule, platformDataModule, mcpDataModule, dataPortModule, fileArchiveModule) }) {
         MaterialTheme(colorScheme = pipeDarkColorScheme) {
             val navController = rememberNavController()
             val preferencesStore = koinInject<PreferencesStore>()

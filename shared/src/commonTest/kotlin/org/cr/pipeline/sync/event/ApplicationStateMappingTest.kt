@@ -36,6 +36,7 @@ class ApplicationStateMappingTest {
         statusHistory = emptyList(),
         contacts = emptyList(),
         reminders = reminders,
+        attachments = emptyList(),
     )
 
     @Test

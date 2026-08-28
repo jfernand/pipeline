@@ -41,6 +41,6 @@ actual val platformDataModule: Module = module {
         }
     }
     single<ApplicationStateStore> { InMemoryApplicationStateStore(get()) }
-    single<JobApplicationRepository> { EventSourcedJobApplicationRepository(get(), get()) }
+    single<JobApplicationRepository> { EventSourcedJobApplicationRepository(get(), get(), get()) }
     single<PreferencesStore> { SettingsPreferencesStore(get()) }
 }

@@ -20,6 +20,7 @@ import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.ContactAdded
+import org.cr.pipeline.sync.event.ContactId
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.sync.event.EventProvenance
 
@@ -54,7 +55,7 @@ class DemoSeedingEventLog(private val delegate: EventLog) : EventLog {
                     val created: ApplicationEvent = ApplicationCreated(applicationId, seed.toApplicationInput(today), provenance)
                     delegate.append(created, timestamp++)
                     for (contact in seed.contacts) {
-                        val contactAdded: ApplicationEvent = ContactAdded(applicationId, contact, provenance)
+                        val contactAdded: ApplicationEvent = ContactAdded(applicationId, ContactId.random(), contact, provenance)
                         delegate.append(contactAdded, timestamp++)
                     }
                 }

@@ -7,8 +7,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.46",
-  date: "2026-08-26",
+  revision: "1.50",
+  date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -228,6 +228,32 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     this catalog's own review's top finding — an empty log is genuinely empty now, replacing the
     old showingSeedData special-case in `InMemoryApplicationStateStore` that let an edit to
     ephemeral demo data silently replay to nothing on restart.],
+  [1.47], [2026-08-27], [Added a Data Model appendix: an entity diagram for `ApplicationState` and
+    its three nested collections (`StatusHistoryEntry`, `Contact`, `Reminder`), and an
+    event-sourcing diagram tracing `event_envelopes` through `replayApplicationState`/`applyEvent`
+    to the three read-side projections (`JobApplication`, `ApplicationDetail`, `FollowUpItem`).],
+  [1.48], [2026-08-27], [Added an Event Log appendix — every `ApplicationEvent` `event_envelopes`
+    recognizes (`ApplicationCreated`, `ApplicationEdited`, `StatusChanged`, `ContactAdded`), its
+    fields, and what emits it. Placed after Navigation Routes rather than under Data Model, since
+    the two appendices are expected to merge. Also fixes the Data Model page's Applications
+    section, which still said neither the app nor the MCP server had a write path for `Contact` —
+    `ContactAdded` closed that; `Reminder` still has none.],
+  [1.49], [2026-08-27], [`ContactAdded` gained a `contactId: ContactId`, generated at construction
+    the same way `ApplicationId.random()` already is for a new application — a contact previously
+    had nothing stable for a future edit or remove event to target, since name+email isn't a
+    reliable identity and list position isn't either. `ContactRecord` and `ContactSummary` carry
+    it now too. Event Log and Data Model appendices updated to match.],
+  [1.50], [2026-08-27], [Shipped PL-031, File Management Service: a zip-backed archive
+    (`FileArchiveService`) for résumé/cover-letter/misc attachments, one folder per application
+    named after its `ApplicationId`. `AttachmentAdded`/`AttachmentRemoved` join the event
+    vocabulary — `RESUME`/`COVER_LETTER` are one slot each (a new one replaces the old),
+    `MISC` just appends. Real on JVM and Android (new `jvmAndroidMain` source set,
+    `java.util.zip`-backed); iOS/js/wasmJs stay on `UnsupportedFileArchiveService`, same rollout
+    shape as PL-014's `DataPortController`. Dev Tools gained a Files section — the archive's raw
+    contents, plus an "Add test file" button, since PL-018's actual attach-file form doesn't exist
+    yet to exercise this any other way. Event Log appendix gained both events; Data Model appendix's
+    entity diagram gained `Attachment`, and its event-vocabulary box was simplified to point at the
+    Event Log appendix instead of re-listing every case (it had already drifted out of sync once).],
 )
 
 #part(1, "Core Application",
@@ -439,6 +465,88 @@ link if it has one, and the MCP tool that reaches it, if any.
 tablet only, via `NavRail`'s "Follow-ups" tab.
 
 #pagebreak(weak: true, to: "odd")
+#heading(level: 1, numbering: none)[Event Log]
+
+Every event `ApplicationEvent` (`sync/event/ApplicationEvent.kt`) recognizes — the payload shapes
+`event_envelopes` actually stores, and the only inputs `applyEvent` and `replayApplicationState`
+know how to fold into `ApplicationState`. `ApplicationEvent` is `sealed`, so both of those `when`
+blocks are exhaustive: a fifth event type can't compile in without a matching branch in each.
+
+Every one of these also carries a `provenance: EventProvenance` (PL-033) — `Device`, `McpClient`,
+or `Unknown`, the default for payloads written before that field existed — not repeated per row
+below.
+
+#let event-row(event, fields, emitted-by, notes: none) = block(
+  below: 14pt,
+  breakable: false,
+  stroke: (bottom: rule-w + hairline),
+  inset: (bottom: 10pt),
+)[
+  #text(font: mono-font, size: 10pt, weight: 600, fill: ink)[#event]
+  #v(4pt)
+  #grid(
+    columns: (72pt, 1fr),
+    column-gutter: 10pt,
+    row-gutter: 4pt,
+    label("Fields", size: 7pt), fields,
+    label("Emitted by", size: 7pt), emitted-by,
+    ..if notes != none { (label("Notes", size: 7pt), notes) } else { () },
+  )
+]
+
+#event-row(
+  [ApplicationCreated],
+  [`applicationId` · `input: ApplicationInput` · `provenance`],
+  [`saveApplication(id: none, ...)` — the Add/Edit form's Save with no existing application;
+    `add_application` (MCP); `DemoSeedingEventLog`'s seeding (PL-019)],
+  notes: [Seeds `statusHistory`'s first entry: `input.status`, dated `input.dateApplied` if given,
+    else the replay-time `today`.],
+)
+#event-row(
+  [ApplicationEdited],
+  [`applicationId` · `input: ApplicationInput` · `provenance`],
+  [`saveApplication(id: <existing>, ...)` — the Add/Edit form's Save on an existing application;
+    `edit_application` (MCP)],
+  notes: [Always the full field set, not a diff — applies without needing to know the
+    application's prior state. Appends a `statusHistory` entry only when `status` actually
+    changed.],
+)
+#event-row(
+  [StatusChanged],
+  [`applicationId` · `status` · `note`],
+  [`updateStatus(...)` — the "Update status" sheet],
+  notes: [Always appends a `statusHistory` entry, unlike `ApplicationEdited` — the one thing this
+    event exists to guarantee, since an edit only touches status incidentally when that field
+    happens to differ.],
+)
+#event-row(
+  [ContactAdded],
+  [`applicationId` · `contactId: ContactId` · `contact: ContactInput` · `provenance`],
+  [`addContact(...)` — the Contacts section's "+" button (`ContactSheet`); `DemoSeedingEventLog`'s
+    seeding],
+  notes: [Appends to `contacts`, always to the end, never a diff against it. `contactId` is
+    assigned here, at construction — not derived from list position — so a future edit/remove
+    event has something stable to target. No such event exists yet.],
+)
+#event-row(
+  [AttachmentAdded],
+  [`applicationId` · `attachmentId: AttachmentId` · `kind: AttachmentKind` · `fileName` · `provenance`],
+  [`addAttachment(...)` — Dev Tools' Files section "Add test file" button, the only caller today;
+    PL-018's actual attach-file form doesn't exist yet],
+  notes: [`RESUME`/`COVER_LETTER` are one slot each — a new one replaces whichever one of that
+    kind is already on the application, enforced in `applyEvent` itself. `MISC` has no slot limit,
+    every add just appends. The bytes never go in this event's payload — those go straight to
+    `FileArchiveService` (PL-031); this just records that it happened.],
+)
+#event-row(
+  [AttachmentRemoved],
+  [`applicationId` · `attachmentId: AttachmentId` · `provenance`],
+  [`removeAttachment(...)`; no caller exists yet — PL-018's form doesn't either],
+  notes: [Detaches one file — removes it from `FileArchiveService`'s archive and from
+    `attachments`. Deleting the application itself leaves the archive alone (PL-031).],
+)
+
+#pagebreak(weak: true, to: "odd")
 #heading(level: 1, numbering: none)[Data Model]
 
 #let dm-box(pos, w, h, title, body, accent: amber, title-size: 7.3pt) = {
@@ -474,10 +582,14 @@ tablet only, via `NavRail`'s "Follow-ups" tab.
 == Applications
 
 `ApplicationState` (`sync/event/ApplicationState.kt`) is the one entity in this app — a job
-application, and the three small collections that belong to it. `StatusHistoryEntry`, `Contact`,
-and `Reminder` aren't rows in their own table with a foreign key back — they have no id of their
-own at all. Each lives entirely inside its application's own `ApplicationState`, held as a plain
-nested list, replayed and discarded as one unit with it.
+application, and the four small collections that belong to it. None are rows in their own table
+with a foreign key back. `StatusHistoryEntry` and `Reminder` have no id of their own at all;
+`Contact` and `Attachment` do (`contactId`, `attachmentId` — see the Event Log appendix's
+`ContactAdded`/`AttachmentAdded`), but neither is an independent row: no foreign key, no lifecycle
+of its own outside its application's. `Attachment` carries no bytes — those live only in
+`FileArchiveService`'s zip archive (PL-031), keyed by `attachmentId`; this is just the metadata a
+real event can carry. Each lives entirely inside its application's own `ApplicationState`, held as
+a plain nested list, replayed and discarded as one unit with it.
 
 #v(4pt)
 
@@ -496,23 +608,26 @@ nested list, replayed and discarded as one unit with it.
       accent: amber-deep,
     )
 
-    dm-arrow((2.6, -2.6), (1.8, -4.6))
-    dm-arrow((5.7, -2.6), (5.7, -4.6), label: [one Application, many of each — nested, not joined], label-width: 4cm)
-    dm-arrow((8.8, -2.6), (9.6, -4.6))
+    dm-arrow((2.0, -2.6), (1.35, -4.6))
+    dm-arrow((4.6, -2.6), (4.25, -4.6), label: [one Application, many of each — nested, not joined], label-width: 4cm)
+    dm-arrow((7.2, -2.6), (7.15, -4.6))
+    dm-arrow((9.8, -2.6), (10.05, -4.6))
 
-    dm-box((0, -4.6), 3.6, 1.8, [StatusHistoryEntry], [status · date · note])
-    dm-box((4.0, -4.6), 3.6, 1.8, [Contact], [name · role · email])
-    dm-box((8.0, -4.6), 3.4, 1.8, [Reminder], [message · dueDate])
+    dm-box((0, -4.6), 2.7, 2.2, [StatusHistoryEntry], [status · date · note], title-size: 6.6pt)
+    dm-box((2.9, -4.6), 2.7, 2.2, [Contact], [contactId · name · role · email], title-size: 6.6pt)
+    dm-box((5.8, -4.6), 2.7, 2.2, [Reminder], [message · dueDate], title-size: 6.6pt)
+    dm-box((8.7, -4.6), 2.7, 2.2, [Attachment], [attachmentId · kind · fileName], title-size: 6.6pt)
   })
 ]
 
 #v(4pt)
 
 `ApplicationDetail` (the detail screen) and `FollowUpItem` (PL-010) both read `Contact` and
-`Reminder` at display time — `toApplicationDetail`, `toFollowUpItems` — but neither the app nor
-the MCP server has a write path for either one yet: every `Contact` and `Reminder` on a real
-application today only ever got there through `SeedData`. `AddEditScreen` and the event vocabulary
-below cover every other field.
+`Reminder` at display time — `toApplicationDetail`, `toFollowUpItems`. `ApplicationDetail` also
+reads `Attachment`, though nothing displays it yet (PL-018 doesn't exist). `Contact` and
+`Attachment` each have a write path now (`ContactAdded`, `AttachmentAdded` — see the Event Log
+appendix); `Reminder` still has none — every `Reminder` on a real application today only ever got
+there through `SeedData`. `AddEditScreen` and the event vocabulary below cover every other field.
 
 == Event Sourcing
 
@@ -527,14 +642,18 @@ application doesn't update a row; it appends an event and re-folds.
   #canvas(length: 1cm, {
     import draw: *
 
-    // Row A — the event vocabulary (ApplicationEvent, sealed)
-    dm-box((0, 0), 3.6, 1.5, [ApplicationCreated], [applicationId · input · provenance], title-size: 6.4pt)
-    dm-box((4.0, 0), 3.6, 1.5, [ApplicationEdited], [applicationId · input · provenance], title-size: 6.4pt)
-    dm-box((8.0, 0), 3.4, 1.5, [StatusChanged], [applicationId · status · note], title-size: 6.4pt)
+    // Row A — the event vocabulary (ApplicationEvent, sealed). One box, not one per case — that
+    // list only grows, and the Event Log appendix is the exhaustive, always-current version of it;
+    // this diagram just needs to show where events come from, not enumerate every one.
+    dm-box(
+      (0, 0), 11.4, 1.5,
+      [ApplicationEvent — sealed],
+      [ApplicationCreated · ApplicationEdited · StatusChanged · ContactAdded · AttachmentAdded ·
+        AttachmentRemoved — see the Event Log appendix],
+      title-size: 6.8pt,
+    )
 
-    dm-arrow((1.8, -1.5), (4.6, -3.3), label: [append() —], label-width: 2.4cm)
-    dm-arrow((5.8, -1.5), (5.7, -3.3), label: [hash-chained], label-width: 2.4cm)
-    dm-arrow((9.7, -1.5), (6.8, -3.3), label: [per device], label-width: 2.4cm)
+    dm-arrow((5.7, -1.5), (5.7, -3.3), label: [append() — hash-chained per device], label-width: 4.2cm)
 
     // Row B — the one durable table
     dm-box(
@@ -558,7 +677,7 @@ application doesn't update a row; it appends an event and re-folds.
 
         dateApplied · nextActionDate · postingUrl · source · notes
 
-        statusHistory[] · contacts[] · reminders[]],
+        statusHistory[] · contacts[] · reminders[] · attachments[]],
     )
 
     dm-arrow((3.2, -11.1), (1.8, -13.1))

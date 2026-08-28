@@ -6,6 +6,7 @@ package org.cr.pipeline.sync.event
 
 import kotlinx.datetime.LocalDate
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentKind
 
 /**
  * The raw, storage-shaped fields of one application — the counterpart to
@@ -27,8 +28,13 @@ data class ApplicationState(
     val statusHistory: List<StatusHistoryRecord>,
     val contacts: List<ContactRecord>,
     val reminders: List<ReminderRecord>,
+    val attachments: List<AttachmentRecord>,
 )
 
 data class StatusHistoryRecord(val status: AppStatus, val date: LocalDate, val note: String)
-data class ContactRecord(val name: String, val role: String, val email: String)
+data class ContactRecord(val id: ContactId, val name: String, val role: String, val email: String)
 data class ReminderRecord(val message: String, val dueDate: LocalDate)
+
+/** No bytes — those live only in [org.cr.pipeline.data.io.FileArchiveService]'s archive, keyed by
+ *  [id]. This is just the metadata a real event can carry. */
+data class AttachmentRecord(val id: AttachmentId, val kind: AttachmentKind, val fileName: String)

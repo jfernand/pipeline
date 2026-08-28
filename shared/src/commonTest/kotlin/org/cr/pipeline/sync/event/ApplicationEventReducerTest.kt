@@ -7,6 +7,7 @@ package org.cr.pipeline.sync.event
 import kotlinx.datetime.LocalDate
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -47,6 +48,7 @@ class ApplicationEventReducerTest {
         )
         assertEquals(emptyList(), state.contacts)
         assertEquals(emptyList(), state.reminders)
+        assertEquals(emptyList(), state.attachments)
     }
 
     @Test
@@ -111,13 +113,17 @@ class ApplicationEventReducerTest {
     }
 
     @Test
-    fun `ContactAdded appends a contact without touching other fields`() {
+    fun `ContactAdded appends a contact carrying its event's contactId, without touching other fields`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val contactId = ContactId("contact-1")
         val contact = ContactInput("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")
 
-        val withContact = applyEvent(created, ContactAdded(applicationId, contact), today)
+        val withContact = applyEvent(created, ContactAdded(applicationId, contactId, contact), today)
 
-        assertEquals(listOf(ContactRecord("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")), withContact.contacts)
+        assertEquals(
+            listOf(ContactRecord(contactId, "Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")),
+            withContact.contacts,
+        )
         assertEquals(created.company, withContact.company)
         assertEquals(created.status, withContact.status)
         assertEquals(created.statusHistory, withContact.statusHistory)
@@ -126,12 +132,93 @@ class ApplicationEventReducerTest {
     @Test
     fun `ContactAdded appends to, rather than replaces, existing contacts`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
-        val first = applyEvent(created, ContactAdded(applicationId, ContactInput("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")), today)
+        val first = applyEvent(
+            created,
+            ContactAdded(applicationId, ContactId("contact-1"), ContactInput("Dana Whitfield", "Engineering manager", "dana@northwindlabs.com")),
+            today,
+        )
 
-        val second = applyEvent(first, ContactAdded(applicationId, ContactInput("Marcus Oyelaran", "Recruiter", "marcus@northwindlabs.com")), today)
+        val second = applyEvent(
+            first,
+            ContactAdded(applicationId, ContactId("contact-2"), ContactInput("Marcus Oyelaran", "Recruiter", "marcus@northwindlabs.com")),
+            today,
+        )
 
         assertEquals(2, second.contacts.size)
         assertEquals("Dana Whitfield", second.contacts.first().name)
         assertEquals("Marcus Oyelaran", second.contacts.last().name)
+        assertEquals(ContactId("contact-1"), second.contacts.first().id)
+        assertEquals(ContactId("contact-2"), second.contacts.last().id)
+    }
+
+    @Test
+    fun `AttachmentAdded appends a MISC attachment without touching other fields`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val attachmentId = AttachmentId("attachment-1")
+
+        val withAttachment = applyEvent(created, AttachmentAdded(applicationId, attachmentId, AttachmentKind.MISC, "notes.pdf"), today)
+
+        assertEquals(
+            listOf(AttachmentRecord(attachmentId, AttachmentKind.MISC, "notes.pdf")),
+            withAttachment.attachments,
+        )
+        assertEquals(created.company, withAttachment.company)
+        assertEquals(created.statusHistory, withAttachment.statusHistory)
+    }
+
+    @Test
+    fun `AttachmentAdded appends, rather than replaces, additional MISC attachments`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val first = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("a1"), AttachmentKind.MISC, "one.pdf"), today)
+
+        val second = applyEvent(first, AttachmentAdded(applicationId, AttachmentId("a2"), AttachmentKind.MISC, "two.pdf"), today)
+
+        assertEquals(2, second.attachments.size)
+        assertEquals(listOf("one.pdf", "two.pdf"), second.attachments.map { it.fileName })
+    }
+
+    @Test
+    fun `AttachmentAdded with RESUME replaces the prior resume instead of appending`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val first = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("r1"), AttachmentKind.RESUME, "resume-v1.pdf"), today)
+
+        val second = applyEvent(first, AttachmentAdded(applicationId, AttachmentId("r2"), AttachmentKind.RESUME, "resume-v2.pdf"), today)
+
+        assertEquals(
+            listOf(AttachmentRecord(AttachmentId("r2"), AttachmentKind.RESUME, "resume-v2.pdf")),
+            second.attachments,
+        )
+    }
+
+    @Test
+    fun `AttachmentAdded with RESUME doesn't disturb an existing COVER_LETTER slot`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val withCoverLetter = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("c1"), AttachmentKind.COVER_LETTER, "cover.pdf"), today)
+
+        val withResumeToo = applyEvent(withCoverLetter, AttachmentAdded(applicationId, AttachmentId("r1"), AttachmentKind.RESUME, "resume.pdf"), today)
+
+        assertEquals(2, withResumeToo.attachments.size)
+        assertEquals(setOf(AttachmentKind.COVER_LETTER, AttachmentKind.RESUME), withResumeToo.attachments.map { it.kind }.toSet())
+    }
+
+    @Test
+    fun `AttachmentRemoved removes only the matching attachment`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val withTwo = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("a1"), AttachmentKind.MISC, "one.pdf"), today)
+            .let { applyEvent(it, AttachmentAdded(applicationId, AttachmentId("a2"), AttachmentKind.MISC, "two.pdf"), today) }
+
+        val removed = applyEvent(withTwo, AttachmentRemoved(applicationId, AttachmentId("a1")), today)
+
+        assertEquals(listOf(AttachmentRecord(AttachmentId("a2"), AttachmentKind.MISC, "two.pdf")), removed.attachments)
+    }
+
+    @Test
+    fun `AttachmentRemoved for an unknown id is a no-op`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val withOne = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("a1"), AttachmentKind.MISC, "one.pdf"), today)
+
+        val removed = applyEvent(withOne, AttachmentRemoved(applicationId, AttachmentId("does-not-exist")), today)
+
+        assertEquals(withOne.attachments, removed.attachments)
     }
 }

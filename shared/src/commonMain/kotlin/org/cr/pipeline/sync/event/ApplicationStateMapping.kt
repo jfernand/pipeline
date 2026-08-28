@@ -8,6 +8,7 @@ import kotlinx.datetime.LocalDate
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentSummary
 import org.cr.pipeline.model.ContactSummary
 import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
@@ -79,10 +80,11 @@ fun ApplicationState.toApplicationDetail(id: Long, today: LocalDate = todayDate(
                 current = index == orderedHistory.lastIndex,
             )
         },
-        contacts = contacts.map { ContactSummary(name = it.name, role = it.role, email = it.email) },
+        contacts = contacts.map { ContactSummary(id = it.id.value, name = it.name, role = it.role, email = it.email) },
         reminders = reminders
             .sortedBy { it.dueDate }
             .map { reminder -> ReminderSummary(reminder.message, reminder.dueDate.formatShort(), reminder.dueDate < today) },
+        attachments = attachments.map { AttachmentSummary(id = it.id.value, kind = it.kind, fileName = it.fileName) },
     )
 }
 

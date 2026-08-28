@@ -28,14 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.DeviceIdentityStore
+import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
+import org.cr.pipeline.data.io.FileArchiveEntry
+import org.cr.pipeline.data.io.FileArchiveService
+import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.sync.chain.EventEnvelope
 import org.cr.pipeline.sync.event.EventLog
+import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.components.SettingsRow
 import org.cr.pipeline.ui.theme.BodyText
@@ -53,12 +59,23 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
     val deviceIdentityStore = koinInject<DeviceIdentityStore>()
     val eventLog = koinInject<EventLog>()
     val preferencesStore = koinInject<PreferencesStore>()
+    val repository = koinInject<JobApplicationRepository>()
+    val fileService = koinInject<FileArchiveService>()
     val scope = rememberCoroutineScope()
     var deviceId by remember { mutableStateOf<String?>(null) }
     val chain by eventLog.observeChain().collectAsState(initial = emptyList())
     val preferences by preferencesStore.observePreferences().collectAsState(initial = AppPreferences())
+    val applications by repository.observeApplications().collectAsState(initial = emptyList())
+    var fileEntries by remember { mutableStateOf<List<FileArchiveEntry>>(emptyList()) }
 
-    LaunchedEffect(Unit) { deviceId = deviceIdentityStore.getDeviceId().value }
+    suspend fun refreshFileEntries() {
+        fileEntries = fileService.listEntries()
+    }
+
+    LaunchedEffect(Unit) {
+        deviceId = deviceIdentityStore.getDeviceId().value
+        refreshFileEntries()
+    }
 
     Column(
         modifier
@@ -127,6 +144,48 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
                 }
             }
         }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            SectionLabel("Files", count = fileEntries.size)
+            if (!fileService.isSupported) {
+                BodyText("Not available on this platform yet.", size = 13.sp, color = PlColors.fgMuted)
+            } else {
+                if (fileEntries.isEmpty()) {
+                    BodyText("Nothing in the archive yet.", size = 13.sp, color = PlColors.fgMuted)
+                } else {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .background(PlColors.bgRaised, RoundedCornerShape(4.dp))
+                            .border(1.dp, PlColors.borderDefault, RoundedCornerShape(4.dp)),
+                    ) {
+                        fileEntries.forEach { entry -> FileEntryRow(entry) }
+                    }
+                }
+                PlSecondaryButton(
+                    "Add test file",
+                    onClick = {
+                        val target = applications.firstOrNull() ?: return@PlSecondaryButton
+                        scope.launch {
+                            repository.addAttachment(
+                                id = target.id,
+                                kind = AttachmentKind.MISC,
+                                fileName = "dev-tools-test-${Clock.System.now().toEpochMilliseconds()}.txt",
+                                bytes = "Dev Tools test attachment".encodeToByteArray(),
+                            )
+                            refreshFileEntries()
+                        }
+                    },
+                    height = 40.dp,
+                )
+                if (applications.isEmpty()) {
+                    BodyText(
+                        "Add an application first — there's nothing to attach a test file to yet.",
+                        size = 12.sp,
+                        color = PlColors.fgMuted,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -164,4 +223,35 @@ private fun EventRow(envelope: EventEnvelope) {
             uppercase = false,
         )
     }
+}
+
+@Composable
+private fun FileEntryRow(entry: FileArchiveEntry) {
+    Row(
+        Modifier.fillMaxWidth().drawBottomBorder(PlColors.borderSubtle).padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        MonoText(
+            entry.path,
+            size = 10.sp,
+            color = PlColors.fgPrimary,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            uppercase = false,
+        )
+        MonoText(formatBytes(entry.sizeBytes), size = 10.sp)
+    }
+}
+
+private fun formatBytes(bytes: Long): String = when {
+    bytes < 1_024 -> "$bytes B"
+    bytes < 1_024 * 1_024 -> "${oneDecimal(bytes / 1_024.0)} KB"
+    else -> "${oneDecimal(bytes / (1_024.0 * 1_024.0))} MB"
+}
+
+// No java.util.Formatter/String.format in commonMain — plain integer math instead.
+private fun oneDecimal(value: Double): String {
+    val tenths = (value * 10).toInt()
+    return "${tenths / 10}.${tenths % 10}"
 }
