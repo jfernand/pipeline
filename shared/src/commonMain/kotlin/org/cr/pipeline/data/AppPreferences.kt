@@ -14,6 +14,10 @@ data class AppPreferences(
     val mcpServerEnabled: Boolean = false,
     val mcpServerAddress: String = "localhost",
     val mcpServerPort: Int = 34687,
+    /** PL-021: null means the list was the last screen (or the app has never run) — the detail
+     *  screen for one application is the only other screen worth reopening into. See
+     *  [PreferencesStore.setLastDetailApplicationId]. */
+    val lastDetailApplicationId: Long? = null,
 )
 
 @Serializable

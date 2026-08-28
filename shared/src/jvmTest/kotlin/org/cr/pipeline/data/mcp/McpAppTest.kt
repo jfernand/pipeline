@@ -64,6 +64,8 @@ internal class FakePreferencesStore(initial: AppPreferences = AppPreferences()) 
 
     override fun observePreferences(): Flow<AppPreferences> = state
 
+    override val currentPreferences: AppPreferences get() = state.value
+
     override suspend fun setSyncNetworkMode(mode: SyncNetworkMode) {
         state.value = state.value.copy(syncNetworkMode = mode)
     }
@@ -82,6 +84,10 @@ internal class FakePreferencesStore(initial: AppPreferences = AppPreferences()) 
 
     override suspend fun setMcpServerPort(port: Int) {
         state.value = state.value.copy(mcpServerPort = port)
+    }
+
+    override suspend fun setLastDetailApplicationId(id: Long?) {
+        state.value = state.value.copy(lastDetailApplicationId = id)
     }
 }
 

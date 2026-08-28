@@ -30,6 +30,7 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
+import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.nav.DeepLinkBus
 import org.cr.pipeline.ui.components.PlFab
 import org.cr.pipeline.ui.nav.AddEditRoute
@@ -48,6 +49,7 @@ import org.koin.compose.koinInject
 @Composable
 fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modifier, initialDeepLink: String? = null) {
     val repository = koinInject<JobApplicationRepository>()
+    val preferencesStore = koinInject<PreferencesStore>()
     val deepLinkBus = koinInject<DeepLinkBus>()
     val scope = rememberCoroutineScope()
     val applications by repository.observeApplications().collectAsState(initial = emptyList())
@@ -108,10 +110,16 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
         }
         // See the matching comment in PipelineTabletApp: this must run in the same composition
         // pass as the NavHost above, not from App()'s onNavHostReady, or navController.graph may
-        // not be set yet.
+        // not be set yet. PL-021: an explicit deep link wins over the last-viewed route below —
+        // it reflects something that just happened (an OS intent, an agent's open_application
+        // call), not where the user idly left off.
         LaunchedEffect(initialDeepLink) {
             if (initialDeepLink != null) {
                 navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(initialDeepLink)).build())
+            } else {
+                preferencesStore.currentPreferences.lastDetailApplicationId?.let { id ->
+                    navController.navigate(DetailRoute(id))
+                }
             }
         }
         // Same graph-readiness requirement as the initialDeepLink effect above, but this one runs
@@ -120,6 +128,16 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
         LaunchedEffect(deepLinkBus) {
             deepLinkBus.deepLinks.collect { deepLink ->
                 navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(deepLink)).build())
+            }
+        }
+        // PL-021: only List/Detail landings are worth reopening into — Settings, Add/Edit, Sync,
+        // Pair, and Dev Tools are all transient, so navigating through them leaves the last-saved
+        // List/Detail screen untouched rather than clobbering it with somewhere not worth resuming.
+        LaunchedEffect(currentEntry) {
+            when {
+                onListRoute -> preferencesStore.setLastDetailApplicationId(null)
+                currentEntry?.destination?.hasRoute<DetailRoute>() == true ->
+                    preferencesStore.setLastDetailApplicationId(currentEntry?.toRoute<DetailRoute>()?.id)
             }
         }
         if (onListRoute && sheetApplication == null && contactSheetApplication == null) {

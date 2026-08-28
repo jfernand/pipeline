@@ -13,6 +13,7 @@ private const val KEY_DEVELOPER_MODE = "developerMode"
 private const val KEY_MCP_SERVER_ENABLED = "mcpServerEnabled"
 private const val KEY_MCP_SERVER_PORT = "mcpServerPort"
 private const val KEY_SHOW_FAKE_DATA = "showFakeData"
+private const val KEY_LAST_DETAIL_APPLICATION_ID = "lastDetailApplicationId"
 
 /** Read directly off [Settings] rather than through [PreferencesStore] — the platform DI modules
  *  need this at module-composition time, before a [PreferencesStore] (or anything else) exists to
@@ -31,6 +32,8 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
     private val state = MutableStateFlow(readPreferences())
 
     override fun observePreferences(): Flow<AppPreferences> = state
+
+    override val currentPreferences: AppPreferences get() = state.value
 
     override suspend fun setSyncNetworkMode(mode: SyncNetworkMode) {
         settings.putString(KEY_SYNC_NETWORK_MODE, mode.name)
@@ -57,6 +60,11 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
         state.value = state.value.copy(mcpServerPort = port)
     }
 
+    override suspend fun setLastDetailApplicationId(id: Long?) {
+        if (id == null) settings.remove(KEY_LAST_DETAIL_APPLICATION_ID) else settings.putLong(KEY_LAST_DETAIL_APPLICATION_ID, id)
+        state.value = state.value.copy(lastDetailApplicationId = id)
+    }
+
     private fun readPreferences(): AppPreferences {
         val mode = settings.getStringOrNull(KEY_SYNC_NETWORK_MODE)
             ?.let { runCatching { SyncNetworkMode.valueOf(it) }.getOrNull() }
@@ -66,6 +74,7 @@ class SettingsPreferencesStore(private val settings: Settings) : PreferencesStor
             developerMode = settings.getBoolean(KEY_DEVELOPER_MODE, false),
             showFakeData = settings.showFakeData(),
             mcpServerEnabled = settings.getBoolean(KEY_MCP_SERVER_ENABLED, false),
+            lastDetailApplicationId = settings.getLongOrNull(KEY_LAST_DETAIL_APPLICATION_ID),
         )
     }
 }

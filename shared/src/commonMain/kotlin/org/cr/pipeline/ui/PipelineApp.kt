@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDeepLinkRequest
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.NavUri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import kotlinx.coroutines.launch
@@ -73,6 +75,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
     val statusSheetApplication = applications.firstOrNull { it.id == statusSheetApplicationId }
     var contactSheetApplicationId by remember { mutableStateOf<Long?>(null) }
     val contactSheetApplication = applications.firstOrNull { it.id == contactSheetApplicationId }
+    val currentEntry by navController.currentBackStackEntryAsState()
 
     Row(Modifier.fillMaxSize().background(PlColors.bgBase).statusBarsPadding()) {
         NavRail(
@@ -144,9 +147,16 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
             // Box), so navController.graph is guaranteed to already be set here — unlike calling
             // handleDeepLink from App()'s onNavHostReady, which fires from an ancestor before this
             // width-gated subtree (and therefore NavHost) has necessarily been composed at all.
+            // PL-021: an explicit deep link wins over the last-viewed route below — it reflects
+            // something that just happened, not where the user idly left off.
             LaunchedEffect(initialDeepLink) {
                 if (initialDeepLink != null) {
                     navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(initialDeepLink)).build())
+                } else {
+                    preferencesStore.currentPreferences.lastDetailApplicationId?.let { id ->
+                        lastViewedId = id
+                        navController.navigate(DetailRoute(id))
+                    }
                 }
             }
             // Same graph-readiness requirement as the initialDeepLink effect above, but this one
@@ -155,6 +165,16 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
             LaunchedEffect(deepLinkBus) {
                 deepLinkBus.deepLinks.collect { deepLink ->
                     navController.handleDeepLink(NavDeepLinkRequest.Builder.fromUri(NavUri(deepLink)).build())
+                }
+            }
+            // PL-021: only List/Detail landings are worth reopening into — Settings, Add/Edit,
+            // Sync, Pair, Follow-ups and Dev Tools are all transient, so navigating through them
+            // leaves the last-saved List/Detail screen untouched rather than clobbering it.
+            LaunchedEffect(currentEntry) {
+                when {
+                    currentEntry?.destination?.hasRoute<ListRoute>() == true -> preferencesStore.setLastDetailApplicationId(null)
+                    currentEntry?.destination?.hasRoute<DetailRoute>() == true ->
+                        preferencesStore.setLastDetailApplicationId(currentEntry?.toRoute<DetailRoute>()?.id)
                 }
             }
             if (statusSheetApplication != null) {
