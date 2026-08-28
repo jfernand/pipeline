@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.51",
+  revision: "1.52",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -266,6 +266,18 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     PL-031's own page, updated to match; the Data Model diagram's event-vocabulary box (simplified
     in 1.50 specifically so it wouldn't need this) turned out to still name individual events —
     fixed to genuinely just point at the Event Log appendix this time.],
+  [1.52], [2026-08-27], [Shipped PL-018's human-facing half, closing it out to `Shipped`: an
+    "Attachments" section on the Add/Edit form — only once the application has an id, since attach
+    needs one to attach to — with a button each for résumé, cover letter, and file, a list of what's
+    already there, and a remove button per entry (`removeAttachment`'s first caller, in-app or MCP).
+    Attach buttons open a native file dialog and call the exact same
+    `attachResume`/`attachCoverLetter`/`attachFile` the MCP tools call. Shipped PL-020 alongside it
+    to make that dialog possible: `DataPortController.jvm.kt`'s private `showFileDialog` moved into
+    its own `FileDialogs.jvm.kt` (`internal`, the `.json`-forcing left behind in
+    `DataPortController` where it belongs), behind a new commonMain `FilePicker` interface — real on
+    JVM, `UnsupportedFilePicker` everywhere else, same rollout shape as
+    `DataPortController`/`FileArchiveService`. Event Log appendix's `ResumeAttached`/
+    `AttachmentRemoved` rows updated — both have an in-app caller now, not just MCP.],
 )
 
 #part(1, "Core Application",
@@ -543,8 +555,8 @@ below.
 #event-row(
   [ResumeAttached],
   [`applicationId` · `attachmentId: AttachmentId` · `fileName` · `provenance`],
-  [`attachResume(...)` — `attach_resume` (MCP, PL-018); Dev Tools' Files section "Add test file"
-    button attaches a `FileAttached` instead, so this one has no in-app caller yet],
+  [`attachResume(...)` — `attach_resume` (MCP, PL-018); the Add/Edit form's Attachments section
+    "Résumé" button (PL-018)],
   notes: [One slot — a new one replaces whichever résumé is already on the application, enforced
     in `applyEvent` itself. The bytes never go in this event's payload — those go straight to
     `FileArchiveService` (PL-031); this just records that it happened.],
@@ -552,7 +564,8 @@ below.
 #event-row(
   [CoverLetterAttached],
   [`applicationId` · `attachmentId: AttachmentId` · `fileName` · `provenance`],
-  [`attachCoverLetter(...)` — `attach_cover_letter` (MCP, PL-018)],
+  [`attachCoverLetter(...)` — `attach_cover_letter` (MCP, PL-018); the Add/Edit form's
+    Attachments section "Cover letter" button (PL-018)],
   notes: [The cover-letter counterpart to `ResumeAttached` — same one-slot-replaces-the-old
     semantics, its own kind and its own event type rather than a shared `kind` field, so each
     reads on its own in this table the way `StatusChanged` does.],
@@ -561,14 +574,15 @@ below.
   [FileAttached],
   [`applicationId` · `attachmentId: AttachmentId` · `fileName` · `provenance`],
   [`attachFile(...)` — `attach_file` (MCP, PL-018); Dev Tools' Files section "Add test file"
-    button],
+    button; the Add/Edit form's Attachments section "File" button (PL-018)],
   notes: [Unlike `ResumeAttached`/`CoverLetterAttached`, no slot limit — every attach just
     appends.],
 )
 #event-row(
   [AttachmentRemoved],
   [`applicationId` · `attachmentId: AttachmentId` · `provenance`],
-  [`removeAttachment(...)`; no caller exists yet — no MCP tool, no in-app affordance],
+  [`removeAttachment(...)` — the Add/Edit form's Attachments section, per-row remove button
+    (PL-018); no MCP tool yet],
   notes: [Detaches one file — removes it from `FileArchiveService`'s archive and from
     `attachments`. Deleting the application itself leaves the archive alone (PL-031). One event
     regardless of kind, unlike attaching — nothing about removal needs to distinguish them.],
@@ -653,11 +667,12 @@ a plain nested list, replayed and discarded as one unit with it.
 
 `ApplicationDetail` (the detail screen) and `FollowUpItem` (PL-010) both read `Contact` and
 `Reminder` at display time — `toApplicationDetail`, `toFollowUpItems`. `ApplicationDetail` also
-reads `Attachment`, though nothing displays it yet — PL-018's UI half doesn't exist, only its MCP
-door. `Contact` and `Attachment` each have a write path now (`ContactAdded`; `ResumeAttached`,
-`CoverLetterAttached`, `FileAttached` — see the Event Log appendix); `Reminder` still has none —
-every `Reminder` on a real application today only ever got there through `SeedData`.
-`AddEditScreen` and the event vocabulary below cover every other field.
+reads `Attachment`, displayed by `AddEditScreen`'s Attachments section (PL-018) — the detail
+screen itself still doesn't show it. `Contact` and `Attachment` each have a write path now
+(`ContactAdded`; `ResumeAttached`, `CoverLetterAttached`, `FileAttached`, `AttachmentRemoved` —
+see the Event Log appendix); `Reminder` still has none — every `Reminder` on a real application
+today only ever got there through `SeedData`. `AddEditScreen` and the event vocabulary below cover
+every other field.
 
 == Event Sourcing
 
