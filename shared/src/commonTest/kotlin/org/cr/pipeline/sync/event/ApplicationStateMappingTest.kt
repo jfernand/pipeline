@@ -9,6 +9,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.sync.chain.DeviceId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -97,5 +98,23 @@ class ApplicationStateMappingTest {
 
         assertEquals(listOf("Oldest", "Older"), items.map { it.message })
         assertEquals(listOf("Northwind Labs", "Cedar & Byrne"), items.map { it.company })
+    }
+
+    @Test
+    fun `toJobApplication carries the state's lastProvenance through`() {
+        val application = state("a", "Cedar & Byrne")
+            .copy(lastProvenance = EventProvenance.McpClient("mcp"))
+            .toJobApplication(1L, today)
+
+        assertEquals(EventProvenance.McpClient("mcp"), application.provenance)
+    }
+
+    @Test
+    fun `toApplicationDetail carries the state's lastProvenance through`() {
+        val detail = state("a", "Cedar & Byrne")
+            .copy(lastProvenance = EventProvenance.Device(DeviceId("device-1")))
+            .toApplicationDetail(1L, today)
+
+        assertEquals(EventProvenance.Device(DeviceId("device-1")), detail.provenance)
     }
 }

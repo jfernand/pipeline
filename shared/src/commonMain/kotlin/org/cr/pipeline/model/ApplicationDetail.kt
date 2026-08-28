@@ -4,6 +4,8 @@
 
 package org.cr.pipeline.model
 
+import org.cr.pipeline.sync.event.EventProvenance
+
 data class ApplicationDetail(
     val id: Long,
     val company: String,
@@ -18,6 +20,8 @@ data class ApplicationDetail(
     val contacts: List<ContactSummary>,
     val reminders: List<ReminderSummary>,
     val attachments: List<AttachmentSummary>,
+    /** PL-034: who or what made the application's most recent change. */
+    val provenance: EventProvenance = EventProvenance.Unknown,
 )
 
 /** Oldest first; [current] marks the most recent entry (the application's present status). */

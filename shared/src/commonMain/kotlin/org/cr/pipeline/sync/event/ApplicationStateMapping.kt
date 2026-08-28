@@ -50,6 +50,7 @@ fun ApplicationState.toJobApplication(id: Long, today: LocalDate = todayDate()):
         activity = activity,
         overdueDays = overdueDays?.toInt(),
         source = source,
+        provenance = lastProvenance,
     )
 }
 
@@ -85,6 +86,7 @@ fun ApplicationState.toApplicationDetail(id: Long, today: LocalDate = todayDate(
             .sortedBy { it.dueDate }
             .map { reminder -> ReminderSummary(reminder.message, reminder.dueDate.formatShort(), reminder.dueDate < today) },
         attachments = attachments.map { AttachmentSummary(id = it.id.value, kind = it.kind, fileName = it.fileName) },
+        provenance = lastProvenance,
     )
 }
 

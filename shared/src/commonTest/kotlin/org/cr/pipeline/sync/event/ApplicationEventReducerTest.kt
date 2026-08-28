@@ -9,6 +9,7 @@ import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
+import org.cr.pipeline.sync.chain.DeviceId
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -233,5 +234,23 @@ class ApplicationEventReducerTest {
         val removed = applyEvent(withOne, AttachmentRemoved(applicationId, AttachmentId("does-not-exist")), today)
 
         assertEquals(withOne.attachments, removed.attachments)
+    }
+
+    @Test
+    fun `lastProvenance tracks the most recently applied event's provenance, not the first`() {
+        val created = applyEvent(
+            null,
+            ApplicationCreated(applicationId, fullInput, EventProvenance.Device(DeviceId("device-1"))),
+            today,
+        )
+        assertEquals(EventProvenance.Device(DeviceId("device-1")), created.lastProvenance)
+
+        val edited = applyEvent(
+            created,
+            StatusChanged(applicationId, AppStatus.OFFER, "Got an offer", EventProvenance.McpClient("mcp")),
+            today,
+        )
+
+        assertEquals(EventProvenance.McpClient("mcp"), edited.lastProvenance)
     }
 }

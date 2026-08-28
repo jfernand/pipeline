@@ -22,27 +22,16 @@ import org.cr.pipeline.model.AttachmentKind
  * event applied to the same state always produces the same result, regardless of when it's
  * replayed. It's only used to date a status-history entry when the event doesn't otherwise pin
  * one down (e.g. the input's dateApplied wasn't given).
+ *
+ * [ApplicationState.lastProvenance] is set once, here, from [event]'s own provenance, after the
+ * per-event-type `when` below decides everything else — every event can be the most recent one,
+ * so every branch needs it, and doing it in one place instead of eight keeps a future branch from
+ * being the one that forgets to.
  */
-fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDate): ApplicationState = when (event) {
-    is ApplicationCreated -> ApplicationState(
-        applicationId = event.applicationId,
-        company = event.input.company,
-        role = event.input.role,
-        status = event.input.status,
-        dateApplied = event.input.dateApplied,
-        nextActionDate = event.input.nextActionDate,
-        postingUrl = event.input.postingUrl,
-        source = event.input.source,
-        notes = event.input.notes,
-        statusHistory = listOf(StatusHistoryRecord(event.input.status, event.input.dateApplied ?: today, "Application created")),
-        contacts = emptyList(),
-        reminders = emptyList(),
-        attachments = emptyList(),
-    )
-
-    is ApplicationEdited -> {
-        val current = checkNotNull(state) { "ApplicationEdited for ${event.applicationId} with no prior state" }
-        current.copy(
+fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDate): ApplicationState {
+    val folded = when (event) {
+        is ApplicationCreated -> ApplicationState(
+            applicationId = event.applicationId,
             company = event.input.company,
             role = event.input.role,
             status = event.input.status,
@@ -51,54 +40,73 @@ fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDa
             postingUrl = event.input.postingUrl,
             source = event.input.source,
             notes = event.input.notes,
-            statusHistory = if (current.status != event.input.status) {
-                current.statusHistory + StatusHistoryRecord(event.input.status, today, "Updated via edit")
-            } else {
-                current.statusHistory
-            },
+            statusHistory = listOf(StatusHistoryRecord(event.input.status, event.input.dateApplied ?: today, "Application created")),
+            contacts = emptyList(),
+            reminders = emptyList(),
+            attachments = emptyList(),
         )
-    }
 
-    is StatusChanged -> {
-        val current = checkNotNull(state) { "StatusChanged for ${event.applicationId} with no prior state" }
-        current.copy(
-            status = event.status,
-            statusHistory = current.statusHistory + StatusHistoryRecord(event.status, today, event.note),
-        )
-    }
+        is ApplicationEdited -> {
+            val current = checkNotNull(state) { "ApplicationEdited for ${event.applicationId} with no prior state" }
+            current.copy(
+                company = event.input.company,
+                role = event.input.role,
+                status = event.input.status,
+                dateApplied = event.input.dateApplied,
+                nextActionDate = event.input.nextActionDate,
+                postingUrl = event.input.postingUrl,
+                source = event.input.source,
+                notes = event.input.notes,
+                statusHistory = if (current.status != event.input.status) {
+                    current.statusHistory + StatusHistoryRecord(event.input.status, today, "Updated via edit")
+                } else {
+                    current.statusHistory
+                },
+            )
+        }
 
-    is ContactAdded -> {
-        val current = checkNotNull(state) { "ContactAdded for ${event.applicationId} with no prior state" }
-        current.copy(
-            contacts = current.contacts + ContactRecord(event.contactId, event.contact.name, event.contact.role, event.contact.email),
-        )
-    }
+        is StatusChanged -> {
+            val current = checkNotNull(state) { "StatusChanged for ${event.applicationId} with no prior state" }
+            current.copy(
+                status = event.status,
+                statusHistory = current.statusHistory + StatusHistoryRecord(event.status, today, event.note),
+            )
+        }
 
-    is ResumeAttached -> {
-        val current = checkNotNull(state) { "ResumeAttached for ${event.applicationId} with no prior state" }
-        current.copy(
-            attachments = current.attachments.filterNot { it.kind == AttachmentKind.RESUME } +
-                AttachmentRecord(event.attachmentId, AttachmentKind.RESUME, event.fileName),
-        )
-    }
+        is ContactAdded -> {
+            val current = checkNotNull(state) { "ContactAdded for ${event.applicationId} with no prior state" }
+            current.copy(
+                contacts = current.contacts + ContactRecord(event.contactId, event.contact.name, event.contact.role, event.contact.email),
+            )
+        }
 
-    is CoverLetterAttached -> {
-        val current = checkNotNull(state) { "CoverLetterAttached for ${event.applicationId} with no prior state" }
-        current.copy(
-            attachments = current.attachments.filterNot { it.kind == AttachmentKind.COVER_LETTER } +
-                AttachmentRecord(event.attachmentId, AttachmentKind.COVER_LETTER, event.fileName),
-        )
-    }
+        is ResumeAttached -> {
+            val current = checkNotNull(state) { "ResumeAttached for ${event.applicationId} with no prior state" }
+            current.copy(
+                attachments = current.attachments.filterNot { it.kind == AttachmentKind.RESUME } +
+                    AttachmentRecord(event.attachmentId, AttachmentKind.RESUME, event.fileName),
+            )
+        }
 
-    is FileAttached -> {
-        val current = checkNotNull(state) { "FileAttached for ${event.applicationId} with no prior state" }
-        current.copy(
-            attachments = current.attachments + AttachmentRecord(event.attachmentId, AttachmentKind.MISC, event.fileName),
-        )
-    }
+        is CoverLetterAttached -> {
+            val current = checkNotNull(state) { "CoverLetterAttached for ${event.applicationId} with no prior state" }
+            current.copy(
+                attachments = current.attachments.filterNot { it.kind == AttachmentKind.COVER_LETTER } +
+                    AttachmentRecord(event.attachmentId, AttachmentKind.COVER_LETTER, event.fileName),
+            )
+        }
 
-    is AttachmentRemoved -> {
-        val current = checkNotNull(state) { "AttachmentRemoved for ${event.applicationId} with no prior state" }
-        current.copy(attachments = current.attachments.filterNot { it.id == event.attachmentId })
+        is FileAttached -> {
+            val current = checkNotNull(state) { "FileAttached for ${event.applicationId} with no prior state" }
+            current.copy(
+                attachments = current.attachments + AttachmentRecord(event.attachmentId, AttachmentKind.MISC, event.fileName),
+            )
+        }
+
+        is AttachmentRemoved -> {
+            val current = checkNotNull(state) { "AttachmentRemoved for ${event.applicationId} with no prior state" }
+            current.copy(attachments = current.attachments.filterNot { it.id == event.attachmentId })
+        }
     }
+    return folded.copy(lastProvenance = event.provenance)
 }

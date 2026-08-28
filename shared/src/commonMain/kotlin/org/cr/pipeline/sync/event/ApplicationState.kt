@@ -29,6 +29,10 @@ data class ApplicationState(
     val contacts: List<ContactRecord>,
     val reminders: List<ReminderRecord>,
     val attachments: List<AttachmentRecord>,
+    /** PL-034: the provenance of the event [applyEvent] last folded onto this application — every
+     *  branch sets this, not just the ones the field's name might suggest, since any event can be
+     *  the most recent one. */
+    val lastProvenance: EventProvenance = EventProvenance.Unknown,
 )
 
 data class StatusHistoryRecord(val status: AppStatus, val date: LocalDate, val note: String)

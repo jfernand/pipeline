@@ -103,6 +103,7 @@ fun AppCard(
                     )
                 }
             }
+            ProvenanceIcon(app.provenance, modifier = Modifier.padding(start = 8.dp))
             Spacer(Modifier.weight(1f))
             val (label, ago) = app.activity
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(0.dp)) {
