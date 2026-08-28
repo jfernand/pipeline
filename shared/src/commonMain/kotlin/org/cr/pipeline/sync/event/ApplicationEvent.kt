@@ -7,7 +7,6 @@ package org.cr.pipeline.sync.event
 import kotlinx.serialization.Serializable
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
-import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 
 /**
@@ -64,15 +63,35 @@ data class ContactAdded(
     override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent
 
-/** PL-031: attaches a résumé, cover letter, or misc file — the bytes themselves go straight to
+/** PL-031/PL-018: attaches a résumé — the one-slot kind; a new one replaces whichever one is
+ *  already on the application. The bytes themselves go straight to
  *  [org.cr.pipeline.data.io.FileArchiveService], never into this event's payload; this just
  *  records that it happened and what it was. [attachmentId] is assigned at construction, same
  *  reasoning as [ContactAdded]'s [ContactAdded.contactId]. */
 @Serializable
-data class AttachmentAdded(
+data class ResumeAttached(
     override val applicationId: ApplicationId,
     val attachmentId: AttachmentId,
-    val kind: AttachmentKind,
+    val fileName: String,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
+) : ApplicationEvent
+
+/** The cover-letter counterpart to [ResumeAttached] — same one-slot-replaces-the-old semantics,
+ *  its own kind. */
+@Serializable
+data class CoverLetterAttached(
+    override val applicationId: ApplicationId,
+    val attachmentId: AttachmentId,
+    val fileName: String,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
+) : ApplicationEvent
+
+/** A miscellaneous attachment — unlike [ResumeAttached]/[CoverLetterAttached], there's no slot
+ *  limit; every one just appends. */
+@Serializable
+data class FileAttached(
+    override val applicationId: ApplicationId,
+    val attachmentId: AttachmentId,
     val fileName: String,
     override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent

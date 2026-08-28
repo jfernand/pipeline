@@ -9,7 +9,8 @@ import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.AttachmentId
 
 /**
- * PL-031: owns the on-disk life of every file an [org.cr.pipeline.sync.event.AttachmentAdded]/
+ * PL-031: owns the on-disk life of every file a [org.cr.pipeline.sync.event.ResumeAttached]/
+ * [org.cr.pipeline.sync.event.CoverLetterAttached]/[org.cr.pipeline.sync.event.FileAttached]/
  * [org.cr.pipeline.sync.event.AttachmentRemoved] event records — [EventSourcedJobApplicationRepository]
  * (see [org.cr.pipeline.data.EventSourcedJobApplicationRepository]) calls this alongside appending
  * the event itself, the same way it calls [org.cr.pipeline.data.ApplicationStateStore]. This is

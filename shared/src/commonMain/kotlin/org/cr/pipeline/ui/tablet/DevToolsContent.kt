@@ -38,7 +38,6 @@ import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.data.io.FileArchiveEntry
 import org.cr.pipeline.data.io.FileArchiveService
-import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.sync.chain.EventEnvelope
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.ui.components.PlSecondaryButton
@@ -166,9 +165,8 @@ fun DevToolsContent(modifier: Modifier = Modifier) {
                     onClick = {
                         val target = applications.firstOrNull() ?: return@PlSecondaryButton
                         scope.launch {
-                            repository.addAttachment(
+                            repository.attachFile(
                                 id = target.id,
-                                kind = AttachmentKind.MISC,
                                 fileName = "dev-tools-test-${Clock.System.now().toEpochMilliseconds()}.txt",
                                 bytes = "Dev Tools test attachment".encodeToByteArray(),
                             )

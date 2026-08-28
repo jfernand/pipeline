@@ -152,11 +152,11 @@ class ApplicationEventReducerTest {
     }
 
     @Test
-    fun `AttachmentAdded appends a MISC attachment without touching other fields`() {
+    fun `FileAttached appends a MISC attachment without touching other fields`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
         val attachmentId = AttachmentId("attachment-1")
 
-        val withAttachment = applyEvent(created, AttachmentAdded(applicationId, attachmentId, AttachmentKind.MISC, "notes.pdf"), today)
+        val withAttachment = applyEvent(created, FileAttached(applicationId, attachmentId, "notes.pdf"), today)
 
         assertEquals(
             listOf(AttachmentRecord(attachmentId, AttachmentKind.MISC, "notes.pdf")),
@@ -167,22 +167,22 @@ class ApplicationEventReducerTest {
     }
 
     @Test
-    fun `AttachmentAdded appends, rather than replaces, additional MISC attachments`() {
+    fun `FileAttached appends, rather than replaces, additional MISC attachments`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
-        val first = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("a1"), AttachmentKind.MISC, "one.pdf"), today)
+        val first = applyEvent(created, FileAttached(applicationId, AttachmentId("a1"), "one.pdf"), today)
 
-        val second = applyEvent(first, AttachmentAdded(applicationId, AttachmentId("a2"), AttachmentKind.MISC, "two.pdf"), today)
+        val second = applyEvent(first, FileAttached(applicationId, AttachmentId("a2"), "two.pdf"), today)
 
         assertEquals(2, second.attachments.size)
         assertEquals(listOf("one.pdf", "two.pdf"), second.attachments.map { it.fileName })
     }
 
     @Test
-    fun `AttachmentAdded with RESUME replaces the prior resume instead of appending`() {
+    fun `ResumeAttached replaces the prior resume instead of appending`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
-        val first = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("r1"), AttachmentKind.RESUME, "resume-v1.pdf"), today)
+        val first = applyEvent(created, ResumeAttached(applicationId, AttachmentId("r1"), "resume-v1.pdf"), today)
 
-        val second = applyEvent(first, AttachmentAdded(applicationId, AttachmentId("r2"), AttachmentKind.RESUME, "resume-v2.pdf"), today)
+        val second = applyEvent(first, ResumeAttached(applicationId, AttachmentId("r2"), "resume-v2.pdf"), today)
 
         assertEquals(
             listOf(AttachmentRecord(AttachmentId("r2"), AttachmentKind.RESUME, "resume-v2.pdf")),
@@ -191,11 +191,24 @@ class ApplicationEventReducerTest {
     }
 
     @Test
-    fun `AttachmentAdded with RESUME doesn't disturb an existing COVER_LETTER slot`() {
+    fun `CoverLetterAttached replaces the prior cover letter instead of appending`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
-        val withCoverLetter = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("c1"), AttachmentKind.COVER_LETTER, "cover.pdf"), today)
+        val first = applyEvent(created, CoverLetterAttached(applicationId, AttachmentId("c1"), "cover-v1.pdf"), today)
 
-        val withResumeToo = applyEvent(withCoverLetter, AttachmentAdded(applicationId, AttachmentId("r1"), AttachmentKind.RESUME, "resume.pdf"), today)
+        val second = applyEvent(first, CoverLetterAttached(applicationId, AttachmentId("c2"), "cover-v2.pdf"), today)
+
+        assertEquals(
+            listOf(AttachmentRecord(AttachmentId("c2"), AttachmentKind.COVER_LETTER, "cover-v2.pdf")),
+            second.attachments,
+        )
+    }
+
+    @Test
+    fun `ResumeAttached doesn't disturb an existing COVER_LETTER slot`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+        val withCoverLetter = applyEvent(created, CoverLetterAttached(applicationId, AttachmentId("c1"), "cover.pdf"), today)
+
+        val withResumeToo = applyEvent(withCoverLetter, ResumeAttached(applicationId, AttachmentId("r1"), "resume.pdf"), today)
 
         assertEquals(2, withResumeToo.attachments.size)
         assertEquals(setOf(AttachmentKind.COVER_LETTER, AttachmentKind.RESUME), withResumeToo.attachments.map { it.kind }.toSet())
@@ -204,8 +217,8 @@ class ApplicationEventReducerTest {
     @Test
     fun `AttachmentRemoved removes only the matching attachment`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
-        val withTwo = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("a1"), AttachmentKind.MISC, "one.pdf"), today)
-            .let { applyEvent(it, AttachmentAdded(applicationId, AttachmentId("a2"), AttachmentKind.MISC, "two.pdf"), today) }
+        val withTwo = applyEvent(created, FileAttached(applicationId, AttachmentId("a1"), "one.pdf"), today)
+            .let { applyEvent(it, FileAttached(applicationId, AttachmentId("a2"), "two.pdf"), today) }
 
         val removed = applyEvent(withTwo, AttachmentRemoved(applicationId, AttachmentId("a1")), today)
 
@@ -215,7 +228,7 @@ class ApplicationEventReducerTest {
     @Test
     fun `AttachmentRemoved for an unknown id is a no-op`() {
         val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
-        val withOne = applyEvent(created, AttachmentAdded(applicationId, AttachmentId("a1"), AttachmentKind.MISC, "one.pdf"), today)
+        val withOne = applyEvent(created, FileAttached(applicationId, AttachmentId("a1"), "one.pdf"), today)
 
         val removed = applyEvent(withOne, AttachmentRemoved(applicationId, AttachmentId("does-not-exist")), today)
 

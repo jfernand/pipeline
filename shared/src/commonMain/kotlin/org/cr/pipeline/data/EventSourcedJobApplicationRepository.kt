@@ -23,13 +23,15 @@ import org.cr.pipeline.sync.event.ApplicationEdited
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
 import org.cr.pipeline.sync.event.ApplicationState
-import org.cr.pipeline.sync.event.AttachmentAdded
 import org.cr.pipeline.sync.event.AttachmentId
 import org.cr.pipeline.sync.event.AttachmentRemoved
 import org.cr.pipeline.sync.event.ContactAdded
 import org.cr.pipeline.sync.event.ContactId
+import org.cr.pipeline.sync.event.CoverLetterAttached
 import org.cr.pipeline.sync.event.EventLog
 import org.cr.pipeline.sync.event.EventProvenance
+import org.cr.pipeline.sync.event.FileAttached
+import org.cr.pipeline.sync.event.ResumeAttached
 import org.cr.pipeline.sync.event.StatusChanged
 import org.cr.pipeline.sync.event.applyEvent
 import org.cr.pipeline.sync.event.toApplicationDetail
@@ -83,17 +85,41 @@ class EventSourcedJobApplicationRepository(
         persist(id, current, ContactAdded(current.applicationId, ContactId.random(), contact, resolveProvenance(provenance)))
     }
 
-    override suspend fun addAttachment(id: Long, kind: AttachmentKind, fileName: String, bytes: ByteArray, provenance: EventProvenance?) {
-        val current = store.getState(id) ?: return
-        // A single-slot kind's prior file would otherwise sit orphaned in the archive forever —
-        // applyEvent drops it from ApplicationState.attachments, but only this repository ever
-        // touches the archive itself, so cleaning up the bytes is on it, not the (pure) reducer.
-        if (kind != AttachmentKind.MISC) {
-            current.attachments.firstOrNull { it.kind == kind }?.let { fileService.delete(current.applicationId, it.id) }
+    override suspend fun attachResume(id: Long, fileName: String, bytes: ByteArray, provenance: EventProvenance?) =
+        attachSingleSlot(id, AttachmentKind.RESUME, fileName, bytes, provenance) { applicationId, attachmentId, resolved ->
+            ResumeAttached(applicationId, attachmentId, fileName, resolved)
         }
+
+    override suspend fun attachCoverLetter(id: Long, fileName: String, bytes: ByteArray, provenance: EventProvenance?) =
+        attachSingleSlot(id, AttachmentKind.COVER_LETTER, fileName, bytes, provenance) { applicationId, attachmentId, resolved ->
+            CoverLetterAttached(applicationId, attachmentId, fileName, resolved)
+        }
+
+    override suspend fun attachFile(id: Long, fileName: String, bytes: ByteArray, provenance: EventProvenance?) {
+        val current = store.getState(id) ?: return
+        val attachmentId = AttachmentId.random()
+        fileService.write(current.applicationId, attachmentId, AttachmentKind.MISC, fileName, bytes)
+        persist(id, current, FileAttached(current.applicationId, attachmentId, fileName, resolveProvenance(provenance)))
+    }
+
+    // Shared by attachResume/attachCoverLetter: both are one-slot kinds, so both need the same
+    // "delete the prior file before writing the new one" step — a single-slot kind's prior file
+    // would otherwise sit orphaned in the archive forever. applyEvent drops it from
+    // ApplicationState.attachments, but only this repository ever touches the archive itself, so
+    // cleaning up the bytes is on it, not the (pure) reducer.
+    private suspend fun attachSingleSlot(
+        id: Long,
+        kind: AttachmentKind,
+        fileName: String,
+        bytes: ByteArray,
+        provenance: EventProvenance?,
+        event: (ApplicationId, AttachmentId, EventProvenance) -> ApplicationEvent,
+    ) {
+        val current = store.getState(id) ?: return
+        current.attachments.firstOrNull { it.kind == kind }?.let { fileService.delete(current.applicationId, it.id) }
         val attachmentId = AttachmentId.random()
         fileService.write(current.applicationId, attachmentId, kind, fileName, bytes)
-        persist(id, current, AttachmentAdded(current.applicationId, attachmentId, kind, fileName, resolveProvenance(provenance)))
+        persist(id, current, event(current.applicationId, attachmentId, resolveProvenance(provenance)))
     }
 
     override suspend fun removeAttachment(id: Long, attachmentId: String, provenance: EventProvenance?) {

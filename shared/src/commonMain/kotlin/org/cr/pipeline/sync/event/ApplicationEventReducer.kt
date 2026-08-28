@@ -74,17 +74,26 @@ fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDa
         )
     }
 
-    is AttachmentAdded -> {
-        val current = checkNotNull(state) { "AttachmentAdded for ${event.applicationId} with no prior state" }
-        // RESUME/COVER_LETTER are one slot each — adding a new one replaces whichever one of the
-        // same kind is already there; MISC has no slot limit, every add just appends.
-        val withoutSameSlot = if (event.kind == AttachmentKind.MISC) {
-            current.attachments
-        } else {
-            current.attachments.filterNot { it.kind == event.kind }
-        }
+    is ResumeAttached -> {
+        val current = checkNotNull(state) { "ResumeAttached for ${event.applicationId} with no prior state" }
         current.copy(
-            attachments = withoutSameSlot + AttachmentRecord(event.attachmentId, event.kind, event.fileName),
+            attachments = current.attachments.filterNot { it.kind == AttachmentKind.RESUME } +
+                AttachmentRecord(event.attachmentId, AttachmentKind.RESUME, event.fileName),
+        )
+    }
+
+    is CoverLetterAttached -> {
+        val current = checkNotNull(state) { "CoverLetterAttached for ${event.applicationId} with no prior state" }
+        current.copy(
+            attachments = current.attachments.filterNot { it.kind == AttachmentKind.COVER_LETTER } +
+                AttachmentRecord(event.attachmentId, AttachmentKind.COVER_LETTER, event.fileName),
+        )
+    }
+
+    is FileAttached -> {
+        val current = checkNotNull(state) { "FileAttached for ${event.applicationId} with no prior state" }
+        current.copy(
+            attachments = current.attachments + AttachmentRecord(event.attachmentId, AttachmentKind.MISC, event.fileName),
         )
     }
 

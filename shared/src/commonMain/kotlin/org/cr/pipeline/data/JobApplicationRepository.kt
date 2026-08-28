@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
-import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
@@ -40,11 +39,19 @@ interface JobApplicationRepository {
      *  server) pass their own. */
     suspend fun addContact(id: Long, contact: ContactInput, provenance: EventProvenance? = null)
 
-    /** Writes [bytes] to the file archive (PL-031) and records an attachment of [kind]. A new
-     *  RESUME or COVER_LETTER replaces whichever one of that kind is already there — see
-     *  [org.cr.pipeline.sync.event.applyEvent]; MISC has no slot limit. [provenance] left null
-     *  resolves to this device's own [EventProvenance.Device]. */
-    suspend fun addAttachment(id: Long, kind: AttachmentKind, fileName: String, bytes: ByteArray, provenance: EventProvenance? = null)
+    /** Writes [bytes] to the file archive (PL-031) as the application's résumé, replacing
+     *  whichever one is already there — one slot, same reasoning as
+     *  [org.cr.pipeline.sync.event.ResumeAttached]. [provenance] left null resolves to this
+     *  device's own [EventProvenance.Device]. */
+    suspend fun attachResume(id: Long, fileName: String, bytes: ByteArray, provenance: EventProvenance? = null)
+
+    /** The cover-letter counterpart to [attachResume] — same one-slot-replaces-the-old semantics. */
+    suspend fun attachCoverLetter(id: Long, fileName: String, bytes: ByteArray, provenance: EventProvenance? = null)
+
+    /** Writes [bytes] to the file archive (PL-031) as a miscellaneous attachment — unlike
+     *  [attachResume]/[attachCoverLetter], there's no slot limit; every call just appends.
+     *  [provenance] left null resolves to this device's own [EventProvenance.Device]. */
+    suspend fun attachFile(id: Long, fileName: String, bytes: ByteArray, provenance: EventProvenance? = null)
 
     /** Removes one attachment from the archive and the application's attachment list.
      *  [attachmentId] is an [org.cr.pipeline.model.AttachmentSummary.id]. [provenance] left null

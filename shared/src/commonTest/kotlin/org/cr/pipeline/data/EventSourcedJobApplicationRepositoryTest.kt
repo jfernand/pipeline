@@ -12,15 +12,16 @@ import kotlinx.serialization.json.Json
 import org.cr.pipeline.data.io.FakeFileArchiveService
 import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
-import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.sync.event.ApplicationCreated
 import org.cr.pipeline.sync.event.ApplicationEvent
-import org.cr.pipeline.sync.event.AttachmentAdded
 import org.cr.pipeline.sync.event.AttachmentRemoved
 import org.cr.pipeline.sync.event.ContactAdded
+import org.cr.pipeline.sync.event.CoverLetterAttached
 import org.cr.pipeline.sync.event.EventProvenance
+import org.cr.pipeline.sync.event.FileAttached
 import org.cr.pipeline.sync.event.InMemoryEventLog
+import org.cr.pipeline.sync.event.ResumeAttached
 import org.cr.pipeline.sync.event.StatusChanged
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -141,13 +142,13 @@ class EventSourcedJobApplicationRepositoryTest {
     }
 
     @Test
-    fun `addAttachment writes to the file service and persists an AttachmentAdded event`() = runTest {
+    fun `attachFile writes to the file service and persists a FileAttached event`() = runTest {
         val store = FakeApplicationStateStore()
         val fileService = FakeFileArchiveService()
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog(), fileService)
         val id = repository.saveApplication(null, input)
 
-        repository.addAttachment(id, AttachmentKind.MISC, "notes.pdf", "pdf bytes".encodeToByteArray())
+        repository.attachFile(id, "notes.pdf", "pdf bytes".encodeToByteArray())
 
         val state = store.states.getValue(id)
         assertEquals(1, state.attachments.size)
@@ -157,43 +158,62 @@ class EventSourcedJobApplicationRepositoryTest {
     }
 
     @Test
-    fun `addAttachment on an unknown id is a no-op`() = runTest {
+    fun `attachFile on an unknown id is a no-op`() = runTest {
         val store = FakeApplicationStateStore()
         val fileService = FakeFileArchiveService()
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog(), fileService)
 
-        repository.addAttachment(999, AttachmentKind.MISC, "notes.pdf", "pdf bytes".encodeToByteArray())
+        repository.attachFile(999, "notes.pdf", "pdf bytes".encodeToByteArray())
 
         assertEquals(emptyMap(), store.states)
         assertTrue(fileService.writes.isEmpty())
     }
 
     @Test
-    fun `addAttachment with a RESUME deletes the prior resume from the file service first`() = runTest {
+    fun `attachResume deletes the prior resume from the file service first`() = runTest {
         val store = FakeApplicationStateStore()
         val fileService = FakeFileArchiveService()
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog(), fileService)
         val id = repository.saveApplication(null, input)
-        repository.addAttachment(id, AttachmentKind.RESUME, "resume-v1.pdf", "v1".encodeToByteArray())
+        repository.attachResume(id, "resume-v1.pdf", "v1".encodeToByteArray())
         val firstAttachmentId = store.states.getValue(id).attachments.single().id
 
-        repository.addAttachment(id, AttachmentKind.RESUME, "resume-v2.pdf", "v2".encodeToByteArray())
+        repository.attachResume(id, "resume-v2.pdf", "v2".encodeToByteArray())
 
         assertEquals(listOf(firstAttachmentId), fileService.deletes.map { it.second })
         assertEquals("resume-v2.pdf", store.states.getValue(id).attachments.single().fileName)
     }
 
     @Test
-    fun `addAttachment appends a correctly chained AttachmentAdded envelope`() = runTest {
+    fun `attachCoverLetter deletes the prior cover letter from the file service first`() = runTest {
+        val store = FakeApplicationStateStore()
+        val fileService = FakeFileArchiveService()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog(), fileService)
+        val id = repository.saveApplication(null, input)
+        repository.attachCoverLetter(id, "cover-v1.pdf", "v1".encodeToByteArray())
+        val firstAttachmentId = store.states.getValue(id).attachments.single().id
+
+        repository.attachCoverLetter(id, "cover-v2.pdf", "v2".encodeToByteArray())
+
+        assertEquals(listOf(firstAttachmentId), fileService.deletes.map { it.second })
+        assertEquals("cover-v2.pdf", store.states.getValue(id).attachments.single().fileName)
+    }
+
+    @Test
+    fun `attachResume, attachCoverLetter, and attachFile each append a correctly chained event`() = runTest {
         val eventLog = InMemoryEventLog()
         val repository = EventSourcedJobApplicationRepository(FakeApplicationStateStore(), eventLog, FakeFileArchiveService())
         val id = repository.saveApplication(null, input)
 
-        repository.addAttachment(id, AttachmentKind.MISC, "notes.pdf", "pdf bytes".encodeToByteArray())
+        repository.attachResume(id, "resume.pdf", "resume bytes".encodeToByteArray())
+        repository.attachCoverLetter(id, "cover.pdf", "cover bytes".encodeToByteArray())
+        repository.attachFile(id, "notes.pdf", "notes bytes".encodeToByteArray())
 
         val chain = eventLog.observeChain().first()
-        assertEquals(2, chain.size)
-        assertIs<AttachmentAdded>(Json.decodeFromString<ApplicationEvent>(chain[1].payload))
+        assertEquals(4, chain.size)
+        assertIs<ResumeAttached>(Json.decodeFromString<ApplicationEvent>(chain[1].payload))
+        assertIs<CoverLetterAttached>(Json.decodeFromString<ApplicationEvent>(chain[2].payload))
+        assertIs<FileAttached>(Json.decodeFromString<ApplicationEvent>(chain[3].payload))
     }
 
     @Test
@@ -203,7 +223,7 @@ class EventSourcedJobApplicationRepositoryTest {
         val eventLog = InMemoryEventLog()
         val repository = EventSourcedJobApplicationRepository(store, eventLog, fileService)
         val id = repository.saveApplication(null, input)
-        repository.addAttachment(id, AttachmentKind.MISC, "notes.pdf", "pdf bytes".encodeToByteArray())
+        repository.attachFile(id, "notes.pdf", "pdf bytes".encodeToByteArray())
         val attachmentId = store.states.getValue(id).attachments.single().id
 
         repository.removeAttachment(id, attachmentId.value)
@@ -220,7 +240,7 @@ class EventSourcedJobApplicationRepositoryTest {
         val fileService = FakeFileArchiveService()
         val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog(), fileService)
         val id = repository.saveApplication(null, input)
-        repository.addAttachment(id, AttachmentKind.MISC, "notes.pdf", "pdf bytes".encodeToByteArray())
+        repository.attachFile(id, "notes.pdf", "pdf bytes".encodeToByteArray())
 
         repository.removeAttachment(id, "does-not-exist")
 
