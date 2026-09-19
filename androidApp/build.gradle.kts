@@ -2,6 +2,7 @@
  * Copyright (c) 2026 Javier Fernández. All rights reserved.
  */
 
+import com.android.build.gradle.internal.tasks.BundleToStandaloneApkTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -71,5 +72,21 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+project.afterEvaluate {
+
+    val packageTasks = tasks.withType<BundleToStandaloneApkTask>()
+        .matching { it.name.startsWith("package") && !it.name.contains("Distributable") }
+
+    tasks.register<Copy>("copyFinalInstaller") {
+        dependsOn(packageTasks)
+        group = "_isss"
+        from(packageTasks.map { task -> task.outputDirectory })
+
+        include("**/*.deb", "**/*.msi", "**/*.dmg", "**/*.pkg", "**/*.jar", "**/*.apk")
+
+        into(rootProject.layout.projectDirectory.dir("release-artifacts"))
     }
 }

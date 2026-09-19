@@ -74,10 +74,8 @@ project.afterEvaluate {
         from(packageTasks.map { task -> task.destinationDir })
         from(uberTasks.map { task -> task.outputs.files })
 
-        include("**/*.deb", "**/*.msi", "**/*.dmg", "**/*.pkg", "**/*.jar")
+        include("**/*.deb", "**/*.msi", "**/*.dmg", "**/*.pkg", "**/*.jar", "**/*.apk")
 
-        into(layout.projectDirectory.dir("release-artifacts"))
+        into(rootProject.layout.projectDirectory.dir("release-artifacts"))
     }
-
-
 }
