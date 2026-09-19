@@ -52,5 +52,32 @@ compose.desktop {
             windows { iconFile.set(project.file("icon/icon.ico")) }
             linux { iconFile.set(project.file("icon/icon.png")) }
         }
+        buildTypes.release.proguard {
+            // Point this directly to your android module's proguard file path
+            configurationFiles.from(project.file("compose-desktop.pro"))
+        }
     }
+}
+
+project.afterEvaluate {
+
+    val packageTasks = tasks.withType<org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask>()
+        .matching { it.name.startsWith("packageRelease") && !it.name.contains("Distributable") }
+
+    val uberTasks = tasks.named("packageReleaseUberJarForCurrentOS")
+    println("uberTasks: $uberTasks")
+
+    tasks.register<Copy>("copyFinalInstaller") {
+        dependsOn(packageTasks)
+        dependsOn(uberTasks)
+        group = "_isss"
+        from(packageTasks.map { task -> task.destinationDir })
+        from(uberTasks.map { task -> task.outputs.files })
+
+        include("**/*.deb", "**/*.msi", "**/*.dmg", "**/*.pkg", "**/*.jar")
+
+        into(layout.projectDirectory.dir("release-artifacts"))
+    }
+
+
 }

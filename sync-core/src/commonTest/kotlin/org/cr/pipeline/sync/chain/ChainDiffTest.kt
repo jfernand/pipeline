@@ -12,13 +12,13 @@ import kotlin.test.assertNull
 private val deviceA = DeviceId("device-a")
 private val deviceB = DeviceId("device-b")
 
-private fun envelope(id: String, vararg parents: String, device: DeviceId = deviceA) = EventEnvelope(
-    hash = Hash(id),
+private fun envelope(payload: String, vararg parents: String, device: DeviceId = deviceA) = EventEnvelope(
+    hash = Hash(payload),
     parentHashes = parents.map { Hash(it) },
     deviceId = device,
     sequence = 0,
     timestampEpochMillis = 0,
-    payload = id,
+    payload = payload,
 )
 
 class ChainDiffTest {

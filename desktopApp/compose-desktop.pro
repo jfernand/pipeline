@@ -19,3 +19,11 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# compose-desktop.pro
+
+# Tell ProGuard to stop breaking the build over optional, compile-time-only dependencies
+-dontwarn **
+
+-dontoptimize
+
