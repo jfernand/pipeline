@@ -23,12 +23,17 @@ fun gitOutput(vararg args: String): String? {
 
 // packageVersion has to be a strict major.minor.patch — unlike Android's free-form versionName,
 // there's no format here to just drop the raw git describe string (with its commit hash suffix)
-// into. No release tags exist yet to derive a real major.minor from, so major.minor stays fixed
-// by hand (bumped manually when it's worth signaling — 1.1 marks the first ProGuard-release-build
-// cycle, PL-031 through the MCP JSON-RPC -32600 fix) and only the patch digit moves, driven by
-// commit count — a real, monotonically-increasing number instead of "1.1.0" frozen forever.
-val gitPatchVersion = gitOutput("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0
-val gitPackageVersion = "1.1.$gitPatchVersion"
+// into. Derived entirely from the nearest "vMAJOR.MINOR.0"-style tag: that tag's own
+// major/minor, plus how many commits HEAD is ahead of it as the patch digit. Bumping the version
+// is now just `git tag vX.Y.0` on the commit that should read as X.Y.0 — the patch digit resets
+// to 0 right there and counts up from that point, rather than a hand-edited major.minor prefix
+// glued to a total-repo-commit-count patch that never reset across a bump (which is how "1.1.229"
+// happened the first time this was bumped by hand).
+val tagDescribeRegex = Regex("""^v(\d+)\.(\d+)\.\d+-(\d+)-g[0-9a-f]+$""")
+val gitPackageVersion = gitOutput("describe", "--tags", "--long", "--match", "v[0-9]*.[0-9]*.[0-9]*")
+    ?.let { tagDescribeRegex.find(it)?.destructured }
+    ?.let { (major, minor, distance) -> "$major.$minor.$distance" }
+    ?: "0.0.0"
 
 dependencies {
     implementation(project(":shared"))
