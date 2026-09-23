@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.55",
+  revision: "1.57",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -300,6 +300,16 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     scoped to the composition, gone on navigating away or relaunching. Also filed two Known Issues:
     the Debian package's task-switcher icon (PL-039-001), and the missing delete-application path
     on both detail layouts (PL-002-004).],
+  [1.56], [2026-09-23], [PL-024, Delete Application, gained a `description`: a soft delete, not a
+    hard one — a new `ApplicationDeleted` event marks `ApplicationState.deleted` rather than
+    touching `event_envelopes`, consistent with PL-042's event-log-as-source-of-truth discipline.
+    List/search filter deleted applications out; detail and the MCP tools treat a deleted id like
+    an unknown one. Cross-referenced from the open "No way to delete a job application" Known
+    Issue (PL-002-004).],
+  [1.57], [2026-09-23], [Filed a Known Issue against PL-003: `NavRail.kt`'s footer always shows a
+    green "Synced" dot, hardcoded rather than read from any real state — misleading, since nothing
+    in PL-003's pairing scaffold actually syncs anything yet. Should be hidden until a device has
+    been paired.],
 )
 
 #part(1, "Core Application",

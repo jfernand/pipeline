@@ -22,11 +22,21 @@
     icon theme entry the window manager can find — worth checking what jpackage actually writes
     for the Linux bundle.
   ]),
-  (id: "no-delete-application", pl: ("PL-002",), num: 4, title: [No way to delete a job application], body: [
+  (id: "no-delete-application", pl: ("PL-002", "PL-024"), num: 4, title: [No way to delete a job application], body: [
     The Delete icon on the phone detail screen (`DetailScreen.kt`'s `PlTopBar` `rightActions`) is
     wired to an empty `{}` lambda — it does nothing. Tablet's `DetailPane.kt` doesn't even have a
     delete affordance in its header actions. There's no path, on either layout, to remove an
-    application once it's been added.
+    application once it's been added. PL-024 (Planned) is the fix — a soft `ApplicationDeleted`
+    event, slide-to-reveal-trash-can on the phone list (`ui/components/AppCard.kt`), a context
+    menu or the Delete key where the platform supports one.
+  ]),
+  (id: "navrail-fake-synced", pl: ("PL-003",), num: 1, title: [Nav rail always shows "Synced", even with no sync set up], body: [
+    `NavRail.kt`'s footer unconditionally renders a green `Dot` and `MonoText("Synced", ...)` —
+    hardcoded, not read from any real state. Since PL-003's pairing/sync scaffold doesn't actually
+    do anything yet (no pairing has ever happened, no event has ever crossed a network), this tells
+    every user their device is synced when nothing is even configured to try. Should hide the
+    marker entirely until a device has actually been paired, then reflect real sync state once
+    PL-003/PL-025 exist to report it.
   ]),
 )
 
