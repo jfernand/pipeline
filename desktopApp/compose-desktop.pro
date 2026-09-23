@@ -37,3 +37,16 @@
     public static ** valueOf(java.lang.String);
 }
 
+# The http4k-ai-mcp-core jar ships one consumer ProGuard rule per message class, each meant to
+# keep that class's synthetic "all Kotlin defaults" constructor (used by Kotshi's Moshi codegen
+# whenever a field with a default value — e.g. every message's `_meta: Meta = Meta.default` — is
+# omitted from the JSON, which is every real client, every request). Those generated rules target
+# the wrong class (the *JsonAdapter class instead of the message class itself), so ProGuard reports
+# "the configuration refers to the unknown method" for every one of them and keeps nothing.
+# Shrinking then strips the real synthetic constructors, and every MCP request fails to parse
+# (JSON-RPC -32600 "Invalid Request") regardless of how well-formed the request actually is.
+# Keep the whole message/protocol/model surface directly rather than relying on Kotshi's broken
+# per-class rules — these are wire-format DTOs with nothing worth shrinking anyway.
+-keep class org.http4k.ai.** { *; }
+-keep class org.http4k.connect.model.** { *; }
+
