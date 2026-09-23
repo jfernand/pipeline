@@ -39,6 +39,29 @@ dependencies {
     implementation(libs.compose.uiToolingPreview)
 }
 
+// Plain ProGuard (what compose desktop's release.proguard task runs) doesn't auto-merge
+// META-INF/proguard/*.pro consumer rules bundled inside dependency jars the way Android's
+// R8/AGP does — so libraries relying on reflection (Room's generated *_Impl lookup, kotlinx
+// .serialization, Moshi/Kotshi codegen used by the MCP SDK, bundled sqlite) silently lose those
+// rules here even though the exact same jars work fine on Android. Pull the rules out of the
+// runtime classpath jars ourselves rather than hand-copying and maintaining our own duplicate of
+// every library's consumer rules.
+val extractConsumerProguardRules = tasks.register<Copy>("extractConsumerProguardRules") {
+    from(provider { configurations.getByName("runtimeClasspath").map { zipTree(it) } }) {
+        include("META-INF/proguard/*.pro")
+        // kotlin-reflect.pro's "-keep class kotlin.Metadata { *; }" + RuntimeVisible*Annotations
+        // trigger ProGuard 7.7.0's Kotlin-module-mapping pass, which reads every .kotlin_module
+        // file on the classpath including this project's own — and that pass hard-fails on
+        // metadata format 2.4.0 (Kotlin 2.4.10) since bundled kotlin-metadata-jvm only supports up
+        // to 2.2.0. kotlin-reflect itself is only a transitive dependency here, not something this
+        // app calls into reflectively, so its rule isn't needed and is excluded rather than
+        // worked around.
+        exclude("**/kotlin-reflect.pro")
+    }
+    into(layout.buildDirectory.dir("consumerProguardRules"))
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
 compose.desktop {
     application {
         mainClass = "org.cr.pipeline.MainKt"
@@ -55,6 +78,14 @@ compose.desktop {
         buildTypes.release.proguard {
             // Point this directly to your android module's proguard file path
             configurationFiles.from(project.file("compose-desktop.pro"))
+            // -include (what configurationFiles feeds ProGuard) takes individual files, not a
+            // directory, so hand it the extracted *.pro files themselves rather than the Copy
+            // task's output directory; .builtBy wires the task dependency since a FileTree built
+            // from a directory doesn't otherwise know it depends on whatever populates it.
+            configurationFiles.from(
+                fileTree(layout.buildDirectory.dir("consumerProguardRules")) { include("**/*.pro") }
+                    .builtBy(extractConsumerProguardRules),
+            )
         }
     }
 }
