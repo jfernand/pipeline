@@ -20,5 +20,9 @@
     "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/ListScreen.kt — phone wiring",
     "shared/src/commonMain/kotlin/org/cr/pipeline/ui/tablet/ListPane.kt — tablet wiring",
   ),
-  related: (("PL-002", [Browse Applications (List & Detail)]), ("PL-023", [Negative Search Filters])),
+  related: (
+    ("PL-002", [Browse Applications (List & Detail)]),
+    ("PL-023", [Negative Search Filters]),
+    ("PL-043", [Remember List Filter]),
+  ),
 )

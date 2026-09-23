@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.54",
+  revision: "1.55",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -293,6 +293,13 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     `Device`, `SmartToy` for `McpClient`, nothing for `Unknown` — appears on every list card next
     to the status chip, and alongside the full `deviceId`/`clientId` text in both detail headers.
     An MCP tool call no longer reads as indistinguishable from a human edit made by tapping.],
+  [1.55], [2026-09-23], [Added PL-043, Remember List Filter (Planned): the search text and status
+    filter chips on the applications list should survive leaving and returning to the screen, the
+    way PL-021 already keeps the last-viewed route. `rememberApplicationListFilter`
+    (`StatusFilterChips.kt`) currently holds both in plain `remember { mutableStateOf(...) }` —
+    scoped to the composition, gone on navigating away or relaunching. Also filed two Known Issues:
+    the Debian package's task-switcher icon (PL-039-001), and the missing delete-application path
+    on both detail layouts (PL-002-004).],
 )
 
 #part(1, "Core Application",
@@ -336,6 +343,7 @@ dialog for every field that might change.
 #include "features/PL-037-artifact-version-from-build-info.typ"
 #include "features/PL-039-platform-app-icons.typ"
 #include "features/PL-041-routes-and-deep-links.typ"
+#include "features/PL-043-remember-list-filter.typ"
 
 #part(2, "Local Storage & \nData Portability",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,

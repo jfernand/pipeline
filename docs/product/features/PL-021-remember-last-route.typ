@@ -44,5 +44,6 @@
     ("PL-002", [Browse Applications (List & Detail)]),
     ("PL-009", [In-App Navigation & Deep Links]),
     ("PL-012", [App Preferences & Developer Mode]),
+    ("PL-043", [Remember List Filter]),
   ),
 )

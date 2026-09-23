@@ -12,7 +12,23 @@
 // picks the next number after the highest already used for that issue's
 // `pl.at(0)`; moving an entry from `issues` to `fixed-issues` never changes
 // its number.
-#let issues = ()
+#let issues = (
+  (id: "deb-taskswitch-icon", pl: ("PL-039",), num: 1, title: [Debian package shows no icon when switching tasks], body: [
+    The `.deb`-packaged desktop build (`packageReleaseDeb`, `desktopApp/build.gradle.kts`'s
+    `linux { iconFile.set(...) }`) shows a generic icon instead of Pipeline's mark in the task
+    switcher (Alt+Tab / window list), even though `Window(icon = painterResource("icon.png"))`
+    (`desktopApp/src/main/kotlin/org/cr/pipeline/main.kt`) sets a titlebar icon correctly. Likely
+    the generated `.desktop` entry's `Icon=`/`StartupWMClass` isn't resolving against an installed
+    icon theme entry the window manager can find — worth checking what jpackage actually writes
+    for the Linux bundle.
+  ]),
+  (id: "no-delete-application", pl: ("PL-002",), num: 4, title: [No way to delete a job application], body: [
+    The Delete icon on the phone detail screen (`DetailScreen.kt`'s `PlTopBar` `rightActions`) is
+    wired to an empty `{}` lambda — it does nothing. Tablet's `DetailPane.kt` doesn't even have a
+    delete affordance in its header actions. There's no path, on either layout, to remove an
+    application once it's been added.
+  ]),
+)
 
 // Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
 // the record of what the issue actually said, not a changelog blurb about it. `known-issues.typ`
