@@ -23,11 +23,12 @@ fun gitOutput(vararg args: String): String? {
 
 // packageVersion has to be a strict major.minor.patch — unlike Android's free-form versionName,
 // there's no format here to just drop the raw git describe string (with its commit hash suffix)
-// into. No release tags exist yet to derive a real major.minor from, so 1.0 stays fixed by hand
-// and only the patch digit moves, driven by commit count — a real, monotonically-increasing
-// number instead of "1.0.0" frozen forever.
+// into. No release tags exist yet to derive a real major.minor from, so major.minor stays fixed
+// by hand (bumped manually when it's worth signaling — 1.1 marks the first ProGuard-release-build
+// cycle, PL-031 through the MCP JSON-RPC -32600 fix) and only the patch digit moves, driven by
+// commit count — a real, monotonically-increasing number instead of "1.1.0" frozen forever.
 val gitPatchVersion = gitOutput("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 0
-val gitPackageVersion = "1.0.$gitPatchVersion"
+val gitPackageVersion = "1.1.$gitPatchVersion"
 
 dependencies {
     implementation(project(":shared"))
