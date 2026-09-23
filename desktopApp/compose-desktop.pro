@@ -27,3 +27,13 @@
 
 -dontoptimize
 
+# Unlike Android's default AGP/R8 rules, plain ProGuard doesn't preserve an enum's values()/
+# valueOf() reflection machinery by default. Without this, http4k-server-netty's
+# Method.valueOf(methodName) (used to turn every inbound Netty request into an http4k Request)
+# throws for every request; the caller swallows that via runCatching { }.getOrNull() and responds
+# 501 Not Implemented, unconditionally, for every method and every path.
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
