@@ -42,6 +42,7 @@ import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.nav.SyncRoute
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.ContactSheet
+import org.cr.pipeline.ui.screens.DeleteConfirmSheet
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.koin.compose.koinInject
 
@@ -57,17 +58,24 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
     val sheetApplication = applications.firstOrNull { it.id == sheetApplicationId }
     var contactSheetApplicationId by remember { mutableStateOf<Long?>(null) }
     val contactSheetApplication = applications.firstOrNull { it.id == contactSheetApplicationId }
+    // PL-024: only the detail header's single-tap Delete icon needs a confirm step — the list's
+    // swipe-to-reveal gesture (ListScreen/AppCard) already has enough friction built in not to
+    // need a second one, so it calls repository.deleteApplication directly.
+    var deleteSheetApplicationId by remember { mutableStateOf<Long?>(null) }
+    val deleteSheetApplication = applications.firstOrNull { it.id == deleteSheetApplicationId }
     val currentEntry by navController.currentBackStackEntryAsState()
     val onListRoute = currentEntry?.destination?.hasRoute<ListRoute>() == true
+    val anySheetOpen = sheetApplication != null || contactSheetApplication != null || deleteSheetApplication != null
 
     Box(modifier.fillMaxSize().statusBarsPadding()) {
         NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
             composable<ListRoute> {
                 ListScreen(
                     applications = applications,
-                    dimmed = sheetApplication != null || contactSheetApplication != null,
+                    dimmed = anySheetOpen,
                     onCard = { app -> navController.navigate(DetailRoute(app.id)) },
                     onSettings = { navController.navigate(SettingsRoute) },
+                    onDeleteApp = { app -> scope.launch { repository.deleteApplication(app.id) } },
                 )
             }
             composable<DetailRoute>(
@@ -79,11 +87,12 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 val route = backStackEntry.toRoute<DetailRoute>()
                 DetailScreen(
                     applicationId = route.id,
-                    dimmed = sheetApplication != null || contactSheetApplication != null,
+                    dimmed = anySheetOpen,
                     onBack = { navController.popBackStack() },
                     onUpdate = { sheetApplicationId = route.id },
                     onEdit = { navController.navigate(AddEditRoute(route.id)) },
                     onAddContact = { contactSheetApplicationId = route.id },
+                    onDelete = { deleteSheetApplicationId = route.id },
                 )
             }
             composable<AddEditRoute> { backStackEntry ->
@@ -140,7 +149,7 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                     preferencesStore.setLastDetailApplicationId(currentEntry?.toRoute<DetailRoute>()?.id)
             }
         }
-        if (onListRoute && sheetApplication == null && contactSheetApplication == null) {
+        if (onListRoute && !anySheetOpen) {
             PlFab(
                 onClick = { navController.navigate(AddEditRoute()) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 20.dp),
@@ -167,6 +176,19 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 onSave = { contact ->
                     scope.launch { repository.addContact(contactSheetApplication.id, contact) }
                     contactSheetApplicationId = null
+                },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+        if (deleteSheetApplication != null) {
+            DeleteConfirmSheet(
+                company = deleteSheetApplication.company,
+                role = deleteSheetApplication.role,
+                onCancel = { deleteSheetApplicationId = null },
+                onConfirm = {
+                    scope.launch { repository.deleteApplication(deleteSheetApplication.id) }
+                    deleteSheetApplicationId = null
+                    navController.popBackStack()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )

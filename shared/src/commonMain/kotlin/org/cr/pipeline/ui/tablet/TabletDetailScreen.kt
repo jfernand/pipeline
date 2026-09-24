@@ -34,6 +34,7 @@ fun TabletDetailScreen(
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
     onAddContact: () -> Unit = {},
+    onDelete: () -> Unit = {},
 ) {
     Column(modifier.fillMaxSize()) {
         Row(
@@ -51,6 +52,7 @@ fun TabletDetailScreen(
             onUpdateStatus = onUpdateStatus,
             onEdit = onEdit,
             onAddContact = onAddContact,
+            onDelete = onDelete,
             modifier = Modifier.weight(1f),
         )
     }

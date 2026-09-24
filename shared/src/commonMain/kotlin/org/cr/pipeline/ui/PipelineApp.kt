@@ -49,6 +49,7 @@ import org.cr.pipeline.ui.phone.PairingScreen
 import org.cr.pipeline.ui.phone.SettingsScreen
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.ContactSheet
+import org.cr.pipeline.ui.screens.DeleteConfirmSheet
 import org.cr.pipeline.ui.screens.StatusSheet
 import org.cr.pipeline.ui.tablet.DevToolsContent
 import org.cr.pipeline.ui.tablet.FollowUpsContent
@@ -75,6 +76,8 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
     val statusSheetApplication = applications.firstOrNull { it.id == statusSheetApplicationId }
     var contactSheetApplicationId by remember { mutableStateOf<Long?>(null) }
     val contactSheetApplication = applications.firstOrNull { it.id == contactSheetApplicationId }
+    var deleteSheetApplicationId by remember { mutableStateOf<Long?>(null) }
+    val deleteSheetApplication = applications.firstOrNull { it.id == deleteSheetApplicationId }
     val currentEntry by navController.currentBackStackEntryAsState()
 
     Row(Modifier.fillMaxSize().background(PlColors.bgBase).statusBarsPadding()) {
@@ -122,6 +125,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                         onEdit = { navController.navigate(AddEditRoute(route.id)) },
                         onUpdateStatus = { statusSheetApplicationId = route.id },
                         onAddContact = { contactSheetApplicationId = route.id },
+                        onDelete = { deleteSheetApplicationId = route.id },
                     )
                 }
                 composable<AddEditRoute> { backStackEntry ->
@@ -198,6 +202,19 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     onSave = { contact ->
                         scope.launch { repository.addContact(contactSheetApplication.id, contact) }
                         contactSheetApplicationId = null
+                    },
+                    modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 480.dp).padding(bottom = 20.dp),
+                )
+            }
+            if (deleteSheetApplication != null) {
+                DeleteConfirmSheet(
+                    company = deleteSheetApplication.company,
+                    role = deleteSheetApplication.role,
+                    onCancel = { deleteSheetApplicationId = null },
+                    onConfirm = {
+                        scope.launch { repository.deleteApplication(deleteSheetApplication.id) }
+                        deleteSheetApplicationId = null
+                        navController.popBackStack()
                     },
                     modifier = Modifier.align(Alignment.BottomCenter).widthIn(max = 480.dp).padding(bottom = 20.dp),
                 )

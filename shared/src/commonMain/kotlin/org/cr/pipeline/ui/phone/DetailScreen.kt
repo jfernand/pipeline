@@ -60,6 +60,7 @@ fun DetailScreen(
     onUpdate: () -> Unit = {},
     onEdit: () -> Unit = {},
     onAddContact: () -> Unit = {},
+    onDelete: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
     val repository = koinInject<JobApplicationRepository>()
@@ -72,6 +73,7 @@ fun DetailScreen(
         onUpdate,
         onEdit,
         onAddContact,
+        onDelete,
         onSaveNotes = { notes ->
             val id = applicationId ?: return@DetailScreenContent
             scope.launch {
@@ -92,6 +94,7 @@ private fun DetailScreenContent(
     onUpdate: () -> Unit = {},
     onEdit: () -> Unit = {},
     onAddContact: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onSaveNotes: (String) -> Unit = {},
 ) {
     DimmedOverlay(dimmed, modifier.background(PlColors.bgBase)) {
@@ -106,7 +109,7 @@ private fun DetailScreenContent(
                 title = "Application",
                 leftIcon = Icons.AutoMirrored.Filled.ArrowBack,
                 onLeftClick = onBack,
-                rightActions = listOf(Icons.Filled.Edit to onEdit, Icons.Filled.Delete to {}),
+                rightActions = listOf(Icons.Filled.Edit to onEdit, Icons.Filled.Delete to onDelete),
             )
             DetailHeader(detail, onUpdate)
             val overdueReminder = detail.reminders.firstOrNull { it.overdue }

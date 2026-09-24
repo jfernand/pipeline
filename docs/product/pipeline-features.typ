@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.60",
+  revision: "1.61",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -332,6 +332,15 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     heuristic. `packageReleaseDeb` now patches the built `.deb` as its very last action
     (`dpkg-deb -R`/inject `StartupWMClass=Org.cr.pipeline`/`dpkg-deb -b`) — the Compose Desktop
     Gradle plugin has no hook to customize jpackage's `.desktop` template directly.],
+  [1.61], [2026-09-24], [Shipped PL-024, Delete Application — closes "No way to delete a job
+    application" (PL-002-004). A new `ApplicationDeleted` event soft-deletes: nothing is removed
+    from `event_envelopes`, `EventSourcedJobApplicationRepository` just filters a deleted state
+    out of every read path (list, search, detail, follow-ups, and by extension the MCP tools).
+    Phone's `AppCard` gets a swipe-left-to-reveal-trash gesture (`SwipeToDismissBox`) that commits
+    directly on a full swipe; the detail header's Delete icon (newly wired on phone, newly added
+    on tablet, which had none) opens a `DeleteConfirmSheet` first, since a single tap has none of
+    the swipe gesture's built-in friction. A context menu and the Delete key on desktop are
+    explicitly deferred, not shipped here.],
 )
 
 #part(1, "Core Application",

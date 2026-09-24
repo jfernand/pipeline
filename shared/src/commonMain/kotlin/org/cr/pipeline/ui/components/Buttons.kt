@@ -39,8 +39,9 @@ fun PlPrimaryButton(
     onClick: () -> Unit = {},
     height: Dp = 48.dp,
     icon: ImageVector? = null,
+    containerColor: Color = PlColors.brandPrimary,
 ) {
-    Surface(onClick = onClick, modifier = modifier.height(height), color = PlColors.brandPrimary, shape = buttonShape) {
+    Surface(onClick = onClick, modifier = modifier.height(height), color = containerColor, shape = buttonShape) {
         Row(
             Modifier.fillMaxHeight().padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically,

@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -65,6 +66,7 @@ fun DetailPane(
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
     onAddContact: () -> Unit = {},
+    onDelete: () -> Unit = {},
 ) {
     val detail = rememberApplicationDetail(applicationId)
     val repository = koinInject<JobApplicationRepository>()
@@ -75,6 +77,7 @@ fun DetailPane(
         onUpdateStatus,
         onEdit,
         onAddContact,
+        onDelete,
         onSaveNotes = { notes ->
             val id = applicationId ?: return@DetailPaneContent
             scope.launch {
@@ -93,6 +96,7 @@ private fun DetailPaneContent(
     onUpdateStatus: () -> Unit = {},
     onEdit: () -> Unit = {},
     onAddContact: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onSaveNotes: (String) -> Unit = {},
 ) {
     Column(modifier.fillMaxHeight().fillMaxWidth().background(PlColors.bgBase)) {
@@ -108,7 +112,7 @@ private fun DetailPaneContent(
                 .drawBottomBorder(PlColors.borderDefault)
                 .padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 18.dp),
         ) {
-            DetailHeader(detail, maxWidth, onUpdateStatus, onEdit)
+            DetailHeader(detail, maxWidth, onUpdateStatus, onEdit, onDelete)
         }
         Row(Modifier.weight(1f).fillMaxWidth()) {
             DetailPrimaryColumn(
@@ -126,19 +130,25 @@ private fun DetailPaneContent(
 }
 
 @Composable
-private fun DetailHeader(detail: ApplicationDetail, maxWidth: Dp, onUpdateStatus: () -> Unit, onEdit: () -> Unit) {
+private fun DetailHeader(
+    detail: ApplicationDetail,
+    maxWidth: Dp,
+    onUpdateStatus: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+) {
     // Below this, the info block (especially the company name at 39sp) doesn't have room
     // to share a row with the action buttons without getting crushed into a near-zero
     // width and wrapping character-by-character; stack them instead.
     if (maxWidth >= 640.dp) {
         Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
             Box(Modifier.weight(1f)) { HeaderInfo(detail) }
-            HeaderActions(detail, onUpdateStatus, onEdit)
+            HeaderActions(detail, onUpdateStatus, onEdit, onDelete)
         }
     } else {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             HeaderInfo(detail)
-            HeaderActions(detail, onUpdateStatus, onEdit)
+            HeaderActions(detail, onUpdateStatus, onEdit, onDelete)
         }
     }
 }
@@ -165,12 +175,13 @@ private fun HeaderInfo(detail: ApplicationDetail) {
 }
 
 @Composable
-private fun HeaderActions(detail: ApplicationDetail, onUpdateStatus: () -> Unit, onEdit: () -> Unit) {
+private fun HeaderActions(detail: ApplicationDetail, onUpdateStatus: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (detail.postingUrl != null) {
             PlSecondaryButton("Posting", icon = Icons.AutoMirrored.Filled.OpenInNew, height = 44.dp)
         }
         PlIconButton(Icons.Filled.Edit, onClick = onEdit, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
+        PlIconButton(Icons.Filled.Delete, onClick = onDelete, size = 44.dp, bordered = true, tint = PlColors.fgSecondary)
         PlPrimaryButton("Update status", onClick = onUpdateStatus, height = 44.dp)
     }
 }
