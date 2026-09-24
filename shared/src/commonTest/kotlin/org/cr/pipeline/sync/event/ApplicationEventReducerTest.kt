@@ -256,4 +256,15 @@ class ApplicationEventReducerTest {
             changed.statusHistory.map { it.provenance },
         )
     }
+
+    @Test
+    fun `ApplicationDeleted marks deleted without touching other fields`() {
+        val created = applyEvent(null, ApplicationCreated(applicationId, fullInput), today)
+
+        val deleted = applyEvent(created, ApplicationDeleted(applicationId), today)
+
+        assertEquals(true, deleted.deleted)
+        assertEquals(created.company, deleted.company)
+        assertEquals(created.statusHistory, deleted.statusHistory)
+    }
 }

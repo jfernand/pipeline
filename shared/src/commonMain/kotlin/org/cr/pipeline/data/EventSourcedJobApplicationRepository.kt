@@ -19,6 +19,7 @@ import org.cr.pipeline.model.FollowUpItem
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.model.todayDate
 import org.cr.pipeline.sync.event.ApplicationCreated
+import org.cr.pipeline.sync.event.ApplicationDeleted
 import org.cr.pipeline.sync.event.ApplicationEdited
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.ApplicationId
@@ -50,17 +51,20 @@ class EventSourcedJobApplicationRepository(
     private val eventLog: EventLog,
     private val fileService: FileArchiveService = UnsupportedFileArchiveService,
 ) : JobApplicationRepository {
+    // PL-024: deleted is a fact ApplicationStateStore doesn't know to filter — it's dumb storage,
+    // this repository is the only thing that decides what a deleted application means to every
+    // read path. A deleted id reads exactly like an unknown one everywhere below.
     override fun observeApplications(): Flow<List<JobApplication>> =
-        store.observeAll().map { list -> list.map { (id, state) -> state.toJobApplication(id) } }
+        store.observeAll().map { list -> list.filterNot { (_, state) -> state.deleted }.map { (id, state) -> state.toJobApplication(id) } }
 
     override fun observeApplicationDetail(id: Long): Flow<ApplicationDetail?> =
-        store.observeState(id).map { it?.toApplicationDetail(id) }
+        store.observeState(id).map { it?.takeUnless { state -> state.deleted }?.toApplicationDetail(id) }
 
     override fun observeFollowUps(): Flow<List<FollowUpItem>> =
-        store.observeAll().map { it.toFollowUpItems() }
+        store.observeAll().map { list -> list.filterNot { (_, state) -> state.deleted }.toFollowUpItems() }
 
     override suspend fun getApplicationInput(id: Long): ApplicationInput? =
-        store.getState(id)?.toApplicationInput()
+        store.getState(id)?.takeUnless { it.deleted }?.toApplicationInput()
 
     override suspend fun saveApplication(id: Long?, input: ApplicationInput, provenance: EventProvenance?): Long {
         if (id == null) {
@@ -128,6 +132,11 @@ class EventSourcedJobApplicationRepository(
         if (current.attachments.none { it.id == target }) return
         fileService.delete(current.applicationId, target)
         persist(id, current, AttachmentRemoved(current.applicationId, target, resolveProvenance(provenance)))
+    }
+
+    override suspend fun deleteApplication(id: Long, provenance: EventProvenance?) {
+        val current = store.getState(id)?.takeUnless { it.deleted } ?: return
+        persist(id, current, ApplicationDeleted(current.applicationId, resolveProvenance(provenance)))
     }
 
     // deviceId() is a storage round trip on first call (then cached by eventLog itself), so this

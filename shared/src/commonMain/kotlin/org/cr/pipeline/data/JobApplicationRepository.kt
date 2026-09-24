@@ -57,4 +57,11 @@ interface JobApplicationRepository {
      *  [attachmentId] is an [org.cr.pipeline.model.AttachmentSummary.id]. [provenance] left null
      *  resolves to this device's own [EventProvenance.Device]. */
     suspend fun removeAttachment(id: Long, attachmentId: String, provenance: EventProvenance? = null)
+
+    /** PL-024: a soft delete — the application stops appearing anywhere (list, detail, MCP tools
+     *  treat it like an unknown id), but its full history survives in the event log. A no-op if
+     *  [id] doesn't exist, or is already deleted. [provenance] left null resolves to this
+     *  device's own [EventProvenance.Device] — callers reached through another path (the MCP
+     *  server) pass their own. */
+    suspend fun deleteApplication(id: Long, provenance: EventProvenance? = null)
 }

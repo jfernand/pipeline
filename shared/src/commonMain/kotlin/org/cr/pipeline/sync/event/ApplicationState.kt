@@ -29,6 +29,9 @@ data class ApplicationState(
     val contacts: List<ContactRecord>,
     val reminders: List<ReminderRecord>,
     val attachments: List<AttachmentRecord>,
+    /** PL-024: a soft delete — [ApplicationDeleted] sets this, nothing ever removes an
+     *  application's state or history outright. Every read path filters it out. */
+    val deleted: Boolean = false,
 )
 
 /** PL-034: [provenance] is who or what made *this* change — not a summary of the whole

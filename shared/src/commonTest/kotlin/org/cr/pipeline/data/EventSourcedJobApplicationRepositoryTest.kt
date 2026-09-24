@@ -14,6 +14,7 @@ import org.cr.pipeline.model.ApplicationInput
 import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.ContactInput
 import org.cr.pipeline.sync.event.ApplicationCreated
+import org.cr.pipeline.sync.event.ApplicationDeleted
 import org.cr.pipeline.sync.event.ApplicationEvent
 import org.cr.pipeline.sync.event.AttachmentRemoved
 import org.cr.pipeline.sync.event.ContactAdded
@@ -246,6 +247,63 @@ class EventSourcedJobApplicationRepositoryTest {
 
         assertEquals(1, store.states.getValue(id).attachments.size)
         assertTrue(fileService.deletes.isEmpty())
+    }
+
+    @Test
+    fun `deleteApplication marks the state deleted and persists an ApplicationDeleted event`() = runTest {
+        val store = FakeApplicationStateStore()
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(store, eventLog)
+        val id = repository.saveApplication(null, input)
+
+        repository.deleteApplication(id)
+
+        assertTrue(store.states.getValue(id).deleted)
+        val chain = eventLog.observeChain().first()
+        assertIs<ApplicationDeleted>(Json.decodeFromString<ApplicationEvent>(chain.last().payload))
+    }
+
+    @Test
+    fun `deleteApplication for an unknown id is a no-op`() = runTest {
+        val store = FakeApplicationStateStore()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+
+        repository.deleteApplication(404)
+
+        assertEquals(emptyMap(), store.states)
+    }
+
+    @Test
+    fun `deleteApplication twice is a no-op the second time`() = runTest {
+        val store = FakeApplicationStateStore()
+        val eventLog = InMemoryEventLog()
+        val repository = EventSourcedJobApplicationRepository(store, eventLog)
+        val id = repository.saveApplication(null, input)
+        repository.deleteApplication(id)
+        val chainLengthAfterFirstDelete = eventLog.observeChain().first().size
+
+        repository.deleteApplication(id)
+
+        assertEquals(chainLengthAfterFirstDelete, eventLog.observeChain().first().size)
+    }
+
+    @Test
+    fun `a deleted application no longer appears in observeApplications, observeApplicationDetail, observeFollowUps, or getApplicationInput`() = runTest {
+        val store = FakeApplicationStateStore()
+        val repository = EventSourcedJobApplicationRepository(store, InMemoryEventLog())
+        val overdue = input.copy(nextActionDate = LocalDate(2020, 1, 1))
+        val id = repository.saveApplication(null, overdue)
+        // Sanity check it's visible everywhere before deleting, so the assertions below actually
+        // prove deletion hid it rather than it never having been visible in the first place.
+        assertEquals(1, repository.observeApplications().first().size)
+        assertEquals(1, repository.observeFollowUps().first().size)
+
+        repository.deleteApplication(id)
+
+        assertEquals(emptyList(), repository.observeApplications().first())
+        assertNull(repository.observeApplicationDetail(id).first())
+        assertEquals(emptyList(), repository.observeFollowUps().first())
+        assertNull(repository.getApplicationInput(id))
     }
 
     @Test

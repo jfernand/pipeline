@@ -52,6 +52,7 @@ fun replayApplicationState(
             }
             is ApplicationEdited, is StatusChanged, is ContactAdded,
             is ResumeAttached, is CoverLetterAttached, is FileAttached, is AttachmentRemoved,
+            is ApplicationDeleted,
             -> {
                 val current = states[event.applicationId]
                 if (current == null) {

@@ -104,3 +104,13 @@ data class AttachmentRemoved(
     val attachmentId: AttachmentId,
     override val provenance: EventProvenance = EventProvenance.Unknown,
 ) : ApplicationEvent
+
+/** PL-024: a soft delete — marks [ApplicationState.deleted], never removes anything from
+ *  [org.cr.pipeline.sync.chain.EventEnvelope]. The application's full history survives even
+ *  after it stops showing up anywhere; every read path just treats a deleted id the way it
+ *  already treats an unknown one. */
+@Serializable
+data class ApplicationDeleted(
+    override val applicationId: ApplicationId,
+    override val provenance: EventProvenance = EventProvenance.Unknown,
+) : ApplicationEvent

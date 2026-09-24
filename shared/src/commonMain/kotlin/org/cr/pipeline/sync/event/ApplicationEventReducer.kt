@@ -103,4 +103,9 @@ fun applyEvent(state: ApplicationState?, event: ApplicationEvent, today: LocalDa
         val current = checkNotNull(state) { "AttachmentRemoved for ${event.applicationId} with no prior state" }
         current.copy(attachments = current.attachments.filterNot { it.id == event.attachmentId })
     }
+
+    is ApplicationDeleted -> {
+        val current = checkNotNull(state) { "ApplicationDeleted for ${event.applicationId} with no prior state" }
+        current.copy(deleted = true)
+    }
 }
