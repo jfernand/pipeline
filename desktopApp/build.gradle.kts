@@ -21,18 +21,17 @@ fun gitOutput(vararg args: String): String? {
     return runCatching { execOutput.standardOutput.asText.get().trim() }.getOrNull()?.takeIf { it.isNotBlank() }
 }
 
-// packageVersion has to be a strict major.minor.patch — unlike Android's free-form versionName,
-// there's no format here to just drop the raw git describe string (with its commit hash suffix)
-// into. Derived entirely from the nearest "vMAJOR.MINOR.0"-style tag: that tag's own
-// major/minor, plus how many commits HEAD is ahead of it as the patch digit. Bumping the version
-// is now just `git tag vX.Y.0` on the commit that should read as X.Y.0 — the patch digit resets
-// to 0 right there and counts up from that point, rather than a hand-edited major.minor prefix
-// glued to a total-repo-commit-count patch that never reset across a bump (which is how "1.1.229"
-// happened the first time this was bumped by hand).
-val tagDescribeRegex = Regex("""^v(\d+)\.(\d+)\.\d+-(\d+)-g[0-9a-f]+$""")
+// Real semver: a tag vX.Y.Z names release X.Y.Z outright, standing exactly on that commit. Every
+// commit after it is a development build of whatever comes next, not a new release in its own
+// right — those get the tag's version plus a "-N" prerelease identifier, N being commits since
+// the tag (semver's own syntax for this, not a made-up scheme). So v1.2.1, then five commits
+// later, reads "1.2.1-5" — not "1.2.6", which would claim a release that was never actually cut.
+// Bumping the version for real is `git tag vX.Y.Z` on the commit that should read as that exact
+// release; everything after it drifts naturally back to "-N" until the next tag.
+val tagDescribeRegex = Regex("""^v(\d+\.\d+\.\d+)-(\d+)-g[0-9a-f]+$""")
 val gitPackageVersion = gitOutput("describe", "--tags", "--long", "--match", "v[0-9]*.[0-9]*.[0-9]*")
     ?.let { tagDescribeRegex.find(it)?.destructured }
-    ?.let { (major, minor, distance) -> "$major.$minor.$distance" }
+    ?.let { (release, distance) -> if (distance == "0") release else "$release-$distance" }
     ?: "0.0.0"
 
 dependencies {
