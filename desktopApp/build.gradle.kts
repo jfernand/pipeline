@@ -53,6 +53,11 @@ dependencies {
 // runtime classpath jars ourselves rather than hand-copying and maintaining our own duplicate of
 // every library's consumer rules.
 val extractConsumerProguardRules = tasks.register<Copy>("extractConsumerProguardRules") {
+    // The Provider wrapping configurations.getByName(...).map { zipTree(it) } doesn't carry the
+    // configuration's own build dependencies (resolving a runtime classpath entry like
+    // sync-core-jvm.jar depends on :sync-core:jvmJar actually having run) — an implicit,
+    // unvalidated dependency Gradle now flags. Declare it explicitly instead.
+    dependsOn(configurations.named("runtimeClasspath"))
     from(provider { configurations.getByName("runtimeClasspath").map { zipTree(it) } }) {
         include("META-INF/proguard/*.pro")
         // kotlin-reflect.pro's "-keep class kotlin.Metadata { *; }" + RuntimeVisible*Annotations
@@ -97,6 +102,64 @@ compose.desktop {
 }
 
 project.afterEvaluate {
+
+    // PL-039-001: on this machine, neither Skiko/AWT's Window(icon = ...) call nor jpackage's own
+    // --icon flag gets the running window's icon into _NET_WM_ICON on Linux (confirmed against a
+    // real running instance via `xprop -id <window> _NET_WM_ICON` — the property is simply
+    // absent), so GNOME Shell's task switcher/Alt+Tab falls back to desktop-file-based icon
+    // lookup instead of reading the window's own icon. That lookup fails too: jpackage's
+    // generated .desktop file has no StartupWMClass, and the running window's actual WM_CLASS
+    // ("Org.cr.pipeline", also confirmed via xprop) doesn't match the .desktop file's own
+    // oddly-doubled name ("org.cr.pipeline-org.cr.pipeline.desktop") closely enough for GNOME's
+    // matching heuristic — so it shows a generic icon instead. The Compose Desktop Gradle plugin
+    // has no hook to customize jpackage's generated .desktop file (no --resource-dir passthrough
+    // the way jpackage itself supports), so this patches the packaged .deb directly as the task's
+    // very last action — anything depending on packageReleaseDeb (copyFinalInstaller included)
+    // only sees the patched .deb, since a doLast action runs before the task is considered
+    // complete. Registered inside afterEvaluate: the compose plugin only creates
+    // packageReleaseDeb once nativeDistributions' target formats are processed.
+    //
+    // debDir/workDir are resolved to plain Files here, at configuration time (safe — this is
+    // ordinary project configuration, not a stored task action), so doLast below only ever
+    // captures serializable File values, never layout/providers/Project itself.
+    val debDir = layout.buildDirectory.dir("compose/binaries/main-release/deb").get().asFile
+    val debPatchWorkDir = layout.buildDirectory.dir("compose/tmp/debPatch").get().asFile
+    tasks.named("packageReleaseDeb") {
+        doLast {
+            // A local function declared right here, not a top-level script function — calling a
+            // top-level function from inside doLast still captures a reference to the enclosing
+            // script object itself ("cannot serialize Gradle script object references"), even
+            // though the function body only touches plain JDK APIs. A function local to this
+            // lambda, referencing only its own parameters, captures nothing.
+            fun runCommand(vararg args: String) {
+                val process = ProcessBuilder(*args).redirectErrorStream(true).start()
+                val output = process.inputStream.bufferedReader().readText()
+                val exitCode = process.waitFor()
+                check(exitCode == 0) { "${args.joinToString(" ")} failed ($exitCode): $output" }
+            }
+
+            val deb = debDir.listFiles { f -> f.extension == "deb" }?.singleOrNull()
+                ?: error("Expected exactly one .deb in $debDir")
+            debPatchWorkDir.deleteRecursively()
+            debPatchWorkDir.mkdirs()
+            runCommand("dpkg-deb", "-R", deb.absolutePath, debPatchWorkDir.absolutePath)
+            // isFile matters: the bundled JDK runtime's own legal-notices tree contains a
+            // directory literally named "legal/java.desktop" (the java.desktop JDK module's
+            // license folder) — File.extension only parses the name string, so without isFile
+            // that directory matches "desktop" too, and the later readText() on it as if it were
+            // a file blows up with "Is a directory".
+            val desktopFiles = debPatchWorkDir.walkTopDown().filter { it.isFile && it.extension == "desktop" }.toList()
+            check(desktopFiles.isNotEmpty()) { "No .desktop file found unpacking $deb" }
+            desktopFiles.forEach { f ->
+                val text = f.readText()
+                if (!text.contains("StartupWMClass")) {
+                    f.writeText(text.trimEnd() + "\nStartupWMClass=Org.cr.pipeline\n")
+                }
+            }
+            deb.delete()
+            runCommand("dpkg-deb", "-b", debPatchWorkDir.absolutePath, deb.absolutePath)
+        }
+    }
 
     val packageTasks = tasks.withType<org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask>()
         .matching { it.name.startsWith("packageRelease") && !it.name.contains("Distributable") }

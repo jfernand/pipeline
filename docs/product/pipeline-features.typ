@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.59",
+  revision: "1.60",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -323,6 +323,15 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     "Synced" dot. Nothing in PL-003's pairing scaffold syncs anything yet, so there was no real
     state behind the claim — the marker is gone entirely until pairing is real and has something
     true to report.],
+  [1.60], [2026-09-24], [Fixed PL-039-001: the `.deb` build's task-switcher/Alt+Tab icon.
+    `_NET_WM_ICON` is never set on the running window on this machine (confirmed via `xprop` —
+    neither Skiko/AWT's `Window(icon = ...)` nor jpackage's own `--icon` flag get it there), so
+    GNOME Shell falls back to desktop-file-based icon lookup — which also failed, since jpackage's
+    generated `.desktop` entry has no `StartupWMClass` and the running window's real `WM_CLASS`
+    ("Org.cr.pipeline") doesn't match the file's own oddly-doubled name well enough for GNOME's
+    heuristic. `packageReleaseDeb` now patches the built `.deb` as its very last action
+    (`dpkg-deb -R`/inject `StartupWMClass=Org.cr.pipeline`/`dpkg-deb -b`) — the Compose Desktop
+    Gradle plugin has no hook to customize jpackage's `.desktop` template directly.],
 )
 
 #part(1, "Core Application",
