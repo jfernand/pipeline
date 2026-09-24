@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.61",
+  revision: "1.62",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -341,6 +341,16 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     on tablet, which had none) opens a `DeleteConfirmSheet` first, since a single tap has none of
     the swipe gesture's built-in friction. A context menu and the Delete key on desktop are
     explicitly deferred, not shipped here.],
+  [1.62], [2026-09-24], [Actually fixed PL-039-001 (the earlier `StartupWMClass` patch alone
+    wasn't enough — the dock and Alt+Tab switcher still showed a generic icon while the app was
+    running, though the not-running pinned entry was correct). Root cause: `_NET_WM_ICON` was
+    never set on the real window at all; `Window(icon = ...)`'s `setIconImage()` call doesn't land
+    it on this Linux/XWayland setup. `main.kt` now also calls `Taskbar.setIconImage(...)`, which
+    does. Also corrected `StartupWMClass` itself — the earlier value came from checking the wrong
+    X11 window (one of several invisible AWT utility windows the process opens, found by a class-
+    name substring search rather than by matching the real window's title); the actual visible
+    window reports `org-cr-pipeline-MainKt`, not the app/package identity string that seemed like
+    the obvious guess.],
 )
 
 #part(1, "Core Application",

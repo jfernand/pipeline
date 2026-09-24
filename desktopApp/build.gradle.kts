@@ -102,21 +102,30 @@ compose.desktop {
 
 project.afterEvaluate {
 
-    // PL-039-001: on this machine, neither Skiko/AWT's Window(icon = ...) call nor jpackage's own
-    // --icon flag gets the running window's icon into _NET_WM_ICON on Linux (confirmed against a
-    // real running instance via `xprop -id <window> _NET_WM_ICON` — the property is simply
-    // absent), so GNOME Shell's task switcher/Alt+Tab falls back to desktop-file-based icon
-    // lookup instead of reading the window's own icon. That lookup fails too: jpackage's
-    // generated .desktop file has no StartupWMClass, and the running window's actual WM_CLASS
-    // ("Org.cr.pipeline", also confirmed via xprop) doesn't match the .desktop file's own
-    // oddly-doubled name ("org.cr.pipeline-org.cr.pipeline.desktop") closely enough for GNOME's
-    // matching heuristic — so it shows a generic icon instead. The Compose Desktop Gradle plugin
-    // has no hook to customize jpackage's generated .desktop file (no --resource-dir passthrough
-    // the way jpackage itself supports), so this patches the packaged .deb directly as the task's
-    // very last action — anything depending on packageReleaseDeb (copyFinalInstaller included)
-    // only sees the patched .deb, since a doLast action runs before the task is considered
-    // complete. Registered inside afterEvaluate: the compose plugin only creates
-    // packageReleaseDeb once nativeDistributions' target formats are processed.
+    // PL-039-001: the *primary* fix (a real _NET_WM_ICON on the running window, via
+    // java.awt.Taskbar) lives in main.kt — this is a secondary, belt-and-suspenders one for
+    // GNOME's own app-matching (dock grouping, Alt+Tab when a WM prefers app identity over a
+    // window's own icon). jpackage's generated .desktop file has no StartupWMClass at all.
+    //
+    // The value matters and is easy to get wrong: `xdotool search --class pipeline` matches
+    // several X11 windows this process opens (AWT creates a few invisible utility windows — for
+    // clipboard/selection ownership, drag-and-drop — that inherit a default WM_CLASS early,
+    // before any of our code runs), and picking whichever one search returns first, rather than
+    // the actual visible application window, gives a StartupWMClass that never matches anything
+    // real. The one actual visible window (confirmed by matching its title, "pipeline", set in
+    // main.kt's Window(...)) reports WM_CLASS "org-cr-pipeline-MainKt" for both fields — derived
+    // from the main class's FQN (org.cr.pipeline.MainKt) with dots turned to dashes, not from
+    // any app/package identity string. Confirmed by enumerating every window whose _NET_WM_PID
+    // matches the running process and checking each one's WM_NAME individually, not by
+    // class-name substring search.
+    //
+    // The Compose Desktop Gradle plugin has no hook to customize jpackage's generated .desktop
+    // file (no --resource-dir passthrough the way jpackage itself supports), so this patches the
+    // packaged .deb directly as the task's very last action — anything depending on
+    // packageReleaseDeb (copyFinalInstaller included) only sees the patched .deb, since a doLast
+    // action runs before the task is considered complete. Registered inside afterEvaluate: the
+    // compose plugin only creates packageReleaseDeb once nativeDistributions' target formats are
+    // processed.
     //
     // debDir/workDir are resolved to plain Files here, at configuration time (safe — this is
     // ordinary project configuration, not a stored task action), so doLast below only ever
@@ -152,7 +161,7 @@ project.afterEvaluate {
             desktopFiles.forEach { f ->
                 val text = f.readText()
                 if (!text.contains("StartupWMClass")) {
-                    f.writeText(text.trimEnd() + "\nStartupWMClass=Org.cr.pipeline\n")
+                    f.writeText(text.trimEnd() + "\nStartupWMClass=org-cr-pipeline-MainKt\n")
                 }
             }
             deb.delete()
