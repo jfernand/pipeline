@@ -18,10 +18,10 @@ import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.ui.theme.PlColors
 
 /**
- * PL-034: human (a device) or AI (an MCP client) — the small icon a list card shows, and the icon
- * half of the full identifier the detail view shows alongside it. Shared by [AppCard] and both
- * phone/tablet detail headers so the icon mapping can't drift between them the way three separate
- * private copies could.
+ * PL-034: human (a device) or AI (an MCP client) — a small icon next to each status-history
+ * entry (`Timeline`) showing who or what made *that* change. Not a whole-application summary:
+ * an application's history can span both a device and an MCP client, so there's no single icon
+ * that could stand for "the" application's provenance.
  */
 private fun provenanceIcon(provenance: EventProvenance): ImageVector? = when (provenance) {
     is EventProvenance.Device -> Icons.Filled.Person
@@ -30,22 +30,13 @@ private fun provenanceIcon(provenance: EventProvenance): ImageVector? = when (pr
 }
 
 private fun provenanceDescription(provenance: EventProvenance): String = when (provenance) {
-    is EventProvenance.Device -> "Last changed from a device"
-    is EventProvenance.McpClient -> "Last changed by an AI agent"
+    is EventProvenance.Device -> "Changed from a device"
+    is EventProvenance.McpClient -> "Changed by an AI agent"
     EventProvenance.Unknown -> ""
 }
 
-/** The detail view's "full identifier available" half of the summary — a full [EventProvenance.Device.deviceId]
- *  or [EventProvenance.McpClient.clientId], not the short icon+description a list card is limited
- *  to. Empty for [EventProvenance.Unknown] — nothing to identify for event payloads written before
- *  PL-033 gave events a provenance field at all. */
-fun provenanceIdentifier(provenance: EventProvenance): String = when (provenance) {
-    is EventProvenance.Device -> "Device ${provenance.deviceId.value}"
-    is EventProvenance.McpClient -> "MCP client \"${provenance.clientId}\""
-    EventProvenance.Unknown -> ""
-}
-
-/** Renders nothing for [EventProvenance.Unknown] — same reasoning as [provenanceIdentifier]. */
+/** Renders nothing for [EventProvenance.Unknown] — event payloads written before PL-033 gave
+ *  events a provenance field at all have nothing to show here. */
 @Composable
 fun ProvenanceIcon(provenance: EventProvenance, modifier: Modifier = Modifier, tint: Color = PlColors.fgMuted) {
     provenanceIcon(provenance)?.let { icon ->

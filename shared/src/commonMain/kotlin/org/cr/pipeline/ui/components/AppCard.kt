@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -103,7 +106,14 @@ fun AppCard(
                     )
                 }
             }
-            ProvenanceIcon(app.provenance, modifier = Modifier.padding(start = 8.dp))
+            if (app.hasAttachments) {
+                Icon(
+                    Icons.Filled.AttachFile,
+                    contentDescription = "Has attachments",
+                    tint = PlColors.fgMuted,
+                    modifier = Modifier.padding(start = 8.dp).size(14.dp),
+                )
+            }
             Spacer(Modifier.weight(1f))
             val (label, ago) = app.activity
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(0.dp)) {

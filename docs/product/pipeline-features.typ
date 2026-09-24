@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.57",
+  revision: "1.58",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -310,6 +310,15 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     green "Synced" dot, hardcoded rather than read from any real state — misleading, since nothing
     in PL-003's pairing scaffold actually syncs anything yet. Should be hidden until a device has
     been paired.],
+  [1.58], [2026-09-23], [Fixed PL-034: a single provenance icon can't honestly represent a whole
+    application, since provenance belongs to individual events — an application's history
+    routinely spans both a device and an MCP client. `ApplicationState.lastProvenance` and the
+    single `provenance` field it fed on `JobApplication`/`ApplicationDetail` are gone.
+    `StatusHistoryRecord`/`StatusHistoryEntry` now each carry their own `provenance`, and
+    `Timeline` renders `ProvenanceIcon` next to every status-history entry, not just a single
+    header-level summary. `AppCard`'s slot that used to carry that icon now shows a paperclip when
+    the application has any attachments (`JobApplication.hasAttachments`) — a fact that actually
+    is true of the whole application, unlike who made its most recent edit.],
 )
 
 #part(1, "Core Application",

@@ -53,7 +53,7 @@ fun StatusHistorySection(statusHistory: List<StatusHistoryEntry>, modifier: Modi
         right = { MonoText(changesLabel(statusHistory.size), size = 9.sp) },
         modifier = modifier,
     ) {
-        Timeline(entries = statusHistory.map { TimelineEntry(it.status, it.date, it.note, it.current) })
+        Timeline(entries = statusHistory.map { TimelineEntry(it.status, it.date, it.note, it.current, it.provenance) })
     }
 }
 

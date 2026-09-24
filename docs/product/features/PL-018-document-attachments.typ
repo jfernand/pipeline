@@ -42,5 +42,6 @@
     ("PL-004", [Local Application Database]),
     ("PL-020", [File Picker Module]),
     ("PL-031", [File Management Service]),
+    ("PL-034", [Event Provenance Indicator]),
   ),
 )

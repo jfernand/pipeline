@@ -29,13 +29,17 @@ data class ApplicationState(
     val contacts: List<ContactRecord>,
     val reminders: List<ReminderRecord>,
     val attachments: List<AttachmentRecord>,
-    /** PL-034: the provenance of the event [applyEvent] last folded onto this application — every
-     *  branch sets this, not just the ones the field's name might suggest, since any event can be
-     *  the most recent one. */
-    val lastProvenance: EventProvenance = EventProvenance.Unknown,
 )
 
-data class StatusHistoryRecord(val status: AppStatus, val date: LocalDate, val note: String)
+/** PL-034: [provenance] is who or what made *this* change — not a summary of the whole
+ *  application, which can span history from both a device and an MCP client. Set from the
+ *  originating event's own provenance in [applyEvent]. */
+data class StatusHistoryRecord(
+    val status: AppStatus,
+    val date: LocalDate,
+    val note: String,
+    val provenance: EventProvenance = EventProvenance.Unknown,
+)
 data class ContactRecord(val id: ContactId, val name: String, val role: String, val email: String)
 data class ReminderRecord(val message: String, val dueDate: LocalDate)
 

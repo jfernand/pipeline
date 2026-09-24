@@ -50,7 +50,7 @@ fun ApplicationState.toJobApplication(id: Long, today: LocalDate = todayDate()):
         activity = activity,
         overdueDays = overdueDays?.toInt(),
         source = source,
-        provenance = lastProvenance,
+        hasAttachments = attachments.isNotEmpty(),
     )
 }
 
@@ -79,6 +79,7 @@ fun ApplicationState.toApplicationDetail(id: Long, today: LocalDate = todayDate(
                 date = event.date.formatShort(),
                 note = event.note,
                 current = index == orderedHistory.lastIndex,
+                provenance = event.provenance,
             )
         },
         contacts = contacts.map { ContactSummary(id = it.id.value, name = it.name, role = it.role, email = it.email) },
@@ -86,7 +87,6 @@ fun ApplicationState.toApplicationDetail(id: Long, today: LocalDate = todayDate(
             .sortedBy { it.dueDate }
             .map { reminder -> ReminderSummary(reminder.message, reminder.dueDate.formatShort(), reminder.dueDate < today) },
         attachments = attachments.map { AttachmentSummary(id = it.id.value, kind = it.kind, fileName = it.fileName) },
-        provenance = lastProvenance,
     )
 }
 

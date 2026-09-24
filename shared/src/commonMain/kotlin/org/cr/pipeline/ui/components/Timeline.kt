@@ -22,11 +22,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
 
-data class TimelineEntry(val status: AppStatus, val date: String, val note: String, val current: Boolean = false)
+/** PL-034: [provenance] is who or what made *this* entry's change — not a summary of the whole
+ *  application, which can span history from both a device and an MCP client. */
+data class TimelineEntry(
+    val status: AppStatus,
+    val date: String,
+    val note: String,
+    val current: Boolean = false,
+    val provenance: EventProvenance = EventProvenance.Unknown,
+)
 
 val defaultTimeline = listOf(
     TimelineEntry(AppStatus.APPLIED, "Jun 3", "Referred by Dana W."),
@@ -53,6 +62,7 @@ fun Timeline(modifier: Modifier = Modifier, entries: List<TimelineEntry> = defau
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         StatusChip(entry.status, small = true)
                         MonoText(entry.date, size = 9.5f.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        ProvenanceIcon(entry.provenance)
                         if (entry.current) {
                             MonoText(
                                 "· current",

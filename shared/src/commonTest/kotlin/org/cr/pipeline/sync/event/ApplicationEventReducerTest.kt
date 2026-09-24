@@ -237,20 +237,23 @@ class ApplicationEventReducerTest {
     }
 
     @Test
-    fun `lastProvenance tracks the most recently applied event's provenance, not the first`() {
+    fun `each status history entry carries its own originating event's provenance, not a whole-application summary`() {
         val created = applyEvent(
             null,
             ApplicationCreated(applicationId, fullInput, EventProvenance.Device(DeviceId("device-1"))),
             today,
         )
-        assertEquals(EventProvenance.Device(DeviceId("device-1")), created.lastProvenance)
+        assertEquals(EventProvenance.Device(DeviceId("device-1")), created.statusHistory.single().provenance)
 
-        val edited = applyEvent(
+        val changed = applyEvent(
             created,
             StatusChanged(applicationId, AppStatus.OFFER, "Got an offer", EventProvenance.McpClient("mcp")),
             today,
         )
 
-        assertEquals(EventProvenance.McpClient("mcp"), edited.lastProvenance)
+        assertEquals(
+            listOf(EventProvenance.Device(DeviceId("device-1")), EventProvenance.McpClient("mcp")),
+            changed.statusHistory.map { it.provenance },
+        )
     }
 }

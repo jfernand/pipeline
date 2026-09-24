@@ -9,9 +9,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.cr.pipeline.model.AppStatus
+import org.cr.pipeline.model.AttachmentKind
 import org.cr.pipeline.sync.chain.DeviceId
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class ApplicationStateMappingTest {
     private val today = LocalDate(2026, 8, 25)
@@ -101,20 +103,29 @@ class ApplicationStateMappingTest {
     }
 
     @Test
-    fun `toJobApplication carries the state's lastProvenance through`() {
-        val application = state("a", "Cedar & Byrne")
-            .copy(lastProvenance = EventProvenance.McpClient("mcp"))
+    fun `toJobApplication reflects whether the application has any attachments`() {
+        val withAttachment = state("a", "Cedar & Byrne")
+            .copy(attachments = listOf(AttachmentRecord(AttachmentId("a1"), AttachmentKind.RESUME, "resume.pdf")))
             .toJobApplication(1L, today)
 
-        assertEquals(EventProvenance.McpClient("mcp"), application.provenance)
+        assertEquals(true, withAttachment.hasAttachments)
+        assertFalse(state("a", "Cedar & Byrne").toJobApplication(1L, today).hasAttachments)
     }
 
     @Test
-    fun `toApplicationDetail carries the state's lastProvenance through`() {
+    fun `toApplicationDetail carries each status history entry's own provenance through, not a whole-application summary`() {
         val detail = state("a", "Cedar & Byrne")
-            .copy(lastProvenance = EventProvenance.Device(DeviceId("device-1")))
+            .copy(
+                statusHistory = listOf(
+                    StatusHistoryRecord(AppStatus.APPLIED, today, "Applied", EventProvenance.Device(DeviceId("device-1"))),
+                    StatusHistoryRecord(AppStatus.SCREEN, today, "Phone screen", EventProvenance.McpClient("mcp")),
+                ),
+            )
             .toApplicationDetail(1L, today)
 
-        assertEquals(EventProvenance.Device(DeviceId("device-1")), detail.provenance)
+        assertEquals(
+            listOf(EventProvenance.Device(DeviceId("device-1")), EventProvenance.McpClient("mcp")),
+            detail.statusHistory.map { it.provenance },
+        )
     }
 }

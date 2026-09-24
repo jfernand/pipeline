@@ -36,7 +36,6 @@ import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.model.ApplicationDetail
 import org.cr.pipeline.model.ReminderSummary
-import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.ui.components.ContactsSection
 import org.cr.pipeline.ui.components.DetailSection
 import org.cr.pipeline.ui.components.Dot
@@ -46,10 +45,8 @@ import org.cr.pipeline.ui.components.PlIconButton
 import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.PostingLinkRow
-import org.cr.pipeline.ui.components.ProvenanceIcon
 import org.cr.pipeline.ui.components.StatusChip
 import org.cr.pipeline.ui.components.StatusHistorySection
-import org.cr.pipeline.ui.components.provenanceIdentifier
 import org.cr.pipeline.ui.components.rememberApplicationDetail
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
@@ -163,15 +160,6 @@ private fun HeaderInfo(detail: ApplicationDetail) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            if (detail.provenance != EventProvenance.Unknown) {
-                ProvenanceIcon(detail.provenance)
-                MonoText(
-                    provenanceIdentifier(detail.provenance),
-                    size = 9.5f.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
         }
     }
 }

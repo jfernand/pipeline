@@ -20,16 +20,17 @@ data class ApplicationDetail(
     val contacts: List<ContactSummary>,
     val reminders: List<ReminderSummary>,
     val attachments: List<AttachmentSummary>,
-    /** PL-034: who or what made the application's most recent change. */
-    val provenance: EventProvenance = EventProvenance.Unknown,
 )
 
-/** Oldest first; [current] marks the most recent entry (the application's present status). */
+/** Oldest first; [current] marks the most recent entry (the application's present status).
+ *  PL-034: [provenance] is who or what made *this* entry's change — not a summary of the whole
+ *  application, which can span history from both a device and an MCP client. */
 data class StatusHistoryEntry(
     val status: AppStatus,
     val date: String,
     val note: String,
     val current: Boolean,
+    val provenance: EventProvenance = EventProvenance.Unknown,
 )
 
 data class ContactSummary(

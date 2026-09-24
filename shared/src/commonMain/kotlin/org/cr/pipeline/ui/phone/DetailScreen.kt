@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.model.ApplicationDetail
-import org.cr.pipeline.sync.event.EventProvenance
 import org.cr.pipeline.ui.components.ContactsSection
 import org.cr.pipeline.ui.components.DetailSection
 import org.cr.pipeline.ui.components.DimmedOverlay
@@ -41,10 +40,8 @@ import org.cr.pipeline.ui.components.PlIconButton
 import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlTopBar
 import org.cr.pipeline.ui.components.PostingLinkRow
-import org.cr.pipeline.ui.components.ProvenanceIcon
 import org.cr.pipeline.ui.components.StatusChip
 import org.cr.pipeline.ui.components.StatusHistorySection
-import org.cr.pipeline.ui.components.provenanceIdentifier
 import org.cr.pipeline.ui.components.rememberApplicationDetail
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
@@ -147,17 +144,6 @@ private fun DetailHeader(detail: ApplicationDetail, onUpdate: () -> Unit) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-        if (detail.provenance != EventProvenance.Unknown) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                ProvenanceIcon(detail.provenance)
-                MonoText(
-                    provenanceIdentifier(detail.provenance),
-                    size = 9.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             PlPrimaryButton("Update status", onClick = onUpdate, height = 46.dp, modifier = Modifier.weight(1f))

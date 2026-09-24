@@ -6,40 +6,53 @@
   status: "Shipped",
   release: "MVP",
   summary: [
-    A small icon on each application card in the list — human (device) or AI (MCP client) —
-    showing at a glance who or what made the application's most recent change, with the full
-    identifier available in the detail view.
+    A small icon — human (device) or AI (MCP client) — next to each entry in an application's
+    status history, showing who or what made *that* change. A separate paperclip icon on the list
+    card marks whether the application has any attachments at all.
   ],
   purpose: [
     PL-033 gives every event an origin, but recorded provenance nobody can see doesn't change how
-    a user reads their list — an application edited by an agent overnight should look different
-    from one they edited themselves. This is the surface for that data: `AppCard` (PL-002) already
-    carries a small icon slot for the job-source glyph; provenance gets the same treatment.
+    a user reads their history — a status change made by an agent overnight should look different
+    from one made by hand. That's a fact about the event, though, not about the application as a
+    whole: an application's history routinely spans both a device and an MCP client, so no single
+    icon on a list card or a detail header can honestly stand for "who made this application."
+    The original shipped version tried anyway — this corrects it to the granularity provenance
+    actually has.
   ],
   description: [
-    `ApplicationState` gained `lastProvenance` — set once, in `applyEvent`, from whichever event
-    was just folded, rather than in each of its eight branches individually: every event type can
-    be the most recent one, so setting it in one place after the per-event-type `when` keeps a
-    future branch from being the one that forgets to. `toJobApplication`/`toApplicationDetail`
-    carry it onto `JobApplication`/`ApplicationDetail` as `provenance`, unchanged.
+    `ApplicationState.lastProvenance`, and the single `provenance` field it fed on `JobApplication`
+    and `ApplicationDetail`, are gone. In their place, `StatusHistoryRecord` (and its read-model
+    counterpart, `StatusHistoryEntry`) carry their own `provenance`, set in `applyEvent` from
+    whichever event actually created that history entry — `ApplicationCreated`, `ApplicationEdited`
+    (when it changes status), or `StatusChanged`. `StatusHistorySection`'s `Timeline` renders
+    `ProvenanceIcon` next to each entry's date, so a history mixing device and MCP-client edits
+    shows exactly that, entry by entry, instead of collapsing to whichever event happened to be
+    last.
 
-    `ProvenanceIcon` (a small shared composable, `Person` for `Device`, `SmartToy` for
-    `McpClient`, nothing for `Unknown`) and `provenanceIdentifier` (the full `deviceId`/`clientId`
-    text) live in one file so `AppCard`'s list-card icon and both detail headers' icon-plus-text
-    can't drift the way three separate copies could. `AppCard`'s own `sourceIcon` — a similar
-    per-source icon lookup for the job-source glyph the summary references — turned out to be
-    unused dead code once actually checked; left alone, out of scope here.
+    `AppCard`'s slot that used to carry a provenance icon now shows a paperclip
+    (`Icons.Filled.AttachFile`) when the application has any attachments — `JobApplication` gained
+    `hasAttachments`, a real application-level fact, replacing the field that couldn't honestly be
+    one. Both phone and tablet detail headers lost their single provenance icon+identifier line
+    entirely; the per-event icons in the status history below are where that information actually
+    belongs now, and `provenanceIdentifier` (the full `deviceId`/`clientId` text) was dead code
+    once its only two callers were gone, so it's gone too.
 
-    Demo/seed data (`DemoSeedingEventLog`) always attributes `Device`, since it's seeded through
-    the same repository path a real device edit would use — the indicator only ever shows the
-    `McpClient` glyph on data an MCP tool actually touched.
+    Demo/seed data (`DemoSeedingEventLog`) still always attributes `Device`, unchanged — the
+    indicator only ever shows the `McpClient` glyph on history an MCP tool actually created.
   ],
   implementation: (
-    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationState.kt, ApplicationEventReducer.kt — lastProvenance",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationStateMapping.kt — toJobApplication/toApplicationDetail pass it through",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/model/JobApplication.kt, ApplicationDetail.kt — the provenance field",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/components/ProvenanceIndicator.kt — ProvenanceIcon, provenanceIdentifier",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/components/AppCard.kt, ui/tablet/DetailPane.kt, ui/phone/DetailScreen.kt — where each is shown",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationState.kt — StatusHistoryRecord.provenance",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationEventReducer.kt — sets it per history-appending branch, from that event's own provenance",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/sync/event/ApplicationStateMapping.kt — carries it onto StatusHistoryEntry; hasAttachments onto JobApplication",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/model/JobApplication.kt — hasAttachments; ApplicationDetail.kt — StatusHistoryEntry.provenance",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/components/ProvenanceIndicator.kt — ProvenanceIcon, now per-event only",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/components/Timeline.kt, DetailSections.kt — ProvenanceIcon next to each status-history entry",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/components/AppCard.kt — the paperclip, gated on hasAttachments",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/tablet/DetailPane.kt, ui/phone/DetailScreen.kt — the removed header provenance line",
   ),
-  related: (("PL-033", [Event Provenance]), ("PL-002", [Browse Applications (List & Detail)])),
+  related: (
+    ("PL-033", [Event Provenance]),
+    ("PL-002", [Browse Applications (List & Detail)]),
+    ("PL-018", [Document Attachments (Resume & Cover Letter)]),
+  ),
 )

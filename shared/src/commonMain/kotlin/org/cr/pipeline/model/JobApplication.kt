@@ -5,7 +5,6 @@
 package org.cr.pipeline.model
 
 import androidx.compose.ui.graphics.Color
-import org.cr.pipeline.sync.event.EventProvenance
 
 /** Serialized by name into the event log (`ApplicationInput.status`/`StatusChanged.status` inside
  *  `ApplicationEvent`), which is permanent — append-only, never remove or rename an entry. There's
@@ -33,6 +32,7 @@ data class JobApplication(
     val activity: Pair<String, String>,
     val overdueDays: Int? = null,
     val source: String? = null,
-    /** PL-034: who or what made the application's most recent change. */
-    val provenance: EventProvenance = EventProvenance.Unknown,
+    /** Whether this application has any attachments at all — an application-level fact, unlike
+     *  provenance (PL-034), which belongs to individual events, not the application as a whole. */
+    val hasAttachments: Boolean = false,
 )
