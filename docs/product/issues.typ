@@ -30,14 +30,6 @@
     event, slide-to-reveal-trash-can on the phone list (`ui/components/AppCard.kt`), a context
     menu or the Delete key where the platform supports one.
   ]),
-  (id: "navrail-fake-synced", pl: ("PL-003",), num: 1, title: [Nav rail always shows "Synced", even with no sync set up], body: [
-    `NavRail.kt`'s footer unconditionally renders a green `Dot` and `MonoText("Synced", ...)` —
-    hardcoded, not read from any real state. Since PL-003's pairing/sync scaffold doesn't actually
-    do anything yet (no pairing has ever happened, no event has ever crossed a network), this tells
-    every user their device is synced when nothing is even configured to try. Should hide the
-    marker entirely until a device has actually been paired, then reflect real sync state once
-    PL-003/PL-025 exist to report it.
-  ]),
 )
 
 // Resolved entries, moved here verbatim from `issues` rather than edited or summarized — this is
@@ -97,6 +89,14 @@
   (id: "overdue-badge-align", pl: ("PL-002",), num: 1, title: [Overdue badge alignment], body: [
     `OverdueBadge` (`StatusChip.kt`), as rendered next to the status chip on `AppCard`, should be
     smaller, and just tab over the top edge of the status chip it sits beside.
+  ]),
+  (id: "navrail-fake-synced", pl: ("PL-003",), num: 1, title: [Nav rail always shows "Synced", even with no sync set up], body: [
+    `NavRail.kt`'s footer unconditionally renders a green `Dot` and `MonoText("Synced", ...)` —
+    hardcoded, not read from any real state. Since PL-003's pairing/sync scaffold doesn't actually
+    do anything yet (no pairing has ever happened, no event has ever crossed a network), this tells
+    every user their device is synced when nothing is even configured to try. Should hide the
+    marker entirely until a device has actually been paired, then reflect real sync state once
+    PL-003/PL-025 exist to report it.
   ]),
 )
 

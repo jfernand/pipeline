@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.58",
+  revision: "1.59",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -319,6 +319,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     header-level summary. `AppCard`'s slot that used to carry that icon now shows a paperclip when
     the application has any attachments (`JobApplication.hasAttachments`) — a fact that actually
     is true of the whole application, unlike who made its most recent edit.],
+  [1.59], [2026-09-23], [Fixed PL-003-001: `NavRail`'s footer no longer shows a hardcoded green
+    "Synced" dot. Nothing in PL-003's pairing scaffold syncs anything yet, so there was no real
+    state behind the claim — the marker is gone entirely until pairing is real and has something
+    true to report.],
 )
 
 #part(1, "Core Application",

@@ -34,8 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.cr.pipeline.BuildInfo
-import org.cr.pipeline.model.AppStatus
-import org.cr.pipeline.ui.components.Dot
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
 import org.cr.pipeline.ui.theme.PlColors
@@ -84,9 +82,11 @@ fun NavRail(
             DestinationIcon(NavDestination.DEVTOOLS, active == NavDestination.DEVTOOLS, onSelect)
         }
         DestinationIcon(NavDestination.SETTINGS, active == NavDestination.SETTINGS, onSelect)
+        // No "Synced" marker here (PL-003-001): nothing in PL-003's pairing scaffold actually
+        // syncs anything yet, so there's no real state to show. Once pairing is real, this is
+        // where a genuine sync-status indicator belongs — hidden entirely until a device has
+        // actually been paired, not a hardcoded claim that one has.
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Dot(color = AppStatus.OFFER.color)
-            MonoText("Synced", size = 8.sp)
             MonoText(
                 BuildInfo.GIT_DESCRIBE,
                 size = 6.5f.sp,
