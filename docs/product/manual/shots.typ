@@ -106,6 +106,36 @@
       phone layout takes over. Capture the whole window.]),
 )
 
+// The deep link that lands on each shot's screen (chapter 9's route table), so a
+// shot can be set up by opening a link instead of clicking through the app. Only
+// pipeline://app/{id} is shipped; every other link is Planned (PL-041). `none`
+// marks a shot whose state no link can reach — a gesture, a window size, an
+// in-progress edit — and still needs the manual steps in its setup.
+#let shot-links = (
+  "SS-01": "pipeline://list",
+  "SS-02": "pipeline://list",
+  "SS-03": none,
+  "SS-04": "pipeline://list?q=eng&status=interviewing&exclude=rejected",
+  "SS-05": "pipeline://app/new",
+  "SS-06": "pipeline://app/{id}/edit",
+  "SS-07": "pipeline://app/{id}/edit",
+  "SS-08": "pipeline://app/{id}",
+  "SS-09": "pipeline://app/{id}",
+  "SS-10": "pipeline://app/{id}/status",
+  "SS-11": "pipeline://app/{id}/contacts/new",
+  "SS-12": "pipeline://app/{id}",
+  "SS-13": "pipeline://app/{id}",
+  "SS-14": "pipeline://list",
+  "SS-15": "pipeline://app/{id}/delete",
+  "SS-16": "pipeline://followups",
+  "SS-17": "pipeline://settings",
+  "SS-18": "pipeline://settings",
+  "SS-19": "pipeline://settings",
+  "SS-20": "pipeline://devtools",
+  "SS-21": "pipeline://sync",
+  "SS-22": "pipeline://list",
+)
+
 #let _fig = counter("manual-figure")
 
 #let _placeholder(id, s, w, h) = box(
@@ -151,6 +181,12 @@
   ..shots.pairs().map(((id, s)) => (
     text(font: mono-font, size: 8.5pt)[#id#if id in available [ ✓]],
     [#s.platform #linebreak() #text(size: 7.5pt, fill: ink-faint)[#s.kind]],
-    [*#s.subject* #linebreak() #text(fill: ink-muted)[#s.setup]],
+    [*#s.subject* #linebreak() #text(fill: ink-muted)[#s.setup] #linebreak()
+      #text(font: mono-font, size: 7.5pt, fill: ink-faint)[#{
+        let l = shot-links.at(id)
+        if l == none { "Link: none — manual steps only" }
+        else if l == "pipeline://app/{id}" { "Link: " + l }
+        else { "Link: " + l + " (planned)" }
+      }]],
   )).flatten(),
 )

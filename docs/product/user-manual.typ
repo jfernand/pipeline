@@ -526,6 +526,39 @@ handler for `pipeline://` links — so clicking one elsewhere may do nothing.
 
 #xref("PL-009")[In-App Navigation]
 
+That is the only link Pipeline answers today. Every other screen is reached by clicking through
+the app. The table lists the full set of links Pipeline needs — one for every screen and sheet in
+this manual — with the one that works marked Shipped and the rest Planned.
+
+#xref("PL-041")[Routes and Deep Links]
+
+#{
+show raw: set text(size: 7.5pt)
+data-table(
+  columns: (auto, auto, 1fr),
+  header: ("Link", "Status", "Opens"),
+  [`pipeline://app/{id}`], [Shipped], [An application's detail screen.],
+  [`pipeline://list`], [Planned], [The applications list, unfiltered.],
+  [`pipeline://list?…`], [Planned], [The list with a search and status filters applied:
+    `q` for the search text, `status` for required chips, `exclude` for excluded ones, the last
+    two comma-separated. SS-04 in Appendix C has a worked example.],
+  [`pipeline://app/new`], [Planned], [The New application form.],
+  [`pipeline://app/{id}/edit`], [Planned], [The Edit application form.],
+  [`pipeline://app/{id}/status`], [Planned], [The detail screen with the Update status sheet
+    open.],
+  [`pipeline://app/{id}/contacts/new`], [Planned], [The detail screen with the Add contact sheet
+    open.],
+  [`pipeline://app/{id}/delete`], [Planned], [The detail screen with the delete confirmation
+    open. Opening it never deletes anything by itself.],
+  [`pipeline://followups`], [Planned], [Follow-ups (desktop layout; the list on the phone).],
+  [`pipeline://settings`], [Planned], [Settings.],
+  [`pipeline://settings/pair`], [Planned], [Pair a device.],
+  [`pipeline://sync`], [Planned], [The Sync screen.],
+  [`pipeline://devtools`], [Planned], [Dev Tools, when developer mode is on; Settings
+    otherwise.],
+)
+}
+
 Separately, Pipeline remembers what you were looking at. Close it on an application's detail and
 it reopens on that application; close it on the list and it reopens on the list. Settings, the
 forms and Dev Tools don't count — you'll land back on whichever list or application you visited
