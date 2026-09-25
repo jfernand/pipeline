@@ -213,7 +213,7 @@
 #let danger-block(body) = block(
   width: 100%, above: 14pt, below: 14pt,
   fill: panel,
-  stroke: (paint: danger, thickness: rule-w, left: 1.5pt + danger),
+  stroke: (rest: rule-w + danger, left: 1.5pt + danger),
   inset: (x: 11pt, y: 9pt),
 )[
   #label("Danger", color: danger, size: 7pt)
@@ -228,7 +228,7 @@
   block(
     width: 100%, above: 16pt, below: if caption == none { 16pt } else { 5pt },
     fill: panel,
-    stroke: (paint: hairline, thickness: rule-w, left: 1.5pt + amber),
+    stroke: (rest: rule-w + hairline, left: 1.5pt + amber),
     inset: (x: 12pt, y: 10pt),
     text(font: mono-font, size: 8.5pt, fill: ink-body, body),
   )

@@ -93,6 +93,10 @@ typst compile pipeline-features.typ                     # standard PDF
 typst compile --input print=true pipeline-features.typ   # hatch fill instead of solid ink, for printing
 ```
 
+The user manual (PL-026) builds the same way, from `user-manual.typ`. Its screenshots are
+registered in `manual/shots.typ`: each one renders as a labelled placeholder until its PNG is saved
+under `manual/screenshots/` and its ID added to `available` there.
+
 The Data Model appendix draws its diagram with `@preview/cetz` — the one non-vendored dependency
 in this build. Typst fetches and caches it locally on first compile, so that first run needs
 network access; every run after that is offline again, same as the rest of the catalog.

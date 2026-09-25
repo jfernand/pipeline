@@ -22,6 +22,7 @@ captures
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 /docs/product/pipeline-features.pdf
+/docs/product/user-manual.pdf
 /docs/product/reports/*.pdf
 /restart
 /desktopApp/release-artifacts/
