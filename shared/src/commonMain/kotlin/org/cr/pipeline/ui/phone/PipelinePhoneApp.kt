@@ -41,6 +41,7 @@ import org.cr.pipeline.ui.nav.ListRoute
 import org.cr.pipeline.ui.nav.PairRoute
 import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.nav.SyncRoute
+import org.cr.pipeline.ui.nav.UpdateStatusRoute
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.ContactSheet
 import org.cr.pipeline.ui.screens.DeleteConfirmSheet
@@ -115,6 +116,19 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<AddEditRoute>()
                 AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
+            }
+            // See the matching comment in PipelineTabletApp.
+            composable<UpdateStatusRoute>(
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "pipeline://app/{id}/status" },
+                    navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/{id}/status" },
+                ),
+            ) { backStackEntry ->
+                val route = backStackEntry.toRoute<UpdateStatusRoute>()
+                LaunchedEffect(route.id) {
+                    navController.navigate(DetailRoute(route.id)) { popUpTo<UpdateStatusRoute> { inclusive = true } }
+                    sheetApplicationId = route.id
+                }
             }
             composable<SettingsRoute> {
                 SettingsScreen(

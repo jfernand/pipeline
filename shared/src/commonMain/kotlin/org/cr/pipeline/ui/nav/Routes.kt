@@ -23,6 +23,15 @@ data class ListRoute(val q: String? = null, val status: String? = null, val excl
 @Serializable
 data class DetailRoute(val id: Long)
 
+/**
+ * Deep-link-only (PL-041): `pipeline://app/{id}/status`. Nothing inside the app navigates here —
+ * the Update status sheet is shell state, not a destination — so this route's destination just
+ * redirects to [DetailRoute] with the sheet open, leaving the back stack exactly as tapping
+ * Update status by hand would.
+ */
+@Serializable
+data class UpdateStatusRoute(val id: Long)
+
 /** [id] is null when creating a new application, set when editing an existing one. */
 @Serializable
 data class AddEditRoute(val id: Long? = null)

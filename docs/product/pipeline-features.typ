@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.66",
+  revision: "1.67",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -366,6 +366,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     Edit form. The form now closes itself when its id resolves to nothing — unknown or deleted —
     since a link can name either, and saving the blank form would have appended an
     `ApplicationEdited` to a deleted application's history.],
+  [1.67], [2026-09-26], [PL-009 gains `pipeline://app/{id}/status`: the application's detail
+    screen with the Update status sheet open. The sheet is shell state rather than a destination,
+    so the link lands on a new deep-link-only `UpdateStatusRoute`, whose destination redirects to
+    `DetailRoute` and opens the sheet — leaving the back stack as tapping Update status would.],
 )
 
 #part(1, "Core Application",

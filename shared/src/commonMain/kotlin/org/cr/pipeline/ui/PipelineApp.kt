@@ -46,6 +46,7 @@ import org.cr.pipeline.ui.nav.ListRoute
 import org.cr.pipeline.ui.nav.PairRoute
 import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.nav.SyncRoute
+import org.cr.pipeline.ui.nav.UpdateStatusRoute
 import org.cr.pipeline.ui.phone.PairingScreen
 import org.cr.pipeline.ui.phone.SettingsScreen
 import org.cr.pipeline.ui.screens.AddEditScreen
@@ -153,6 +154,22 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                 ) { backStackEntry ->
                     val route = backStackEntry.toRoute<AddEditRoute>()
                     AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
+                }
+                // PL-041: see UpdateStatusRoute. The sheet state lives out here, above the
+                // NavHost, so it survives the redirect; an unknown or deleted id finds no
+                // application and simply shows no sheet, same as DetailRoute shows no detail.
+                composable<UpdateStatusRoute>(
+                    deepLinks = listOf(
+                        navDeepLink { uriPattern = "pipeline://app/{id}/status" },
+                        navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/{id}/status" },
+                    ),
+                ) { backStackEntry ->
+                    val route = backStackEntry.toRoute<UpdateStatusRoute>()
+                    LaunchedEffect(route.id) {
+                        lastViewedId = route.id
+                        navController.navigate(DetailRoute(route.id)) { popUpTo<UpdateStatusRoute> { inclusive = true } }
+                        statusSheetApplicationId = route.id
+                    }
                 }
                 composable<SyncRoute> { TabletSyncContent() }
                 composable<FollowUpsRoute> {

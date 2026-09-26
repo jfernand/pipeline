@@ -532,7 +532,9 @@ list with "eng" in the search field, Interviewing required and Rejected excluded
 written as on screen or in lower case (`interviewing`, `phone-screen`); a name Pipeline doesn't
 recognise is ignored. A third link, `pipeline://app/new`, opens the New application form, and
 `pipeline://app/42/edit` opens application 42's Edit form. An edit link for an application that
-doesn't exist, or has been deleted, opens nothing.
+doesn't exist, or has been deleted, opens nothing. `pipeline://app/42/status` opens application
+42 with the Update status sheet already up; cancel it and you're on the application's detail
+screen, as if you'd tapped *Update status* yourself.
 
 Those are the only links Pipeline answers today; every other screen is reached by clicking
 through the app. The table lists the full set of links Pipeline needs — one for every screen and
@@ -552,7 +554,7 @@ data-table(
     two comma-separated. SS-04 in Appendix C has a worked example.],
   [`pipeline://app/new`], [Shipped], [The New application form.],
   [`pipeline://app/{id}/edit`], [Shipped], [The Edit application form.],
-  [`pipeline://app/{id}/status`], [Planned], [The detail screen with the Update status sheet
+  [`pipeline://app/{id}/status`], [Shipped], [The detail screen with the Update status sheet
     open.],
   [`pipeline://app/{id}/contacts/new`], [Planned], [The detail screen with the Add contact sheet
     open.],
