@@ -26,6 +26,14 @@ fun gitOutput(vararg args: String): String? {
 val gitVersionCode = gitOutput("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
 val gitVersionName = gitOutput("describe", "--tags", "--always", "--dirty") ?: "unknown"
 
+// Release signing comes from the environment — CI secrets (see .github/workflows/ci.yml's apk
+// leg), or a local shell that exports the same four variables — never from a file in the repo.
+// With PIPELINE_KEYSTORE_FILE unset, release builds stay unsigned exactly as before, so local and
+// `build`-job builds are unaffected. providers.environmentVariable rather than System.getenv so the
+// configuration cache knows these are inputs.
+fun env(name: String): String? = providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
+val releaseKeystore = env("PIPELINE_KEYSTORE_FILE")?.let { file(it) }
+
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11
@@ -52,6 +60,16 @@ android {
         versionCode = gitVersionCode
         versionName = gitVersionName
     }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = env("PIPELINE_KEYSTORE_PASSWORD")
+                keyAlias = env("PIPELINE_KEY_ALIAS")
+                keyPassword = env("PIPELINE_KEY_PASSWORD")
+            }
+        }
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -59,6 +77,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
