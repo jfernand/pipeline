@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.65",
+  revision: "1.66",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -362,6 +362,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
   [1.65], [2026-09-26], [PL-009 gains `pipeline://app/new`, landing on the New application form —
     the next of PL-041's planned routes. Registered as an exact pattern on `AddEditRoute`; it
     can't be mistaken for `pipeline://app/{id}`, whose id must parse as a number.],
+  [1.66], [2026-09-26], [PL-009 gains `pipeline://app/{id}/edit`, landing on that application's
+    Edit form. The form now closes itself when its id resolves to nothing — unknown or deleted —
+    since a link can name either, and saving the blank form would have appended an
+    `ApplicationEdited` to a deleted application's history.],
 )
 
 #part(1, "Core Application",

@@ -82,16 +82,23 @@ fun AddEditScreen(
 
     LaunchedEffect(applicationId) {
         if (applicationId == null) return@LaunchedEffect
-        repository.getApplicationInput(applicationId)?.let { input ->
-            company = input.company
-            role = input.role
-            status = input.status
-            dateApplied = input.dateApplied
-            nextActionDate = input.nextActionDate
-            postingUrl = input.postingUrl.orEmpty()
-            source = input.source
-            notes = input.notes
+        // PL-041: pipeline://app/{id}/edit can name any id — one that never existed, or one
+        // that's since been deleted. There's nothing to edit either way, and saving the blank
+        // form would append an ApplicationEdited to a deleted application's history, so close
+        // instead of showing it.
+        val input = repository.getApplicationInput(applicationId)
+        if (input == null) {
+            onClose()
+            return@LaunchedEffect
         }
+        company = input.company
+        role = input.role
+        status = input.status
+        dateApplied = input.dateApplied
+        nextActionDate = input.nextActionDate
+        postingUrl = input.postingUrl.orEmpty()
+        source = input.source
+        notes = input.notes
     }
 
     fun save() {

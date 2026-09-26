@@ -137,15 +137,18 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                         onDelete = { deleteSheetApplicationId = route.id },
                     )
                 }
-                // PL-041: an exact pattern, not navDeepLink<AddEditRoute>(basePath) — that would
+                // PL-041: explicit patterns, not navDeepLink<AddEditRoute>(basePath) — that would
                 // generate pipeline://app?id={id}, not the pipeline://app/new the route table
                 // names. "new" can't collide with DetailRoute's pipeline://app/{id}: an id that
                 // doesn't parse as a Long never matches it, and an exact pattern outranks an
                 // argument pattern anyway. No id argument, so AddEditRoute.id stays null: create.
+                // /edit patterns fill id from the path instead: edit that application.
                 composable<AddEditRoute>(
                     deepLinks = listOf(
                         navDeepLink { uriPattern = "pipeline://app/new" },
                         navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/new" },
+                        navDeepLink { uriPattern = "pipeline://app/{id}/edit" },
+                        navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/{id}/edit" },
                     ),
                 ) { backStackEntry ->
                     val route = backStackEntry.toRoute<AddEditRoute>()

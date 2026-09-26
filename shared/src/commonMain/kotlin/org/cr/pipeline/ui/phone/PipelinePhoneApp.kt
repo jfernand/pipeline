@@ -104,11 +104,13 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                     onDelete = { deleteSheetApplicationId = route.id },
                 )
             }
-            // See the matching comment in PipelineTabletApp on why this is an exact pattern.
+            // See the matching comment in PipelineTabletApp on why these are explicit patterns.
             composable<AddEditRoute>(
                 deepLinks = listOf(
                     navDeepLink { uriPattern = "pipeline://app/new" },
                     navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/new" },
+                    navDeepLink { uriPattern = "pipeline://app/{id}/edit" },
+                    navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/{id}/edit" },
                 ),
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<AddEditRoute>()
