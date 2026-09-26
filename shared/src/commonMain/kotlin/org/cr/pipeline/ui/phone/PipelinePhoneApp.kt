@@ -69,7 +69,12 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
 
     Box(modifier.fillMaxSize().statusBarsPadding()) {
         NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
-            composable<ListRoute> {
+            composable<ListRoute>(
+                deepLinks = listOf(
+                    navDeepLink<ListRoute>(basePath = "pipeline://list"),
+                    navDeepLink<ListRoute>(basePath = "https://pipeline.casaroja.es/list"),
+                ),
+            ) {
                 ListScreen(
                     applications = applications,
                     dimmed = anySheetOpen,

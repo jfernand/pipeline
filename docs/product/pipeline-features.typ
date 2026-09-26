@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.62",
+  revision: "1.63",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -351,6 +351,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     name substring search rather than by matching the real window's title); the actual visible
     window reports `org-cr-pipeline-MainKt`, not the app/package identity string that seemed like
     the obvious guess.],
+  [1.63], [2026-09-26], [PL-009 gains a second deep link, `pipeline://list` (and
+    `https://pipeline.casaroja.es/list`), landing on the applications list — the first of the
+    routes PL-041 plans beyond `pipeline://app/{id}`. On tablet, the nav rail's highlight now
+    follows a landing on the list rather than only the rail's own clicks.],
 )
 
 #part(1, "Core Application",

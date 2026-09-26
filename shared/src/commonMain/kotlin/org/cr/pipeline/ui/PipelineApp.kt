@@ -101,7 +101,12 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
         )
         Box(Modifier.weight(1f).fillMaxHeight()) {
             NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
-                composable<ListRoute> {
+                composable<ListRoute>(
+                    deepLinks = listOf(
+                        navDeepLink<ListRoute>(basePath = "pipeline://list"),
+                        navDeepLink<ListRoute>(basePath = "https://pipeline.casaroja.es/list"),
+                    ),
+                ) {
                     TabletListContent(
                         applications = applications,
                         selectedId = lastViewedId,
@@ -176,7 +181,12 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
             // leaves the last-saved List/Detail screen untouched rather than clobbering it.
             LaunchedEffect(currentEntry) {
                 when {
-                    currentEntry?.destination?.hasRoute<ListRoute>() == true -> preferencesStore.setLastDetailApplicationId(null)
+                    // A pipeline://list deep link can land here from any rail destination, so the
+                    // rail's highlight has to follow the route, not only the rail's own clicks.
+                    currentEntry?.destination?.hasRoute<ListRoute>() == true -> {
+                        activeRailDestination = NavDestination.LIST
+                        preferencesStore.setLastDetailApplicationId(null)
+                    }
                     currentEntry?.destination?.hasRoute<DetailRoute>() == true ->
                         preferencesStore.setLastDetailApplicationId(currentEntry?.toRoute<DetailRoute>()?.id)
                 }

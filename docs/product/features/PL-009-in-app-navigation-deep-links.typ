@@ -7,9 +7,10 @@
   release: "MVP",
   summary: [
     One type-safe `androidx.navigation` graph, shared by phone and tablet: List, Detail, Add/Edit,
-    Settings, Pair. One deep-link scheme, `pipeline://app/{id}` — Android intent filters, desktop
-    CLI-arg handling, `xdg-open` registration on Linux. The OS can hand the app a link and land on
-    an application's detail screen.
+    Settings, Pair. One deep-link scheme, two routes on it: `pipeline://app/{id}` for an
+    application's detail screen and `pipeline://list` for the applications list — Android intent
+    filters, desktop CLI-arg handling, `xdg-open` registration on Linux. The OS can hand the app a
+    link and land on either.
   ],
   purpose: [
     This is what makes "jump to application #8" possible: first as a link from the OS — a
@@ -18,8 +19,8 @@
   implementation: (
     "shared/src/commonMain/kotlin/org/cr/pipeline/ui/nav/Routes.kt — type-safe routes",
     "shared/src/commonMain/kotlin/org/cr/pipeline/App.kt — shared NavHostController, initialDeepLink handling",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/PipelinePhoneApp.kt, ui/PipelineApp.kt — navDeepLink<DetailRoute>(basePath = \"pipeline://app\")",
-    "androidApp/src/main/AndroidManifest.xml — intent filter for pipeline://app",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/PipelinePhoneApp.kt, ui/PipelineApp.kt — navDeepLink<DetailRoute>(basePath = \"pipeline://app\"), navDeepLink<ListRoute>(basePath = \"pipeline://list\")",
+    "androidApp/src/main/AndroidManifest.xml — intent filter for pipeline://app and pipeline://list",
     "desktopApp/src/main/kotlin/org/cr/pipeline/main.kt — cold-start deep link from CLI args",
     "shared/src/jvmMain/kotlin/org/cr/pipeline/platform/linux/LinuxUrlSchemeRegistrationManager.kt — xdg-open scheme registration",
   ),

@@ -26,6 +26,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data android:scheme="pipeline" android:host="app"/>
+                <data android:scheme="pipeline" android:host="list"/>
             </intent-filter>
             <!-- Real Android App Link: autoVerify here actually does something, since Android can
                  fetch https://pipeline.casaroja.es/.well-known/assetlinks.json to confirm we own

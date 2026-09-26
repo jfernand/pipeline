@@ -526,9 +526,10 @@ handler for `pipeline://` links — so clicking one elsewhere may do nothing.
 
 #xref("PL-009")[In-App Navigation]
 
-That is the only link Pipeline answers today. Every other screen is reached by clicking through
-the app. The table lists the full set of links Pipeline needs — one for every screen and sheet in
-this manual — with the one that works marked Shipped and the rest Planned.
+A second link, `pipeline://list`, opens the applications list. Those two are the only links
+Pipeline answers today; every other screen is reached by clicking through the app. The table
+lists the full set of links Pipeline needs — one for every screen and sheet in this manual — with
+the ones that work marked Shipped and the rest Planned.
 
 #xref("PL-041")[Routes and Deep Links]
 
@@ -538,7 +539,7 @@ data-table(
   columns: (auto, auto, 1fr),
   header: ("Link", "Status", "Opens"),
   [`pipeline://app/{id}`], [Shipped], [An application's detail screen.],
-  [`pipeline://list`], [Planned], [The applications list, unfiltered.],
+  [`pipeline://list`], [Shipped], [The applications list, unfiltered.],
   [`pipeline://list?…`], [Planned], [The list with a search and status filters applied:
     `q` for the search text, `status` for required chips, `exclude` for excluded ones, the last
     two comma-separated. SS-04 in Appendix C has a worked example.],
