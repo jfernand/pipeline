@@ -172,7 +172,12 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     val route = backStackEntry.toRoute<AddEditRoute>()
                     AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
                 }
-                composable<SyncRoute> { TabletSyncContent() }
+                composable<SyncRoute>(
+                    deepLinks = listOf(
+                        navDeepLink<SyncRoute>(basePath = "pipeline://sync"),
+                        navDeepLink<SyncRoute>(basePath = "https://pipeline.casaroja.es/sync"),
+                    ),
+                ) { TabletSyncContent() }
                 composable<FollowUpsRoute>(
                     deepLinks = listOf(
                         navDeepLink<FollowUpsRoute>(basePath = "pipeline://followups"),
@@ -186,11 +191,39 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                         },
                     )
                 }
-                composable<SettingsRoute> {
+                composable<SettingsRoute>(
+                    deepLinks = listOf(
+                        navDeepLink<SettingsRoute>(basePath = "pipeline://settings"),
+                        navDeepLink<SettingsRoute>(basePath = "https://pipeline.casaroja.es/settings"),
+                    ),
+                ) {
                     SettingsScreen(onBack = { navController.popBackStack() }, onPair = { navController.navigate(PairRoute) })
                 }
-                composable<PairRoute> { PairingScreen(onBack = { navController.popBackStack() }) }
-                composable<DevToolsRoute> { DevToolsContent() }
+                composable<PairRoute>(
+                    deepLinks = listOf(
+                        navDeepLink<PairRoute>(basePath = "pipeline://settings/pair"),
+                        navDeepLink<PairRoute>(basePath = "https://pipeline.casaroja.es/settings/pair"),
+                    ),
+                ) { PairingScreen(onBack = { navController.popBackStack() }) }
+                composable<DevToolsRoute>(
+                    deepLinks = listOf(
+                        navDeepLink<DevToolsRoute>(basePath = "pipeline://devtools"),
+                        navDeepLink<DevToolsRoute>(basePath = "https://pipeline.casaroja.es/devtools"),
+                    ),
+                ) {
+                    // PL-041: pipeline://devtools can arrive with developer mode off, when the
+                    // rail doesn't even show Dev Tools; land on Settings instead, where the
+                    // Developer mode switch is. currentPreferences, not the collected
+                    // `preferences`, which reads the default (off) until the store's first
+                    // emission and would bounce every cold-start link.
+                    if (preferencesStore.currentPreferences.developerMode) {
+                        DevToolsContent()
+                    } else {
+                        LaunchedEffect(Unit) {
+                            navController.navigate(SettingsRoute) { popUpTo<DevToolsRoute> { inclusive = true } }
+                        }
+                    }
+                }
             }
             // Runs in the same composition pass as the NavHost above (both are children of this
             // Box), so navController.graph is guaranteed to already be set here — unlike calling
@@ -221,11 +254,19 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
             // leaves the last-saved List/Detail screen untouched rather than clobbering it.
             LaunchedEffect(currentEntry) {
                 when {
-                    // A pipeline://list or pipeline://followups deep link can land from any rail
-                    // destination, so the rail's highlight has to follow the route, not only the
-                    // rail's own clicks. Follow-ups stays out of PL-021's last-route memory.
+                    // A deep link can land on any rail destination from any other, so the rail's
+                    // highlight has to follow the route, not only the rail's own clicks (Pair
+                    // counts as Settings, which it opens from). Only List and Detail touch
+                    // PL-021's last-route memory; the rest stay transient.
                     currentEntry?.destination?.hasRoute<FollowUpsRoute>() == true ->
                         activeRailDestination = NavDestination.FOLLOWUPS
+                    currentEntry?.destination?.hasRoute<SyncRoute>() == true ->
+                        activeRailDestination = NavDestination.SYNC
+                    currentEntry?.destination?.hasRoute<SettingsRoute>() == true ||
+                        currentEntry?.destination?.hasRoute<PairRoute>() == true ->
+                        activeRailDestination = NavDestination.SETTINGS
+                    currentEntry?.destination?.hasRoute<DevToolsRoute>() == true ->
+                        activeRailDestination = NavDestination.DEVTOOLS
                     currentEntry?.destination?.hasRoute<ListRoute>() == true -> {
                         activeRailDestination = NavDestination.LIST
                         preferencesStore.setLastDetailApplicationId(null)

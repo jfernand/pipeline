@@ -514,62 +514,57 @@ status history (chapter 4), so you can always tell its work from yours.
 // =============================================================================
 = Links and Picking Up Where You Left Off
 
-Every application has a link of the form
+Every screen and sheet in this manual has a link that opens it directly. An application's is
 
 #listing[`pipeline://app/42`]
 
 where 42 is the application's id (`list_applications` reports it). Opening one — from a note, a
-calendar entry, a chat — launches Pipeline straight onto that application's detail screen. On
-Android this works as soon as Pipeline is installed. On the desktop, Pipeline opens the link when
-it's launched with one, but it doesn't yet register itself with the operating system as the
-handler for `pipeline://` links — so clicking one elsewhere may do nothing.
+calendar entry, a chat — launches Pipeline straight onto that application's detail screen. The
+table below lists every link. A few behave in ways worth knowing:
 
 #xref("PL-009")[In-App Navigation]
 
-A second link, `pipeline://list`, opens the applications list — and can open it already
-searched and filtered: `pipeline://list?q=eng&status=interviewing&exclude=rejected` lands on the
-list with "eng" in the search field, Interviewing required and Rejected excluded. Statuses can be
-written as on screen or in lower case (`interviewing`, `phone-screen`); a name Pipeline doesn't
-recognise is ignored. A third link, `pipeline://app/new`, opens the New application form, and
-`pipeline://app/42/edit` opens application 42's Edit form. An edit link for an application that
-doesn't exist, or has been deleted, opens nothing. `pipeline://app/42?sheet=status` opens
-application 42 with the Update status sheet already up; cancel it and you're on the application's detail
-screen, as if you'd tapped *Update status* yourself. `?sheet=contact` does the same with the Add
-contact sheet, and `?sheet=delete` with the delete confirmation — which still only asks: nothing
-is deleted unless you tap *Delete*.
-`pipeline://followups` opens Follow-ups on the desktop layout, and the list — Needs follow-up
-at the top — on the phone.
+- *Filtered lists.* `pipeline://list?q=eng&status=interviewing&exclude=rejected` opens the list
+  with "eng" in the search field, Interviewing required and Rejected excluded. Statuses can be
+  written as on screen or in lower case (`interviewing`, `phone-screen`); a name Pipeline doesn't
+  recognise is ignored.
+- *Sheets.* `?sheet=status`, `?sheet=contact` and `?sheet=delete` open an application with that
+  sheet already up. Close it and you're on the detail screen, as if you'd tapped the button
+  yourself. The delete sheet still only asks: nothing is deleted unless you tap *Delete*.
+- *Things that aren't there.* An edit link or sheet link for an application that doesn't exist,
+  or has been deleted, opens no form and no sheet.
+- *The phone.* It has no Follow-ups screen, so `pipeline://followups` opens the list there, with
+  Needs follow-up at the top.
+- *Dev Tools.* `pipeline://devtools` opens Settings instead while developer mode is off.
 
-Those are the only links Pipeline answers today; every other screen is reached by clicking
-through the app. The table lists the full set of links Pipeline needs — one for every screen and
-sheet in this manual — with the ones that work marked Shipped and the rest Planned.
+Every link also works as `https://pipeline.casaroja.es/…` with the same path. On Android all of
+them work as soon as Pipeline is installed. On the desktop, Pipeline opens a link when it's
+launched with one, but it doesn't yet register itself with the operating system as the handler
+for `pipeline://` links — so clicking one elsewhere may do nothing.
 
 #xref("PL-041")[Routes and Deep Links]
 
 #{
 show raw: set text(size: 7.5pt)
 data-table(
-  columns: (auto, auto, 1fr),
-  header: ("Link", "Status", "Opens"),
-  [`pipeline://app/{id}`], [Shipped], [An application's detail screen.],
-  [`pipeline://list`], [Shipped], [The applications list, unfiltered.],
-  [`pipeline://list?…`], [Shipped], [The list with a search and status filters applied:
-    `q` for the search text, `status` for required chips, `exclude` for excluded ones, the last
-    two comma-separated. SS-04 in Appendix C has a worked example.],
-  [`pipeline://app/new`], [Shipped], [The New application form.],
-  [`pipeline://app/{id}/edit`], [Shipped], [The Edit application form.],
-  [`pipeline://app/{id}?sheet=status`], [Shipped], [The detail screen with the Update status
-    sheet open.],
-  [`pipeline://app/{id}?sheet=contact`], [Shipped], [The detail screen with the Add contact sheet
-    open.],
-  [`pipeline://app/{id}?sheet=delete`], [Shipped], [The detail screen with the delete confirmation
-    open. Opening it never deletes anything by itself.],
-  [`pipeline://followups`], [Shipped], [Follow-ups (desktop layout; the list on the phone).],
-  [`pipeline://settings`], [Planned], [Settings.],
-  [`pipeline://settings/pair`], [Planned], [Pair a device.],
-  [`pipeline://sync`], [Planned], [The Sync screen.],
-  [`pipeline://devtools`], [Planned], [Dev Tools, when developer mode is on; Settings
-    otherwise.],
+  columns: (auto, 1fr),
+  header: ("Link", "Opens"),
+  [`pipeline://list`], [The applications list, unfiltered.],
+  [`pipeline://list?…`], [The list with a search and status filters applied: `q` for the search
+    text, `status` for required chips, `exclude` for excluded ones, the last two
+    comma-separated.],
+  [`pipeline://followups`], [Follow-ups (desktop layout; the list on the phone).],
+  [`pipeline://app/new`], [The New application form.],
+  [`pipeline://app/{id}`], [An application's detail screen.],
+  [`pipeline://app/{id}/edit`], [The Edit application form.],
+  [`pipeline://app/{id}?sheet=status`], [The detail screen with the Update status sheet open.],
+  [`pipeline://app/{id}?sheet=contact`], [The detail screen with the Add contact sheet open.],
+  [`pipeline://app/{id}?sheet=delete`], [The detail screen with the delete confirmation open.
+    Opening it never deletes anything by itself.],
+  [`pipeline://settings`], [Settings.],
+  [`pipeline://settings/pair`], [Pair a device.],
+  [`pipeline://sync`], [The Sync screen.],
+  [`pipeline://devtools`], [Dev Tools, when developer mode is on; Settings otherwise.],
 )
 }
 

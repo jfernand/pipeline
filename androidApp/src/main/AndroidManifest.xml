@@ -28,6 +28,9 @@
                 <data android:scheme="pipeline" android:host="app"/>
                 <data android:scheme="pipeline" android:host="list"/>
                 <data android:scheme="pipeline" android:host="followups"/>
+                <data android:scheme="pipeline" android:host="settings"/>
+                <data android:scheme="pipeline" android:host="sync"/>
+                <data android:scheme="pipeline" android:host="devtools"/>
             </intent-filter>
             <!-- Real Android App Link: autoVerify here actually does something, since Android can
                  fetch https://pipeline.casaroja.es/.well-known/assetlinks.json to confirm we own

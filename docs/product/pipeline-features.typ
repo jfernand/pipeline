@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.71",
+  revision: "1.72",
   date: "2026-09-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -386,6 +386,12 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     and its nav rail highlights Follow-ups for a link landing there too. Phone has no Follow-ups
     screen, so there the link lands on the list, whose Needs follow-up section answers the same
     question.],
+  [1.72], [2026-09-26], [PL-009 gains the last four links in the manual's route table:
+    `pipeline://settings`, `pipeline://settings/pair`, `pipeline://sync` and `pipeline://devtools`
+    — every route in the app is now link-reachable. `devtools` lands on Settings while developer
+    mode is off, reading the preference synchronously so a cold-start link isn't bounced by the
+    collected default. On tablet, the nav rail highlight follows every link landing (Pair counts
+    as Settings). PL-041's link half is done; it stays Planned for its MCP half.],
 )
 
 #part(1, "Core Application",

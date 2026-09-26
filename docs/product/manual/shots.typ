@@ -110,13 +110,9 @@
 )
 
 // The deep link that lands on each shot's screen (chapter 9's route table), so a
-// shot can be set up by opening a link instead of clicking through the app.
-// `shipped-links` names the ones that work today; every other link is Planned
-// (PL-041). `none`
+// shot can be set up by opening a link instead of clicking through the app. `none`
 // marks a shot whose state no link can reach — a gesture, a window size, an
 // in-progress edit — and still needs the manual steps in its setup.
-#let shipped-links = ("pipeline://app/{id}", "pipeline://list", "pipeline://app/new", "pipeline://app/{id}/edit", "pipeline://app/{id}?sheet=status", "pipeline://app/{id}?sheet=contact", "pipeline://app/{id}?sheet=delete", "pipeline://followups")
-
 #let shot-links = (
   "SS-01": "pipeline://list",
   "SS-02": "pipeline://list",
@@ -190,9 +186,7 @@
     [*#s.subject* #linebreak() #text(fill: ink-muted)[#s.setup] #linebreak()
       #text(font: mono-font, size: 7.5pt, fill: ink-faint)[#{
         let l = shot-links.at(id)
-        if l == none { "Link: none — manual steps only" }
-        else if l in shipped-links or l.starts-with("pipeline://list?") { "Link: " + l }
-        else { "Link: " + l + " (planned)" }
+        if l == none { "Link: none — manual steps only" } else { "Link: " + l }
       }]],
   )).flatten(),
 )

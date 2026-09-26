@@ -9,12 +9,9 @@
     A fuller navigation and deep-link schema — routes that carry the state a screen is actually
     showing (the list's active status filter, its search text), not just which screen and which
     application id — and every route reachable through MCP, not only `DetailRoute` via
-    `open_application`. Of the app's eight routes (`Routes.kt`), four are deep-linkable today —
-    `DetailRoute`, `ListRoute` (with its search and status filters), `AddEditRoute` (new and
-    edit) and `FollowUpsRoute` — and all three sheets — Update status, Add contact, delete confirmation — open by
-    link as `DetailRoute`'s `sheet` sub-state. `SyncRoute`, `SettingsRoute`, `PairRoute` and `DevToolsRoute` still need
-    in-app navigation; and no route beyond
-    `DetailRoute` has an MCP tool yet.
+    `open_application`. The link half is done: every one of the app's eight routes, and all three
+    of the detail screen's sheets, now opens from a `pipeline://` link (PL-009). The MCP half
+    isn't — no route beyond `DetailRoute` has an MCP tool yet, which is why this stays Planned.
   ],
   purpose: [
     `ListRoute` used to be a bare object; the list screen's filter and search state
@@ -36,11 +33,9 @@
     overlay state on top of `DetailRoute` — so reaching one by link means carrying a sub-state
     alongside the id, not adding a ninth route: `DetailRoute.sheet`, read once on arrival.
 
-    Shipped so far, in PL-009: `pipeline://list` and its `?q=&status=&exclude=` filters,
-    `pipeline://app/new`, `pipeline://app/{id}/edit`, and the three detail sheets —
-    `pipeline://app/{id}?sheet=status`, `?sheet=contact` and `?sheet=delete` — and
-    `pipeline://followups`.
-    The rest of the route table in the user manual's chapter 9 is what remains.
+    Shipped in PL-009, 2026-09-26: `list` with its `?q=&status=&exclude=` filters, `followups`,
+    `app/new`, `app/{id}/edit`, the three `app/{id}?sheet=` sheets, `settings`, `settings/pair`,
+    `sync` and `devtools`. The user manual's chapter 9 lists them all.
   ],
   related: (
     ("PL-009", [In-App Navigation & Deep Links]),

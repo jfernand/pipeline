@@ -136,7 +136,12 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 val route = backStackEntry.toRoute<AddEditRoute>()
                 AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
             }
-            composable<SettingsRoute> {
+            composable<SettingsRoute>(
+                deepLinks = listOf(
+                    navDeepLink<SettingsRoute>(basePath = "pipeline://settings"),
+                    navDeepLink<SettingsRoute>(basePath = "https://pipeline.casaroja.es/settings"),
+                ),
+            ) {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },
                     onPair = { navController.navigate(PairRoute) },
@@ -144,14 +149,36 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                     onDevTools = { navController.navigate(DevToolsRoute) },
                 )
             }
-            composable<PairRoute> {
+            composable<PairRoute>(
+                deepLinks = listOf(
+                    navDeepLink<PairRoute>(basePath = "pipeline://settings/pair"),
+                    navDeepLink<PairRoute>(basePath = "https://pipeline.casaroja.es/settings/pair"),
+                ),
+            ) {
                 PairingScreen(onBack = { navController.popBackStack() })
             }
-            composable<SyncRoute> {
+            composable<SyncRoute>(
+                deepLinks = listOf(
+                    navDeepLink<SyncRoute>(basePath = "pipeline://sync"),
+                    navDeepLink<SyncRoute>(basePath = "https://pipeline.casaroja.es/sync"),
+                ),
+            ) {
                 SyncScreen(onBack = { navController.popBackStack() })
             }
-            composable<DevToolsRoute> {
-                DevToolsScreen(onBack = { navController.popBackStack() })
+            composable<DevToolsRoute>(
+                deepLinks = listOf(
+                    navDeepLink<DevToolsRoute>(basePath = "pipeline://devtools"),
+                    navDeepLink<DevToolsRoute>(basePath = "https://pipeline.casaroja.es/devtools"),
+                ),
+            ) {
+                // See the matching comment in PipelineTabletApp.
+                if (preferencesStore.currentPreferences.developerMode) {
+                    DevToolsScreen(onBack = { navController.popBackStack() })
+                } else {
+                    LaunchedEffect(Unit) {
+                        navController.navigate(SettingsRoute) { popUpTo<DevToolsRoute> { inclusive = true } }
+                    }
+                }
             }
         }
         // See the matching comment in PipelineTabletApp: this must run in the same composition

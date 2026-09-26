@@ -7,14 +7,12 @@
   release: "MVP",
   summary: [
     One type-safe `androidx.navigation` graph, shared by phone and tablet: List, Detail, Add/Edit,
-    Settings, Pair. One deep-link scheme, five routes on it: `pipeline://app/{id}` for an
-    application's detail screen, `pipeline://app/{id}?sheet=status`, `?sheet=contact` and
-    `?sheet=delete` for the same with the Update status, Add contact or delete-confirmation sheet
-    open, `pipeline://followups` for Follow-ups (the list, on phone), `pipeline://app/new` and `pipeline://app/{id}/edit` for the Add
-    and Edit forms, and
-    `pipeline://list` for the applications list, optionally pre-searched and filtered
-    (`?q=…&status=…&exclude=…`) — Android intent filters, desktop CLI-arg handling, `xdg-open`
-    registration on Linux. The OS can hand the app a link and land on any of them.
+    Follow-ups, Settings, Pair, Sync, Dev Tools. One deep-link scheme, `pipeline://`, reaching
+    every one of them — `list` (optionally pre-searched and filtered, `?q=&status=&exclude=`),
+    `followups`, `app/new`, `app/{id}`, `app/{id}/edit`, `app/{id}?sheet=` for the Update status,
+    Add contact and delete sheets, `settings`, `settings/pair`, `sync`, `devtools` — each also
+    under `https://pipeline.casaroja.es/`. Android intent filters, desktop CLI-arg handling,
+    `xdg-open` registration on Linux. The OS can hand the app a link and land on any screen.
   ],
   purpose: [
     This is what makes "jump to application #8" possible: first as a link from the OS — a
@@ -23,8 +21,8 @@
   implementation: (
     "shared/src/commonMain/kotlin/org/cr/pipeline/ui/nav/Routes.kt — type-safe routes",
     "shared/src/commonMain/kotlin/org/cr/pipeline/App.kt — shared NavHostController, initialDeepLink handling",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/PipelinePhoneApp.kt, ui/PipelineApp.kt — navDeepLink<DetailRoute>(basePath = \"pipeline://app\") (its optional sheet argument makes the pattern pipeline://app/{id}?sheet={sheet}), navDeepLink<ListRoute>(basePath = \"pipeline://list\"), navDeepLink { uriPattern = \"pipeline://app/new\" } and \"pipeline://app/{id}/edit\" on AddEditRoute",
-    "androidApp/src/main/AndroidManifest.xml — intent filter for pipeline://app and pipeline://list",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/PipelinePhoneApp.kt, ui/PipelineApp.kt — navDeepLink<DetailRoute>(basePath = \"pipeline://app\") (its optional sheet argument makes the pattern pipeline://app/{id}?sheet={sheet}), navDeepLink<ListRoute>(basePath = \"pipeline://list\"), navDeepLink { uriPattern = \"pipeline://app/new\" } and \"pipeline://app/{id}/edit\" on AddEditRoute; navDeepLink<T> on FollowUpsRoute, SettingsRoute, PairRoute, SyncRoute and DevToolsRoute (phone's ListRoute also answers pipeline://followups)",
+    "androidApp/src/main/AndroidManifest.xml — intent filter for the app, list, followups, settings, sync and devtools hosts",
     "desktopApp/src/main/kotlin/org/cr/pipeline/main.kt — cold-start deep link from CLI args",
     "shared/src/jvmMain/kotlin/org/cr/pipeline/platform/linux/LinuxUrlSchemeRegistrationManager.kt — xdg-open scheme registration",
   ),
