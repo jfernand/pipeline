@@ -13,6 +13,7 @@ class DetailSheetTest {
     fun `a sheet name matches ignoring case`() {
         assertEquals(DetailSheet.STATUS, "status".toDetailSheet())
         assertEquals(DetailSheet.STATUS, "Status".toDetailSheet())
+        assertEquals(DetailSheet.CONTACT, "contact".toDetailSheet())
     }
 
     @Test

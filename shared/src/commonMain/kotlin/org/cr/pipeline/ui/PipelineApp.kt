@@ -141,6 +141,7 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                         sheetOpened = true
                         when (route.sheet.toDetailSheet()) {
                             DetailSheet.STATUS -> statusSheetApplicationId = route.id
+                            DetailSheet.CONTACT -> contactSheetApplicationId = route.id
                             null -> Unit
                         }
                     }

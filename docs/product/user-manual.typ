@@ -534,7 +534,8 @@ recognise is ignored. A third link, `pipeline://app/new`, opens the New applicat
 `pipeline://app/42/edit` opens application 42's Edit form. An edit link for an application that
 doesn't exist, or has been deleted, opens nothing. `pipeline://app/42?sheet=status` opens
 application 42 with the Update status sheet already up; cancel it and you're on the application's detail
-screen, as if you'd tapped *Update status* yourself.
+screen, as if you'd tapped *Update status* yourself. `?sheet=contact` does the same with the Add
+contact sheet.
 
 Those are the only links Pipeline answers today; every other screen is reached by clicking
 through the app. The table lists the full set of links Pipeline needs — one for every screen and
@@ -556,7 +557,7 @@ data-table(
   [`pipeline://app/{id}/edit`], [Shipped], [The Edit application form.],
   [`pipeline://app/{id}?sheet=status`], [Shipped], [The detail screen with the Update status
     sheet open.],
-  [`pipeline://app/{id}?sheet=contact`], [Planned], [The detail screen with the Add contact sheet
+  [`pipeline://app/{id}?sheet=contact`], [Shipped], [The detail screen with the Add contact sheet
     open.],
   [`pipeline://app/{id}?sheet=delete`], [Planned], [The detail screen with the delete confirmation
     open. Opening it never deletes anything by itself.],

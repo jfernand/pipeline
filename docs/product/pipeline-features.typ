@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.68",
+  revision: "1.69",
   date: "2026-09-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -376,6 +376,8 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     an optional `sheet`, and the link is now `pipeline://app/{id}?sheet=status`, the same query
     form the list's filters use. PL-044 now actually appears in the catalog, and PL-041's
     description reflects the links shipped since it was written.],
+  [1.69], [2026-09-26], [PL-009 gains `pipeline://app/{id}?sheet=contact`: the detail screen with
+    the Add contact sheet open — the second sheet on `DetailRoute`'s `sheet` sub-state.],
 )
 
 #part(1, "Core Application",

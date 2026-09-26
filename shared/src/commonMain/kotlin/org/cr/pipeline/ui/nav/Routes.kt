@@ -24,15 +24,16 @@ data class ListRoute(val q: String? = null, val status: String? = null, val excl
  * [sheet] names a sheet to open over the detail screen on arrival (PL-041) — sub-state carried
  * alongside the id, since the sheets are shell overlays rather than destinations of their own.
  * Optional, so `pipeline://app/{id}` and every in-app navigation still land on the bare detail
- * screen; `pipeline://app/42?sheet=status` lands with the Update status sheet up. A plain String
+ * screen; `pipeline://app/42?sheet=status` lands with the Update status sheet up, `?sheet=contact`
+ * with the Add contact sheet. A plain String
  * rather than [DetailSheet] itself so an unrecognized value still reaches the detail screen
  * instead of failing the link; [toDetailSheet] reads it.
  */
 @Serializable
 data class DetailRoute(val id: Long, val sheet: String? = null)
 
-/** The sheets [DetailRoute.sheet] can name. Contact and delete join this as their links ship. */
-enum class DetailSheet { STATUS }
+/** The sheets [DetailRoute.sheet] can name. Delete joins this when its link ships. */
+enum class DetailSheet { STATUS, CONTACT }
 
 fun String?.toDetailSheet(): DetailSheet? = DetailSheet.entries.firstOrNull { it.name.equals(this, ignoreCase = true) }
 
