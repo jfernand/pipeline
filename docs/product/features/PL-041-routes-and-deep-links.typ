@@ -9,11 +9,11 @@
     A fuller navigation and deep-link schema — routes that carry the state a screen is actually
     showing (the list's active status filter, its search text), not just which screen and which
     application id — and every route reachable through MCP, not only `DetailRoute` via
-    `open_application`. Of the app's eight routes (`Routes.kt`), three are deep-linkable today —
-    `DetailRoute`, `ListRoute` (with its search and status filters) and `AddEditRoute` (new and
-    edit) — and all three sheets — Update status, Add contact, delete confirmation — open by
-    link as `DetailRoute`'s `sheet` sub-state. `FollowUpsRoute`, `SyncRoute`, `SettingsRoute`, `PairRoute` and `DevToolsRoute`
-    still need in-app navigation; and no route beyond
+    `open_application`. Of the app's eight routes (`Routes.kt`), four are deep-linkable today —
+    `DetailRoute`, `ListRoute` (with its search and status filters), `AddEditRoute` (new and
+    edit) and `FollowUpsRoute` — and all three sheets — Update status, Add contact, delete confirmation — open by
+    link as `DetailRoute`'s `sheet` sub-state. `SyncRoute`, `SettingsRoute`, `PairRoute` and `DevToolsRoute` still need
+    in-app navigation; and no route beyond
     `DetailRoute` has an MCP tool yet.
   ],
   purpose: [
@@ -38,7 +38,8 @@
 
     Shipped so far, in PL-009: `pipeline://list` and its `?q=&status=&exclude=` filters,
     `pipeline://app/new`, `pipeline://app/{id}/edit`, and the three detail sheets —
-    `pipeline://app/{id}?sheet=status`, `?sheet=contact` and `?sheet=delete`.
+    `pipeline://app/{id}?sheet=status`, `?sheet=contact` and `?sheet=delete` — and
+    `pipeline://followups`.
     The rest of the route table in the user manual's chapter 9 is what remains.
   ],
   related: (

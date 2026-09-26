@@ -10,7 +10,7 @@
     Settings, Pair. One deep-link scheme, five routes on it: `pipeline://app/{id}` for an
     application's detail screen, `pipeline://app/{id}?sheet=status`, `?sheet=contact` and
     `?sheet=delete` for the same with the Update status, Add contact or delete-confirmation sheet
-    open, `pipeline://app/new` and `pipeline://app/{id}/edit` for the Add
+    open, `pipeline://followups` for Follow-ups (the list, on phone), `pipeline://app/new` and `pipeline://app/{id}/edit` for the Add
     and Edit forms, and
     `pipeline://list` for the applications list, optionally pre-searched and filtered
     (`?q=…&status=…&exclude=…`) — Android intent filters, desktop CLI-arg handling, `xdg-open`

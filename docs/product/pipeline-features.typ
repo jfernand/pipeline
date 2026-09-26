@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.70",
+  revision: "1.71",
   date: "2026-09-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -382,6 +382,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     the delete confirmation open. It only asks, as tapping the trash icon does — nothing is
     deleted until the sheet's Delete button is tapped. All three detail sheets are now
     link-reachable.],
+  [1.71], [2026-09-26], [PL-009 gains `pipeline://followups`. Tablet lands on `FollowUpsRoute`,
+    and its nav rail highlights Follow-ups for a link landing there too. Phone has no Follow-ups
+    screen, so there the link lands on the list, whose Needs follow-up section answers the same
+    question.],
 )
 
 #part(1, "Core Application",

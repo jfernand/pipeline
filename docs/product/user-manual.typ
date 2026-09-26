@@ -537,6 +537,8 @@ application 42 with the Update status sheet already up; cancel it and you're on 
 screen, as if you'd tapped *Update status* yourself. `?sheet=contact` does the same with the Add
 contact sheet, and `?sheet=delete` with the delete confirmation — which still only asks: nothing
 is deleted unless you tap *Delete*.
+`pipeline://followups` opens Follow-ups on the desktop layout, and the list — Needs follow-up
+at the top — on the phone.
 
 Those are the only links Pipeline answers today; every other screen is reached by clicking
 through the app. The table lists the full set of links Pipeline needs — one for every screen and
@@ -562,7 +564,7 @@ data-table(
     open.],
   [`pipeline://app/{id}?sheet=delete`], [Shipped], [The detail screen with the delete confirmation
     open. Opening it never deletes anything by itself.],
-  [`pipeline://followups`], [Planned], [Follow-ups (desktop layout; the list on the phone).],
+  [`pipeline://followups`], [Shipped], [Follow-ups (desktop layout; the list on the phone).],
   [`pipeline://settings`], [Planned], [Settings.],
   [`pipeline://settings/pair`], [Planned], [Pair a device.],
   [`pipeline://sync`], [Planned], [The Sync screen.],

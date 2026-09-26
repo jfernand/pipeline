@@ -173,7 +173,12 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
                     AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
                 }
                 composable<SyncRoute> { TabletSyncContent() }
-                composable<FollowUpsRoute> {
+                composable<FollowUpsRoute>(
+                    deepLinks = listOf(
+                        navDeepLink<FollowUpsRoute>(basePath = "pipeline://followups"),
+                        navDeepLink<FollowUpsRoute>(basePath = "https://pipeline.casaroja.es/followups"),
+                    ),
+                ) {
                     FollowUpsContent(
                         onSelect = { id ->
                             lastViewedId = id
@@ -216,8 +221,11 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
             // leaves the last-saved List/Detail screen untouched rather than clobbering it.
             LaunchedEffect(currentEntry) {
                 when {
-                    // A pipeline://list deep link can land here from any rail destination, so the
-                    // rail's highlight has to follow the route, not only the rail's own clicks.
+                    // A pipeline://list or pipeline://followups deep link can land from any rail
+                    // destination, so the rail's highlight has to follow the route, not only the
+                    // rail's own clicks. Follow-ups stays out of PL-021's last-route memory.
+                    currentEntry?.destination?.hasRoute<FollowUpsRoute>() == true ->
+                        activeRailDestination = NavDestination.FOLLOWUPS
                     currentEntry?.destination?.hasRoute<ListRoute>() == true -> {
                         activeRailDestination = NavDestination.LIST
                         preferencesStore.setLastDetailApplicationId(null)

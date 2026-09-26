@@ -77,6 +77,11 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 deepLinks = listOf(
                     navDeepLink<ListRoute>(basePath = "pipeline://list"),
                     navDeepLink<ListRoute>(basePath = "https://pipeline.casaroja.es/list"),
+                    // PL-041: phone has no Follow-ups screen; its list's "Needs follow-up" section,
+                    // at the top, is the phone's answer to the same question, so the link lands
+                    // there — unfiltered, since an explicit pattern supplies no ListRoute args.
+                    navDeepLink { uriPattern = "pipeline://followups" },
+                    navDeepLink { uriPattern = "https://pipeline.casaroja.es/followups" },
                 ),
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<ListRoute>()
