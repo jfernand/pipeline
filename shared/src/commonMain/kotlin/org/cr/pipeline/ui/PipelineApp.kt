@@ -37,6 +37,7 @@ import org.cr.pipeline.data.AppPreferences
 import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.nav.DeepLinkBus
+import org.cr.pipeline.ui.components.parseStatusFilters
 import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
 import org.cr.pipeline.ui.nav.DevToolsRoute
@@ -87,28 +88,31 @@ fun PipelineTabletApp(navController: NavHostController, initialDeepLink: String?
             onSelect = { destination ->
                 activeRailDestination = destination
                 val route = when (destination) {
-                    NavDestination.LIST -> ListRoute
+                    NavDestination.LIST -> ListRoute()
                     NavDestination.FOLLOWUPS -> FollowUpsRoute
                     NavDestination.SYNC -> SyncRoute
                     NavDestination.SETTINGS -> SettingsRoute
                     NavDestination.DEVTOOLS -> DevToolsRoute
                 }
                 navController.navigate(route) {
-                    popUpTo(ListRoute)
+                    popUpTo<ListRoute>()
                     launchSingleTop = true
                 }
             },
         )
         Box(Modifier.weight(1f).fillMaxHeight()) {
-            NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
+            NavHost(navController = navController, startDestination = ListRoute(), modifier = Modifier.fillMaxSize()) {
                 composable<ListRoute>(
                     deepLinks = listOf(
                         navDeepLink<ListRoute>(basePath = "pipeline://list"),
                         navDeepLink<ListRoute>(basePath = "https://pipeline.casaroja.es/list"),
                     ),
-                ) {
+                ) { backStackEntry ->
+                    val route = backStackEntry.toRoute<ListRoute>()
                     TabletListContent(
                         applications = applications,
+                        initialQuery = route.q.orEmpty(),
+                        initialStatusFilters = parseStatusFilters(route.status, route.exclude),
                         selectedId = lastViewedId,
                         onSelect = { app ->
                             lastViewedId = app.id

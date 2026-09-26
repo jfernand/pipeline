@@ -526,8 +526,11 @@ handler for `pipeline://` links — so clicking one elsewhere may do nothing.
 
 #xref("PL-009")[In-App Navigation]
 
-A second link, `pipeline://list`, opens the applications list. Those two are the only links
-Pipeline answers today; every other screen is reached by clicking through the app. The table
+A second link, `pipeline://list`, opens the applications list — and can open it already
+searched and filtered: `pipeline://list?q=eng&status=interviewing&exclude=rejected` lands on the
+list with "eng" in the search field, Interviewing required and Rejected excluded. Statuses can be
+written as on screen or in lower case (`interviewing`, `phone-screen`); a name Pipeline doesn't
+recognise is ignored. Those are the only links Pipeline answers today; every other screen is reached by clicking through the app. The table
 lists the full set of links Pipeline needs — one for every screen and sheet in this manual — with
 the ones that work marked Shipped and the rest Planned.
 
@@ -540,7 +543,7 @@ data-table(
   header: ("Link", "Status", "Opens"),
   [`pipeline://app/{id}`], [Shipped], [An application's detail screen.],
   [`pipeline://list`], [Shipped], [The applications list, unfiltered.],
-  [`pipeline://list?…`], [Planned], [The list with a search and status filters applied:
+  [`pipeline://list?…`], [Shipped], [The list with a search and status filters applied:
     `q` for the search text, `status` for required chips, `exclude` for excluded ones, the last
     two comma-separated. SS-04 in Appendix C has a worked example.],
   [`pipeline://app/new`], [Planned], [The New application form.],

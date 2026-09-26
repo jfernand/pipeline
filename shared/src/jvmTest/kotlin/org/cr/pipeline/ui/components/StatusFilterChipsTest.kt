@@ -43,6 +43,26 @@ class StatusFilterChipsTest {
     }
 
     @Test
+    fun `initial query and status filters preset what the list shows`() = runComposeUiTest {
+        lateinit var filter: ApplicationListFilterState
+        val applications = listOf(
+            application(AppStatus.INTERVIEW, id = 1).copy(company = "Acme"),
+            application(AppStatus.INTERVIEW, id = 2).copy(company = "Globex"),
+            application(AppStatus.REJECTED, id = 3).copy(company = "Acme Labs"),
+        )
+        setContent {
+            filter = rememberApplicationListFilter(
+                applications,
+                initialQuery = "acme",
+                initialStatusFilters = mapOf(AppStatus.REJECTED to StatusFilterMode.NEGATIVE),
+            )
+        }
+
+        assertEquals("acme", filter.query)
+        assertEquals(listOf(1L), (filter.followUp + filter.rest).map { it.id })
+    }
+
+    @Test
     fun `cycling one status through positive then negative then back to unset`() = runComposeUiTest {
         lateinit var filter: ApplicationListFilterState
         setContent { filter = rememberApplicationListFilter(applications) }

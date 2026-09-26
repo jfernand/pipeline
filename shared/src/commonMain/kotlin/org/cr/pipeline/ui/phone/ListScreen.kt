@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.ui.components.AppCard
 import org.cr.pipeline.ui.components.DimmedOverlay
@@ -37,6 +38,7 @@ import org.cr.pipeline.ui.components.PlSearchField
 import org.cr.pipeline.ui.components.PlTopBar
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.components.StatusFilterChips
+import org.cr.pipeline.ui.components.StatusFilterMode
 import org.cr.pipeline.ui.components.rememberApplicationListFilter
 import org.cr.pipeline.ui.theme.PlColors
 
@@ -48,8 +50,10 @@ fun ListScreen(
     onCard: (JobApplication) -> Unit = {},
     onSettings: () -> Unit = {},
     onDeleteApp: (JobApplication) -> Unit = {},
+    initialQuery: String = "",
+    initialStatusFilters: Map<AppStatus, StatusFilterMode> = emptyMap(),
 ) {
-    val filter = rememberApplicationListFilter(applications)
+    val filter = rememberApplicationListFilter(applications, initialQuery, initialStatusFilters)
 
     DimmedOverlay(dimmed, modifier.background(PlColors.bgBase)) {
         Column(Modifier.fillMaxSize()) {

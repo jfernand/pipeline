@@ -35,6 +35,7 @@ import org.cr.pipeline.ui.components.PlPrimaryButton
 import org.cr.pipeline.ui.components.PlSecondaryButton
 import org.cr.pipeline.ui.components.QrCodePlaceholder
 import org.cr.pipeline.ui.components.SectionLabel
+import org.cr.pipeline.ui.components.StatusFilterMode
 import org.cr.pipeline.ui.theme.BodyText
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
@@ -53,10 +54,21 @@ fun TabletListContent(
     onSelect: (JobApplication) -> Unit,
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
+    initialQuery: String = "",
+    initialStatusFilters: Map<AppStatus, StatusFilterMode> = emptyMap(),
 ) {
     BoxWithConstraints(modifier.fillMaxSize()) {
         val columns = if (maxWidth >= 1100.dp) 3 else 2
-        ListPane(applications, selectedId, onSelect, onNew, modifier = Modifier.fillMaxSize(), columns = columns)
+        ListPane(
+            applications,
+            selectedId,
+            onSelect,
+            onNew,
+            modifier = Modifier.fillMaxSize(),
+            columns = columns,
+            initialQuery = initialQuery,
+            initialStatusFilters = initialStatusFilters,
+        )
     }
 }
 

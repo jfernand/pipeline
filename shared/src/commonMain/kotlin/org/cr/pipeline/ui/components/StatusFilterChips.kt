@@ -23,9 +23,13 @@ enum class StatusFilterMode { POSITIVE, NEGATIVE }
  * search/filter behavior can't drift between layouts.
  */
 @Composable
-fun rememberApplicationListFilter(applications: List<JobApplication>): ApplicationListFilterState {
-    var query by remember { mutableStateOf("") }
-    var statusFilters by remember { mutableStateOf<Map<AppStatus, StatusFilterMode>>(emptyMap()) }
+fun rememberApplicationListFilter(
+    applications: List<JobApplication>,
+    initialQuery: String = "",
+    initialStatusFilters: Map<AppStatus, StatusFilterMode> = emptyMap(),
+): ApplicationListFilterState {
+    var query by remember { mutableStateOf(initialQuery) }
+    var statusFilters by remember { mutableStateOf(initialStatusFilters) }
     val required = statusFilters.filterValues { it == StatusFilterMode.POSITIVE }.keys
     val excluded = statusFilters.filterValues { it == StatusFilterMode.NEGATIVE }.keys
     val visible = applications.filter {
@@ -49,6 +53,29 @@ fun rememberApplicationListFilter(applications: List<JobApplication>): Applicati
         followUp = visible.filter { it.overdueDays != null },
         rest = visible.filter { it.overdueDays == null },
     )
+}
+
+/**
+ * PL-041: reads a list deep link's `status` and `exclude` parameters — comma-separated status
+ * names — into the same map the chips produce. A name matches an [AppStatus] by its label or its
+ * enum name, ignoring case, spaces, hyphens and underscores, so `interviewing`, `interview`,
+ * `phone-screen` and `Phone Screen` all work. Unknown names are dropped rather than failing the
+ * link: a typo should still land on a usable list. A status named in both is excluded — the
+ * narrower reading of a contradictory link.
+ */
+fun parseStatusFilters(status: String?, exclude: String?): Map<AppStatus, StatusFilterMode> {
+    fun parse(names: String?) = names.orEmpty().split(',').mapNotNull(::statusByName).toSet()
+    val excluded = parse(exclude)
+    return (parse(status) - excluded).associateWith { StatusFilterMode.POSITIVE } +
+        excluded.associateWith { StatusFilterMode.NEGATIVE }
+}
+
+private fun normalizeStatusName(name: String) = name.filter { it.isLetter() }.lowercase()
+
+private fun statusByName(name: String): AppStatus? {
+    val wanted = normalizeStatusName(name)
+    if (wanted.isEmpty()) return null
+    return AppStatus.entries.firstOrNull { normalizeStatusName(it.label) == wanted || normalizeStatusName(it.name) == wanted }
 }
 
 data class ApplicationListFilterState(

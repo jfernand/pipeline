@@ -33,12 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import org.cr.pipeline.model.AppStatus
 import org.cr.pipeline.model.JobApplication
 import org.cr.pipeline.ui.components.AppCard
 import org.cr.pipeline.ui.components.GridColumns
 import org.cr.pipeline.ui.components.PlSearchField
 import org.cr.pipeline.ui.components.SectionLabel
 import org.cr.pipeline.ui.components.StatusFilterChips
+import org.cr.pipeline.ui.components.StatusFilterMode
 import org.cr.pipeline.ui.components.rememberApplicationListFilter
 import org.cr.pipeline.ui.theme.DisplayText
 import org.cr.pipeline.ui.theme.MonoText
@@ -53,8 +55,10 @@ fun ListPane(
     onNew: () -> Unit,
     modifier: Modifier = Modifier,
     columns: Int = 1,
+    initialQuery: String = "",
+    initialStatusFilters: Map<AppStatus, StatusFilterMode> = emptyMap(),
 ) {
-    val filter = rememberApplicationListFilter(applications)
+    val filter = rememberApplicationListFilter(applications, initialQuery, initialStatusFilters)
 
     Box(
         modifier

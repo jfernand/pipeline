@@ -188,7 +188,7 @@
       #text(font: mono-font, size: 7.5pt, fill: ink-faint)[#{
         let l = shot-links.at(id)
         if l == none { "Link: none — manual steps only" }
-        else if l in shipped-links { "Link: " + l }
+        else if l in shipped-links or l.starts-with("pipeline://list?") { "Link: " + l }
         else { "Link: " + l + " (planned)" }
       }]],
   )).flatten(),

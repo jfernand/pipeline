@@ -33,6 +33,7 @@ import org.cr.pipeline.data.JobApplicationRepository
 import org.cr.pipeline.data.PreferencesStore
 import org.cr.pipeline.nav.DeepLinkBus
 import org.cr.pipeline.ui.components.PlFab
+import org.cr.pipeline.ui.components.parseStatusFilters
 import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
 import org.cr.pipeline.ui.nav.DevToolsRoute
@@ -68,15 +69,18 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
     val anySheetOpen = sheetApplication != null || contactSheetApplication != null || deleteSheetApplication != null
 
     Box(modifier.fillMaxSize().statusBarsPadding()) {
-        NavHost(navController = navController, startDestination = ListRoute, modifier = Modifier.fillMaxSize()) {
+        NavHost(navController = navController, startDestination = ListRoute(), modifier = Modifier.fillMaxSize()) {
             composable<ListRoute>(
                 deepLinks = listOf(
                     navDeepLink<ListRoute>(basePath = "pipeline://list"),
                     navDeepLink<ListRoute>(basePath = "https://pipeline.casaroja.es/list"),
                 ),
-            ) {
+            ) { backStackEntry ->
+                val route = backStackEntry.toRoute<ListRoute>()
                 ListScreen(
                     applications = applications,
+                    initialQuery = route.q.orEmpty(),
+                    initialStatusFilters = parseStatusFilters(route.status, route.exclude),
                     dimmed = anySheetOpen,
                     onCard = { app -> navController.navigate(DetailRoute(app.id)) },
                     onSettings = { navController.navigate(SettingsRoute) },

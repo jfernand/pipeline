@@ -8,7 +8,8 @@
   summary: [
     One type-safe `androidx.navigation` graph, shared by phone and tablet: List, Detail, Add/Edit,
     Settings, Pair. One deep-link scheme, two routes on it: `pipeline://app/{id}` for an
-    application's detail screen and `pipeline://list` for the applications list — Android intent
+    application's detail screen and `pipeline://list` for the applications list, optionally pre-searched and filtered
+    (`?q=…&status=…&exclude=…`) — Android intent
     filters, desktop CLI-arg handling, `xdg-open` registration on Linux. The OS can hand the app a
     link and land on either.
   ],

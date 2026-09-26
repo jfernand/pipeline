@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.63",
+  revision: "1.64",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -355,6 +355,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     `https://pipeline.casaroja.es/list`), landing on the applications list — the first of the
     routes PL-041 plans beyond `pipeline://app/{id}`. On tablet, the nav rail's highlight now
     follows a landing on the list rather than only the rail's own clicks.],
+  [1.64], [2026-09-26], [`pipeline://list` takes optional `q`, `status` and `exclude` parameters
+    that preset the list's search text and status chips — the filter-carrying list route PL-041
+    plans. `ListRoute` becomes a data class with three optional fields; status names parse by
+    label or enum name, ignoring case and separators, and unknown names are dropped.],
 )
 
 #part(1, "Core Application",

@@ -10,8 +10,15 @@ import kotlinx.serialization.Serializable
  * Type-safe navigation destinations, shared by both the tablet and phone entry points so they
  * navigate through the same graph shape (and, on web, the same deep-linkable URLs).
  */
+/**
+ * [q], [status] and [exclude] preset the list's search text and status chips (PL-041), so a deep
+ * link — `pipeline://list?q=eng&status=interviewing&exclude=rejected` — can land on a filtered
+ * list. All three are optional: plain `pipeline://list`, and every in-app navigation to the list,
+ * still land on it unfiltered. [status] and [exclude] are comma-separated status names, read by
+ * [org.cr.pipeline.ui.components.parseStatusFilters].
+ */
 @Serializable
-data object ListRoute
+data class ListRoute(val q: String? = null, val status: String? = null, val exclude: String? = null)
 
 @Serializable
 data class DetailRoute(val id: Long)
