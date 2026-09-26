@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,12 +37,13 @@ import org.cr.pipeline.ui.components.PlFab
 import org.cr.pipeline.ui.components.parseStatusFilters
 import org.cr.pipeline.ui.nav.AddEditRoute
 import org.cr.pipeline.ui.nav.DetailRoute
+import org.cr.pipeline.ui.nav.DetailSheet
 import org.cr.pipeline.ui.nav.DevToolsRoute
 import org.cr.pipeline.ui.nav.ListRoute
 import org.cr.pipeline.ui.nav.PairRoute
 import org.cr.pipeline.ui.nav.SettingsRoute
 import org.cr.pipeline.ui.nav.SyncRoute
-import org.cr.pipeline.ui.nav.UpdateStatusRoute
+import org.cr.pipeline.ui.nav.toDetailSheet
 import org.cr.pipeline.ui.screens.AddEditScreen
 import org.cr.pipeline.ui.screens.ContactSheet
 import org.cr.pipeline.ui.screens.DeleteConfirmSheet
@@ -95,6 +97,16 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                 ),
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<DetailRoute>()
+                // See the matching comment in PipelineTabletApp.
+                var sheetOpened by rememberSaveable { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    if (sheetOpened) return@LaunchedEffect
+                    sheetOpened = true
+                    when (route.sheet.toDetailSheet()) {
+                        DetailSheet.STATUS -> sheetApplicationId = route.id
+                        null -> Unit
+                    }
+                }
                 DetailScreen(
                     applicationId = route.id,
                     dimmed = anySheetOpen,
@@ -116,19 +128,6 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
             ) { backStackEntry ->
                 val route = backStackEntry.toRoute<AddEditRoute>()
                 AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
-            }
-            // See the matching comment in PipelineTabletApp.
-            composable<UpdateStatusRoute>(
-                deepLinks = listOf(
-                    navDeepLink { uriPattern = "pipeline://app/{id}/status" },
-                    navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/{id}/status" },
-                ),
-            ) { backStackEntry ->
-                val route = backStackEntry.toRoute<UpdateStatusRoute>()
-                LaunchedEffect(route.id) {
-                    navController.navigate(DetailRoute(route.id)) { popUpTo<UpdateStatusRoute> { inclusive = true } }
-                    sheetApplicationId = route.id
-                }
             }
             composable<SettingsRoute> {
                 SettingsScreen(

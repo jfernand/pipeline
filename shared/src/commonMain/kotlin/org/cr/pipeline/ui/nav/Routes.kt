@@ -20,17 +20,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ListRoute(val q: String? = null, val status: String? = null, val exclude: String? = null)
 
-@Serializable
-data class DetailRoute(val id: Long)
-
 /**
- * Deep-link-only (PL-041): `pipeline://app/{id}/status`. Nothing inside the app navigates here —
- * the Update status sheet is shell state, not a destination — so this route's destination just
- * redirects to [DetailRoute] with the sheet open, leaving the back stack exactly as tapping
- * Update status by hand would.
+ * [sheet] names a sheet to open over the detail screen on arrival (PL-041) — sub-state carried
+ * alongside the id, since the sheets are shell overlays rather than destinations of their own.
+ * Optional, so `pipeline://app/{id}` and every in-app navigation still land on the bare detail
+ * screen; `pipeline://app/42?sheet=status` lands with the Update status sheet up. A plain String
+ * rather than [DetailSheet] itself so an unrecognized value still reaches the detail screen
+ * instead of failing the link; [toDetailSheet] reads it.
  */
 @Serializable
-data class UpdateStatusRoute(val id: Long)
+data class DetailRoute(val id: Long, val sheet: String? = null)
+
+/** The sheets [DetailRoute.sheet] can name. Contact and delete join this as their links ship. */
+enum class DetailSheet { STATUS }
+
+fun String?.toDetailSheet(): DetailSheet? = DetailSheet.entries.firstOrNull { it.name.equals(this, ignoreCase = true) }
 
 /** [id] is null when creating a new application, set when editing an existing one. */
 @Serializable

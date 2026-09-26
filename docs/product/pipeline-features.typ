@@ -7,8 +7,8 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.63",
-  date: "2026-09-25",
+  revision: "1.68",
+  date: "2026-09-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
   owner: "Javier Fernández",
@@ -366,6 +366,16 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     Edit form. The form now closes itself when its id resolves to nothing — unknown or deleted —
     since a link can name either, and saving the blank form would have appended an
     `ApplicationEdited` to a deleted application's history.],
+  [1.67], [2026-09-26], [PL-009 gains `pipeline://app/{id}/status`: the application's detail
+    screen with the Update status sheet open, via a new deep-link-only `UpdateStatusRoute` that
+    redirects to `DetailRoute` and opens the sheet. Expanded PL-041 with the routes found missing
+    while shooting the user manual's screenshots. Added PL-044, Live Data-Source Switching
+    (Planned).],
+  [1.68], [2026-09-26], [Reworked 1.67's status link to PL-041's own rule — a sheet is sub-state
+    carried alongside the id, not a ninth route. `UpdateStatusRoute` is gone; `DetailRoute` gains
+    an optional `sheet`, and the link is now `pipeline://app/{id}?sheet=status`, the same query
+    form the list's filters use. PL-044 now actually appears in the catalog, and PL-041's
+    description reflects the links shipped since it was written.],
 )
 
 #part(1, "Core Application",
@@ -410,6 +420,7 @@ dialog for every field that might change.
 #include "features/PL-039-platform-app-icons.typ"
 #include "features/PL-041-routes-and-deep-links.typ"
 #include "features/PL-043-remember-list-filter.typ"
+#include "features/PL-044-live-data-source-switching.typ"
 
 #part(2, "Local Storage & \nData Portability",
   blurb: [What happens to the data after it is entered — where it lives, what the user controls,
