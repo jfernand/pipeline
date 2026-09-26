@@ -7,11 +7,11 @@
   release: "MVP",
   summary: [
     One type-safe `androidx.navigation` graph, shared by phone and tablet: List, Detail, Add/Edit,
-    Settings, Pair. One deep-link scheme, two routes on it: `pipeline://app/{id}` for an
-    application's detail screen and `pipeline://list` for the applications list, optionally pre-searched and filtered
-    (`?q=…&status=…&exclude=…`) — Android intent
-    filters, desktop CLI-arg handling, `xdg-open` registration on Linux. The OS can hand the app a
-    link and land on either.
+    Settings, Pair. One deep-link scheme, three routes on it: `pipeline://app/{id}` for an
+    application's detail screen, `pipeline://app/new` for the New application form, and
+    `pipeline://list` for the applications list, optionally pre-searched and filtered
+    (`?q=…&status=…&exclude=…`) — Android intent filters, desktop CLI-arg handling, `xdg-open`
+    registration on Linux. The OS can hand the app a link and land on any of them.
   ],
   purpose: [
     This is what makes "jump to application #8" possible: first as a link from the OS — a
@@ -20,7 +20,7 @@
   implementation: (
     "shared/src/commonMain/kotlin/org/cr/pipeline/ui/nav/Routes.kt — type-safe routes",
     "shared/src/commonMain/kotlin/org/cr/pipeline/App.kt — shared NavHostController, initialDeepLink handling",
-    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/PipelinePhoneApp.kt, ui/PipelineApp.kt — navDeepLink<DetailRoute>(basePath = \"pipeline://app\"), navDeepLink<ListRoute>(basePath = \"pipeline://list\")",
+    "shared/src/commonMain/kotlin/org/cr/pipeline/ui/phone/PipelinePhoneApp.kt, ui/PipelineApp.kt — navDeepLink<DetailRoute>(basePath = \"pipeline://app\"), navDeepLink<ListRoute>(basePath = \"pipeline://list\"), navDeepLink { uriPattern = \"pipeline://app/new\" } on AddEditRoute",
     "androidApp/src/main/AndroidManifest.xml — intent filter for pipeline://app and pipeline://list",
     "desktopApp/src/main/kotlin/org/cr/pipeline/main.kt — cold-start deep link from CLI args",
     "shared/src/jvmMain/kotlin/org/cr/pipeline/platform/linux/LinuxUrlSchemeRegistrationManager.kt — xdg-open scheme registration",

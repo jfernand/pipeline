@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.64",
+  revision: "1.65",
   date: "2026-08-27",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -359,6 +359,9 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     that preset the list's search text and status chips — the filter-carrying list route PL-041
     plans. `ListRoute` becomes a data class with three optional fields; status names parse by
     label or enum name, ignoring case and separators, and unknown names are dropped.],
+  [1.65], [2026-09-26], [PL-009 gains `pipeline://app/new`, landing on the New application form —
+    the next of PL-041's planned routes. Registered as an exact pattern on `AddEditRoute`; it
+    can't be mistaken for `pipeline://app/{id}`, whose id must parse as a number.],
 )
 
 #part(1, "Core Application",

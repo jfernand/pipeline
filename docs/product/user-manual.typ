@@ -530,9 +530,11 @@ A second link, `pipeline://list`, opens the applications list — and can open i
 searched and filtered: `pipeline://list?q=eng&status=interviewing&exclude=rejected` lands on the
 list with "eng" in the search field, Interviewing required and Rejected excluded. Statuses can be
 written as on screen or in lower case (`interviewing`, `phone-screen`); a name Pipeline doesn't
-recognise is ignored. Those are the only links Pipeline answers today; every other screen is reached by clicking through the app. The table
-lists the full set of links Pipeline needs — one for every screen and sheet in this manual — with
-the ones that work marked Shipped and the rest Planned.
+recognise is ignored. A third link, `pipeline://app/new`, opens the New application form.
+
+Those are the only links Pipeline answers today; every other screen is reached by clicking
+through the app. The table lists the full set of links Pipeline needs — one for every screen and
+sheet in this manual — with the ones that work marked Shipped and the rest Planned.
 
 #xref("PL-041")[Routes and Deep Links]
 
@@ -546,7 +548,7 @@ data-table(
   [`pipeline://list?…`], [Shipped], [The list with a search and status filters applied:
     `q` for the search text, `status` for required chips, `exclude` for excluded ones, the last
     two comma-separated. SS-04 in Appendix C has a worked example.],
-  [`pipeline://app/new`], [Planned], [The New application form.],
+  [`pipeline://app/new`], [Shipped], [The New application form.],
   [`pipeline://app/{id}/edit`], [Planned], [The Edit application form.],
   [`pipeline://app/{id}/status`], [Planned], [The detail screen with the Update status sheet
     open.],

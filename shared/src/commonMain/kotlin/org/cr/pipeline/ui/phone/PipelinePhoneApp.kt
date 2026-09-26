@@ -104,7 +104,13 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                     onDelete = { deleteSheetApplicationId = route.id },
                 )
             }
-            composable<AddEditRoute> { backStackEntry ->
+            // See the matching comment in PipelineTabletApp on why this is an exact pattern.
+            composable<AddEditRoute>(
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "pipeline://app/new" },
+                    navDeepLink { uriPattern = "https://pipeline.casaroja.es/app/new" },
+                ),
+            ) { backStackEntry ->
                 val route = backStackEntry.toRoute<AddEditRoute>()
                 AddEditScreen(applicationId = route.id, onClose = { navController.popBackStack() })
             }
