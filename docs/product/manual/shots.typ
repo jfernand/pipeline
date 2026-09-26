@@ -18,7 +18,10 @@
 #import "../isss-doc.typ": *
 
 /// IDs that have a real PNG in screenshots/. Add each one as it lands.
-#let available = ()
+#let available = (
+  "SS-01", "SS-02", "SS-03", "SS-05", "SS-08", "SS-09", "SS-10", "SS-13", "SS-14",
+  "SS-16", "SS-17", "SS-18", "SS-20", "SS-21",
+)
 
 // kind: "window"  — a full desktop window at its default 1280 × 800.
 //       "phone"   — a full portrait phone screen (status bar may be cropped off).

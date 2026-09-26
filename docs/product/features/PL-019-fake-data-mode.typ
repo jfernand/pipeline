@@ -38,5 +38,6 @@
     ("PL-011", [Event-Sourced Local Storage]),
     ("PL-012", [App Preferences & Developer Mode]),
     ("PL-042", [Event Log as Source of Truth]),
+    ("PL-044", [Live Data-Source Switching]),
   ),
 )

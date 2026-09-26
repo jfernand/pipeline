@@ -79,7 +79,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "org.cr.pipeline"
-            packageVersion = gitPackageVersion
+            packageVersion = gitPackageVersion.replace("-1", "")
 
             macOS { iconFile.set(project.file("icon/icon.icns")) }
             windows { iconFile.set(project.file("icon/icon.ico")) }
