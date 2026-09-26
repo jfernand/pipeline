@@ -122,7 +122,7 @@ class McpAppTest {
     }
 
     @Test
-    fun `lists add_application, edit_application, list_applications, list_settings, open_application, and the three attach tools`() {
+    fun `lists add_application, edit_application, list_applications, list_settings, open_application, open_link, and the three attach tools`() {
         val client = clientAgainst(FakeApplicationStateStore())
 
         val names = client.tools().list().orFail().map { it.name.value }
@@ -130,7 +130,7 @@ class McpAppTest {
         assertEquals(
             setOf(
                 "add_application", "edit_application", "list_applications", "list_settings", "open_application",
-                "attach_resume", "attach_cover_letter", "attach_file",
+                "open_link", "attach_resume", "attach_cover_letter", "attach_file",
             ),
             names.toSet(),
         )
@@ -216,6 +216,33 @@ class McpAppTest {
         val result = client.tools().call(ToolName.of("open_application"), ToolRequest(emptyMap()))
 
         assertIs<Failure<*>>(result)
+        assertEquals(emptyList(), deepLinkBus.navigatedTo)
+    }
+
+    @Test
+    fun `open_link pushes a pipeline link onto the bus as given`() {
+        val deepLinkBus = FakeDeepLinkBus()
+        val client = clientAgainst(FakeApplicationStateStore(), deepLinkBus = deepLinkBus)
+        val links = listOf("pipeline://followups", "pipeline://list?status=interviewing", "pipeline://app/7?sheet=status")
+
+        links.forEach { link ->
+            val result = client.tools().call(ToolName.of("open_link"), ToolRequest(mapOf("link" to link))).orFail()
+            assertIs<ToolResponse.Ok>(result)
+        }
+
+        assertEquals(links, deepLinkBus.navigatedTo)
+    }
+
+    @Test
+    fun `open_link rejects other schemes and unknown destinations without navigating`() {
+        val deepLinkBus = FakeDeepLinkBus()
+        val client = clientAgainst(FakeApplicationStateStore(), deepLinkBus = deepLinkBus)
+
+        listOf("https://example.com", "pipeline://nowhere", "pipeline:/list", "list").forEach { link ->
+            val result = client.tools().call(ToolName.of("open_link"), ToolRequest(mapOf("link" to link))).orFail()
+            assertIs<ToolResponse.Error>(result)
+        }
+
         assertEquals(emptyList(), deepLinkBus.navigatedTo)
     }
 

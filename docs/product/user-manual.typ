@@ -504,6 +504,8 @@ server on, whenever the agent wants to use it.
   [`attach_cover_letter`], [Same, as the cover letter.],
   [`attach_file`], [Attaches any other file.],
   [`open_application`], [Brings that application's detail screen up in the running app.],
+  [`open_link`], [Opens any screen or sheet by its link (chapter 9) — a filtered list,
+    Follow-ups, a form, Settings. A link to the delete sheet only asks, as it does for you.],
   [`list_settings`], [Reports Pipeline's settings, including where the MCP server is listening.],
 )
 

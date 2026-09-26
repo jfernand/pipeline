@@ -51,6 +51,15 @@ fun buildMcpApp(
     val listApplications = Tool("list_applications", "List all job applications currently tracked in Pipeline.")
     val listSettings = Tool("list_settings", "List Pipeline's current app-level settings for this device.")
     val openApplication = Tool("open_application", "Open a job application's detail screen in the running Pipeline app.", idArg)
+    val openLink = Tool(
+        "open_link",
+        "Open any screen or sheet in the running Pipeline app by its pipeline:// link — e.g. " +
+            "pipeline://list?status=interviewing, pipeline://followups, pipeline://app/new, " +
+            "pipeline://app/{id}/edit, pipeline://app/{id}?sheet=status (or contact, delete — delete " +
+            "only asks, never deletes), pipeline://settings, pipeline://settings/pair, pipeline://sync, " +
+            "pipeline://devtools.",
+        linkArg,
+    )
     val attachResume = Tool(
         "attach_resume",
         "Attach a résumé file to a job application, identified by id. Replaces the current résumé, if any.",
@@ -129,6 +138,27 @@ fun buildMcpApp(
             logger.d { "MCP tool response: open_application -> #$id" }
             ToolResponse.Ok(message)
         },
+        // PL-041's MCP half: one tool reaching every route, through the same DeepLinkBus and
+        // the same nav-graph deep links an OS link takes — not a tool per route, which would
+        // duplicate the route table here and drift from it. A link the graph doesn't know is
+        // ignored by the graph without a word, so the destination is checked here first, where
+        // an error can still reach the caller.
+        openLink bind { request: ToolRequest ->
+            val link = linkArg(request).trim()
+            logger.d { "MCP tool call: open_link with link=$link" }
+            val destination = link.removePrefix(PIPELINE_SCHEME).substringBefore('?').substringBefore('/')
+            if (!link.startsWith(PIPELINE_SCHEME) || destination !in LINK_DESTINATIONS) {
+                logger.d { "MCP tool response: open_link -> rejected $link" }
+                ToolResponse.Error(
+                    "Not a Pipeline link: $link. Links start with $PIPELINE_SCHEME followed by one of " +
+                        LINK_DESTINATIONS.joinToString() + ".",
+                )
+            } else {
+                runBlocking { deepLinkBus.navigate(link) }
+                logger.d { "MCP tool response: open_link -> $link" }
+                ToolResponse.Ok("Opened $link in Pipeline.")
+            }
+        },
         attachResume bind { request: ToolRequest ->
             val id = idArg(request)
             val path = filePathArg(request)
@@ -192,6 +222,13 @@ fun buildMcpApp(
 
     return loggingFilter.then(serverHandler)
 }
+
+private const val PIPELINE_SCHEME = "pipeline://"
+
+/** The first path segment of every link the nav graphs answer (PipelineApp, PipelinePhoneApp). */
+private val LINK_DESTINATIONS = listOf("app", "list", "followups", "settings", "sync", "devtools")
+
+private val linkArg = Tool.Arg.string().required("link", "A pipeline:// link, e.g. pipeline://followups")
 
 private val companyArg = Tool.Arg.string().required("company", "Company name")
 private val roleArg = Tool.Arg.string().required("role", "Job title / role")

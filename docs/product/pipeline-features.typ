@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.72",
+  revision: "1.73",
   date: "2026-09-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -392,6 +392,11 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     mode is off, reading the preference synchronously so a cold-start link isn't bounced by the
     collected default. On tablet, the nav rail highlight follows every link landing (Pair counts
     as Settings). PL-041's link half is done; it stays Planned for its MCP half.],
+  [1.73], [2026-09-26], [Shipped PL-041. Its MCP half is one new tool, `open_link`, which opens
+    any `pipeline://` link in the running app through `DeepLinkBus` — every route and sheet, not
+    only `DetailRoute`. It rejects other schemes and destinations the nav graphs don't answer, so
+    an agent gets an error instead of a silently ignored link. The Routes appendix, stale since
+    1.63, now shows every route's links.],
 )
 
 #part(1, "Core Application",
@@ -582,28 +587,54 @@ link if it has one, and the MCP tool that reaches it, if any.
   )
 ]
 
-// Only open_application (PL-017) actually navigates anywhere — add_application, edit_application,
-// list_applications and list_settings all read/write data through the repository directly and
-// never touch a route, so they're not listed on any row here.
-#route-row([ListRoute], [`ListScreen` — start destination], [`TabletListContent` — start destination])
+// Only the navigation tools act on a route — add_application, edit_application,
+// list_applications, list_settings and the attach tools read/write data through the repository
+// directly and never touch one, so they're not listed on any row here. Every link below also
+// answers under https://pipeline.casaroja.es/ with the same path; open_link (PL-041) opens any of
+// them, so it's named once here rather than repeated on every row.
 #route-row(
-  [DetailRoute(id: Long)],
+  [ListRoute(q, status, exclude: String? = null)],
+  [`ListScreen` — start destination],
+  [`TabletListContent` — start destination],
+  deep-link: [`pipeline://list`, optionally `?q=…&status=…&exclude=…`; on phone also
+    `pipeline://followups`],
+)
+#route-row(
+  [DetailRoute(id: Long, sheet: String? = null)],
   [`DetailScreen`],
   [`TabletDetailScreen`],
-  deep-link: [`pipeline://app/{id}`; `https://pipeline.casaroja.es/app/{id}`],
+  deep-link: [`pipeline://app/{id}`, optionally `?sheet=status`, `contact` or `delete` — the sheet
+    opens once, on arrival],
   mcp-tool: [`open_application` — pushes `pipeline://app/{id}` onto `DeepLinkBus`, the same path a
     real deep link takes],
 )
-#route-row([AddEditRoute(id: Long? = null)], [`AddEditScreen`], [`AddEditScreen`])
-#route-row([FollowUpsRoute], [Not registered — unreachable], [`FollowUpsContent`])
-#route-row([SyncRoute], [`SyncScreen`], [`TabletSyncContent`])
-#route-row([SettingsRoute], [`SettingsScreen`], [`SettingsScreen`])
-#route-row([PairRoute], [`PairingScreen`], [`PairingScreen`])
-#route-row([DevToolsRoute], [`DevToolsScreen`], [`DevToolsContent`])
+#route-row(
+  [AddEditRoute(id: Long? = null)],
+  [`AddEditScreen`],
+  [`AddEditScreen`],
+  deep-link: [`pipeline://app/new`; `pipeline://app/{id}/edit` — closes itself if the id is
+    unknown or deleted],
+)
+#route-row(
+  [FollowUpsRoute],
+  [Not registered — its link lands on `ListRoute` instead],
+  [`FollowUpsContent`],
+  deep-link: [`pipeline://followups`],
+)
+#route-row([SyncRoute], [`SyncScreen`], [`TabletSyncContent`], deep-link: [`pipeline://sync`])
+#route-row([SettingsRoute], [`SettingsScreen`], [`SettingsScreen`], deep-link: [`pipeline://settings`])
+#route-row([PairRoute], [`PairingScreen`], [`PairingScreen`], deep-link: [`pipeline://settings/pair`])
+#route-row(
+  [DevToolsRoute],
+  [`DevToolsScreen`],
+  [`DevToolsContent`],
+  deep-link: [`pipeline://devtools` — redirects to `SettingsRoute` while developer mode is off],
+)
 
-`FollowUpsRoute` is the one route on this table with no phone entry point at all —
-`PipelinePhoneApp`'s `NavHost` never registers it, unlike every other route here. Reachable on
-tablet only, via `NavRail`'s "Follow-ups" tab.
+Every route is reachable through MCP with `open_link`, which takes any of the links above and
+pushes it onto `DeepLinkBus` after checking its destination. `FollowUpsRoute` is the one route
+with no phone destination; on phone its link lands on the list, whose Needs follow-up section
+covers the same ground.
 
 #pagebreak(weak: true, to: "odd")
 #heading(level: 1, numbering: none)[Event Log]
