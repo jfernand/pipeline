@@ -25,15 +25,16 @@ data class ListRoute(val q: String? = null, val status: String? = null, val excl
  * alongside the id, since the sheets are shell overlays rather than destinations of their own.
  * Optional, so `pipeline://app/{id}` and every in-app navigation still land on the bare detail
  * screen; `pipeline://app/42?sheet=status` lands with the Update status sheet up, `?sheet=contact`
- * with the Add contact sheet. A plain String
+ * with the Add contact sheet, `?sheet=delete` with the delete confirmation — which, like tapping
+ * the trash icon, only asks; nothing is deleted until its Delete button is. A plain String
  * rather than [DetailSheet] itself so an unrecognized value still reaches the detail screen
  * instead of failing the link; [toDetailSheet] reads it.
  */
 @Serializable
 data class DetailRoute(val id: Long, val sheet: String? = null)
 
-/** The sheets [DetailRoute.sheet] can name. Delete joins this when its link ships. */
-enum class DetailSheet { STATUS, CONTACT }
+/** The sheets [DetailRoute.sheet] can name. */
+enum class DetailSheet { STATUS, CONTACT, DELETE }
 
 fun String?.toDetailSheet(): DetailSheet? = DetailSheet.entries.firstOrNull { it.name.equals(this, ignoreCase = true) }
 

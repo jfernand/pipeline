@@ -7,7 +7,7 @@
   subtitle: "Feature catalog — shipped and planned capabilities.",
   class: "Product Reference",
   doc-id: "ISSS-0001",
-  revision: "1.69",
+  revision: "1.70",
   date: "2026-09-26",
   status: "Current",
   applies-to: "Pipeline — Android, iOS, Desktop, Web",
@@ -378,6 +378,10 @@ UI does — not a copy, not an export. The same pipeline, through a different do
     description reflects the links shipped since it was written.],
   [1.69], [2026-09-26], [PL-009 gains `pipeline://app/{id}?sheet=contact`: the detail screen with
     the Add contact sheet open — the second sheet on `DetailRoute`'s `sheet` sub-state.],
+  [1.70], [2026-09-26], [PL-009 gains `pipeline://app/{id}?sheet=delete`: the detail screen with
+    the delete confirmation open. It only asks, as tapping the trash icon does — nothing is
+    deleted until the sheet's Delete button is tapped. All three detail sheets are now
+    link-reachable.],
 )
 
 #part(1, "Core Application",

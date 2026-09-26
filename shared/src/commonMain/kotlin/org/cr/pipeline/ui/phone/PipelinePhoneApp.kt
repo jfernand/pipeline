@@ -105,6 +105,7 @@ fun PipelinePhoneApp(navController: NavHostController, modifier: Modifier = Modi
                     when (route.sheet.toDetailSheet()) {
                         DetailSheet.STATUS -> sheetApplicationId = route.id
                         DetailSheet.CONTACT -> contactSheetApplicationId = route.id
+                        DetailSheet.DELETE -> deleteSheetApplicationId = route.id
                         null -> Unit
                     }
                 }

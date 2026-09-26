@@ -115,7 +115,7 @@
 // (PL-041). `none`
 // marks a shot whose state no link can reach — a gesture, a window size, an
 // in-progress edit — and still needs the manual steps in its setup.
-#let shipped-links = ("pipeline://app/{id}", "pipeline://list", "pipeline://app/new", "pipeline://app/{id}/edit", "pipeline://app/{id}?sheet=status", "pipeline://app/{id}?sheet=contact")
+#let shipped-links = ("pipeline://app/{id}", "pipeline://list", "pipeline://app/new", "pipeline://app/{id}/edit", "pipeline://app/{id}?sheet=status", "pipeline://app/{id}?sheet=contact", "pipeline://app/{id}?sheet=delete")
 
 #let shot-links = (
   "SS-01": "pipeline://list",

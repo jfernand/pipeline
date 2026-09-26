@@ -535,7 +535,8 @@ recognise is ignored. A third link, `pipeline://app/new`, opens the New applicat
 doesn't exist, or has been deleted, opens nothing. `pipeline://app/42?sheet=status` opens
 application 42 with the Update status sheet already up; cancel it and you're on the application's detail
 screen, as if you'd tapped *Update status* yourself. `?sheet=contact` does the same with the Add
-contact sheet.
+contact sheet, and `?sheet=delete` with the delete confirmation — which still only asks: nothing
+is deleted unless you tap *Delete*.
 
 Those are the only links Pipeline answers today; every other screen is reached by clicking
 through the app. The table lists the full set of links Pipeline needs — one for every screen and
@@ -559,7 +560,7 @@ data-table(
     sheet open.],
   [`pipeline://app/{id}?sheet=contact`], [Shipped], [The detail screen with the Add contact sheet
     open.],
-  [`pipeline://app/{id}?sheet=delete`], [Planned], [The detail screen with the delete confirmation
+  [`pipeline://app/{id}?sheet=delete`], [Shipped], [The detail screen with the delete confirmation
     open. Opening it never deletes anything by itself.],
   [`pipeline://followups`], [Planned], [Follow-ups (desktop layout; the list on the phone).],
   [`pipeline://settings`], [Planned], [Settings.],
